@@ -1,0 +1,279 @@
+/* ─── Google Fonts are loaded in index.html ─────────────────────────────── */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design tokens ────────────────────────────────────────────────────────── */
+:root {
+  --color-bg:           #000000;
+  --color-surface:      #0a0a0f;
+  --color-card:         #0d0d1a;
+  --color-border:       #1a1a2e;
+  --color-muted:        #111122;
+
+  --color-cyan:         #00e5ff;
+  --color-cyan-dim:     rgba(0, 229, 255, 0.15);
+  --color-cyan-glow:    rgba(0, 229, 255, 0.4);
+
+  --color-green:        #00ff88;
+  --color-green-dim:    rgba(0, 255, 136, 0.15);
+  --color-green-glow:   rgba(0, 255, 136, 0.4);
+
+  --color-red:          #ff3355;
+  --color-red-dim:      rgba(255, 51, 85, 0.15);
+  --color-red-glow:     rgba(255, 51, 85, 0.4);
+
+  --color-gold:         #ffd600;
+  --color-gold-glow:    rgba(255, 214, 0, 0.4);
+
+  --font-display:       'Orbitron', sans-serif;
+  --font-mono:          'Share Tech Mono', monospace;
+
+  --grid-size:          60px;
+  --grid-color:         rgba(0, 229, 255, 0.04);
+  --grid-color-strong:  rgba(0, 229, 255, 0.08);
+}
+
+/* ─── Base reset ────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: #e0e0e0;
+  font-family: var(--font-mono);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ─── Animated grid background ─────────────────────────────────────────────── */
+/*
+   Two overlapping grids:
+   - Primary 60×60px grid drifts diagonally (very subtle, depth)
+   - Secondary 300×300px "major grid" stays fixed (gives structure)
+   Vignette overlay darkens the edges so content pops.
+*/
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    /* major grid lines (every 5 cells) */
+    linear-gradient(var(--grid-color-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color-strong) 1px, transparent 1px),
+    /* minor grid */
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size:
+    300px 300px,
+    300px 300px,
+    var(--grid-size) var(--grid-size),
+    var(--grid-size) var(--grid-size);
+  animation: grid-drift 20s linear infinite;
+}
+
+/* Radial vignette */
+#root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 120% 80% at 50% 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+/* Subtle horizontal scan line */
+.scan-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-cyan-dim),
+    var(--color-cyan),
+    var(--color-cyan-dim),
+    transparent
+  );
+  opacity: 0.4;
+  animation: scan 8s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes grid-drift {
+  0%   { background-position: 0 0, 0 0, 0 0, 0 0; }
+  100% { background-position: 300px 300px, 300px 300px, 60px 60px, 60px 60px; }
+}
+
+@keyframes scan {
+  0%   { top: -2px; }
+  100% { top: 100vh; }
+}
+
+/* ─── Glow utilities ────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Text glow */
+  .text-glow-cyan  { text-shadow: 0 0 8px var(--color-cyan),  0 0 20px var(--color-cyan-glow);  }
+  .text-glow-green { text-shadow: 0 0 8px var(--color-green), 0 0 20px var(--color-green-glow); }
+  .text-glow-red   { text-shadow: 0 0 8px var(--color-red),   0 0 20px var(--color-red-glow);   }
+  .text-glow-gold  { text-shadow: 0 0 8px var(--color-gold),  0 0 20px var(--color-gold-glow);  }
+
+  /* Box glow */
+  .glow-cyan  { box-shadow: 0 0 6px var(--color-cyan),  0 0 20px var(--color-cyan-glow);  }
+  .glow-green { box-shadow: 0 0 6px var(--color-green), 0 0 20px var(--color-green-glow); }
+  .glow-red   { box-shadow: 0 0 6px var(--color-red),   0 0 20px var(--color-red-glow);   }
+  .glow-gold  { box-shadow: 0 0 6px var(--color-gold),  0 0 20px var(--color-gold-glow);  }
+
+  /* Bordered glow (card borders) */
+  .border-glow-cyan {
+    border: 1px solid rgba(0, 229, 255, 0.5);
+    box-shadow:
+      0 0 6px var(--color-cyan-glow),
+      inset 0 0 12px rgba(0, 229, 255, 0.04);
+  }
+  .border-glow-green {
+    border: 1px solid rgba(0, 255, 136, 0.5);
+    box-shadow:
+      0 0 6px var(--color-green-glow),
+      inset 0 0 12px rgba(0, 255, 136, 0.04);
+  }
+  .border-glow-red {
+    border: 1px solid rgba(255, 51, 85, 0.5);
+    box-shadow:
+      0 0 6px var(--color-red-glow),
+      inset 0 0 12px rgba(255, 51, 85, 0.04);
+  }
+  .border-glow-gold {
+    border: 1px solid rgba(255, 214, 0, 0.5);
+    box-shadow:
+      0 0 6px var(--color-gold-glow),
+      inset 0 0 12px rgba(255, 214, 0, 0.04);
+  }
+
+  /* Pulsing animated glow (for live badge, current price, etc.) */
+  .glow-pulse-cyan {
+    animation: glow-pulse-cyan 2s ease-in-out infinite alternate;
+  }
+  .glow-pulse-green {
+    animation: glow-pulse-green 2s ease-in-out infinite alternate;
+  }
+
+  /* Corner bracket decoration */
+  .bracket-cyan {
+    position: relative;
+  }
+  .bracket-cyan::before,
+  .bracket-cyan::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-color: var(--color-cyan);
+    border-style: solid;
+  }
+  .bracket-cyan::before {
+    top: -1px;
+    left: -1px;
+    border-width: 1px 0 0 1px;
+  }
+  .bracket-cyan::after {
+    bottom: -1px;
+    right: -1px;
+    border-width: 0 1px 1px 0;
+  }
+}
+
+@keyframes glow-pulse-cyan {
+  from { box-shadow: 0 0 4px var(--color-cyan-glow); }
+  to   { box-shadow: 0 0 14px var(--color-cyan), 0 0 32px var(--color-cyan-glow); }
+}
+@keyframes glow-pulse-green {
+  from { box-shadow: 0 0 4px var(--color-green-glow); }
+  to   { box-shadow: 0 0 14px var(--color-green), 0 0 32px var(--color-green-glow); }
+}
+
+/* ─── Card component ────────────────────────────────────────────────────────── */
+@layer components {
+  .card {
+    @apply relative bg-surface-card rounded-lg p-5;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    border-color: rgba(0, 229, 255, 0.25);
+    box-shadow: 0 4px 32px rgba(0, 229, 255, 0.08), 0 0 0 1px rgba(0, 229, 255, 0.1);
+  }
+  .card-active {
+    @apply card border-glow-cyan;
+  }
+
+  /* Live indicator dot */
+  .live-dot {
+    @apply inline-block w-2 h-2 rounded-full bg-neon-green;
+    box-shadow: 0 0 4px var(--color-green), 0 0 8px var(--color-green-glow);
+    animation: live-blink 1.4s ease-in-out infinite;
+  }
+  @keyframes live-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  /* Stat value */
+  .stat-value {
+    @apply font-mono text-2xl font-normal;
+  }
+  .stat-label {
+    @apply font-mono text-xs tracking-widest uppercase text-gray-500;
+  }
+
+  /* Direction badge */
+  .badge-up   { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono bg-neon-green/10 text-neon-green border border-neon-green/30; }
+  .badge-down { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono bg-neon-red/10   text-neon-red   border border-neon-red/30;   }
+  .badge-neutral { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono bg-gray-800 text-gray-400 border border-gray-700; }
+
+  /* Scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar       { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+}
+
+/* ─── Typography helpers ────────────────────────────────────────────────────── */
+.font-display { font-family: var(--font-display); }
+.font-data    { font-family: var(--font-mono); }
+
+/* Ensure all chart canvases don't overflow their containers */
+canvas {
+  max-width: 100%;
+}
+
+/* ─── Selection color ───────────────────────────────────────────────────────── */
+::selection {
+  background: var(--color-cyan-dim);
+  color: var(--color-cyan);
+}
