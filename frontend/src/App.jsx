@@ -314,7 +314,7 @@ export default function App() {
         {/* live ticker */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           {lastAt && (
-            <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.text, letterSpacing: '0.2em', textAlign: 'right' }}>
+            <div className="hide-mobile" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.text, letterSpacing: '0.2em', textAlign: 'right' }}>
               <div>REFRESHES IN {countdown}s</div>
               <div style={{ opacity: 0.5 }}>{lastAt.toLocaleTimeString()}</div>
             </div>
@@ -343,8 +343,8 @@ export default function App() {
       {/* ── BODY ── */}
       <main className="main-pad" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
 
-        <div style={{textAlign:'center',padding:'16px 0 12px 0',position:'relative',pointerEvents:'none'}}>
-          <span className="ai-title" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
+        <div style={{textAlign:'center',padding:'16px 0 12px 0',position:'relative',pointerEvents:'none',marginBottom:16}}>
+          <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
           <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
         </div>
 
@@ -436,14 +436,16 @@ export default function App() {
         @keyframes rotateDash  { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
         @keyframes circlePulse { 0%,100%{box-shadow:0 0 15px currentColor} 50%{box-shadow:0 0 30px currentColor, 0 0 60px currentColor} }
         @media (max-width: 768px) {
-          .grid-4    { grid-template-columns: 1fr 1fr !important; }
-          .grid-5    { grid-template-columns: 1fr 1fr !important; }
-          .grid-2col { grid-template-columns: 1fr !important; }
-          .grid-6    { grid-template-columns: 1fr 1fr !important; }
-          .main-pad  { padding: 16px !important; }
-          .header-inner { flex-wrap: wrap; gap: 8px !important; }
-          .ai-title  { font-size: 13px !important; }
-          .ai-sub    { font-size: 8px !important; }
+          .grid-4       { grid-template-columns: 1fr 1fr !important; }
+          .grid-5       { grid-template-columns: 1fr 1fr !important; }
+          .grid-2col    { grid-template-columns: 1fr !important; }
+          .grid-6       { grid-template-columns: 1fr 1fr !important; }
+          .main-pad     { padding: 16px !important; }
+          .header-inner { padding: 8px 12px !important; flex-wrap: wrap; gap: 8px !important; }
+          .hide-mobile  { display: none !important; }
+          .ai-title     { font-size: 13px !important; }
+          .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
+          .ai-sub       { font-size: 7px !important; }
         }
         @keyframes introScan  { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
         @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
