@@ -158,24 +158,62 @@ function IndCard({ label, value, sub }) {
 
 function SentimentMeter({ value, label }) {
   const color = value >= 75 ? G.green : value >= 55 ? '#84cc16' : value >= 45 ? G.gold : value >= 25 ? '#f97316' : G.red
+  // Gradient border: map value 0→100 to red→gold→green
+  const gradAngle = value != null ? Math.round((value / 100) * 360) : 0
+  const ticks = Array.from({ length: 10 }, (_, i) => i * 36)
+
   return (
-    <div style={cardStyle}>
+    <div style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
       <div style={labelStyle}>Fear & Greed Index</div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{
-          width: 64, height: 64, borderRadius: '50%',
-          border: `3px solid ${color}`,
-          boxShadow: `0 0 16px ${color}66`,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 20, color, fontWeight: 'bold' }}>{value ?? '—'}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+
+        {/* ── futuristic circle ── */}
+        <div style={{ position: 'relative', width: 90, height: 90, flexShrink: 0 }}>
+
+          {/* rotating dashed outer ring */}
+          <div style={{
+            position: 'absolute', inset: -6,
+            borderRadius: '50%',
+            border: `1px dashed ${color}55`,
+            animation: 'rotateDash 8s linear infinite',
+          }} />
+
+          {/* tick marks */}
+          {ticks.map(deg => (
+            <div key={deg} style={{
+              position: 'absolute',
+              width: 2, height: 6,
+              background: `${color}66`,
+              borderRadius: 1,
+              top: '50%', left: '50%',
+              transform: `rotate(${deg}deg) translateY(-46px) translateX(-1px)`,
+              transformOrigin: '1px 0',
+            }} />
+          ))}
+
+          {/* main circle */}
+          <div style={{
+            width: 90, height: 90, borderRadius: '50%',
+            border: `3px solid transparent`,
+            background: `linear-gradient(#141414, #141414) padding-box,
+                         linear-gradient(${gradAngle}deg, ${G.red}, ${G.gold}, ${G.green}) border-box`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            animation: 'circlePulse 2.5s ease-in-out infinite',
+            color,
+          }}>
+            <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 26, color, fontWeight: 'bold', lineHeight: 1 }}>
+              {value ?? '—'}
+            </span>
+          </div>
         </div>
-        <div>
-          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 15, color, marginBottom: 4 }}>{label ?? '—'}</div>
-          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: G.text, letterSpacing: '0.2em' }}>ALTERNATIVE.ME</div>
+
+        {/* label + bar */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 15, color, marginBottom: 6 }}>{label ?? '—'}</div>
+          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: G.text, letterSpacing: '0.2em', marginBottom: 8 }}>ALTERNATIVE.ME</div>
           {value != null && (
-            <div style={{ background: '#1a1a1a', borderRadius: 3, height: 4, width: 120, overflow: 'hidden', marginTop: 8 }}>
-              <div style={{ height: '100%', width: `${value}%`, background: `linear-gradient(90deg, ${G.red}, ${G.gold}, ${G.green})`, borderRadius: 3 }} />
+            <div style={{ background: '#1a1a1a', borderRadius: 3, height: 4, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${value}%`, background: `linear-gradient(90deg, ${G.red}, ${G.gold}, ${G.green})`, borderRadius: 3, transition: 'width 0.8s ease' }} />
             </div>
           )}
         </div>
@@ -394,7 +432,9 @@ export default function App() {
       </main>
 
       <style>{`
-        @keyframes textPulse { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
+        @keyframes textPulse   { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
+        @keyframes rotateDash  { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        @keyframes circlePulse { 0%,100%{box-shadow:0 0 15px currentColor} 50%{box-shadow:0 0 30px currentColor, 0 0 60px currentColor} }
         @media (max-width: 768px) {
           .grid-4    { grid-template-columns: 1fr 1fr !important; }
           .grid-5    { grid-template-columns: 1fr 1fr !important; }
