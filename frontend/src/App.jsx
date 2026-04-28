@@ -245,27 +245,13 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
 
+      <div style={{textAlign:'center',padding:'8px 0',position:'sticky',top:68,zIndex:49,pointerEvents:'none'}}>
+        <span style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
+        <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
+      </div>
+
       <div style={{position:'fixed',top:0,left:'-2px',width:'2px',height:'100vh',zIndex:999,pointerEvents:'none',background:`linear-gradient(180deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScan 1.2s linear 1 forwards'}} />
       <div style={{position:'fixed',top:'-2px',left:0,width:'100vw',height:'2px',zIndex:999,pointerEvents:'none',background:`linear-gradient(90deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScanH 1.2s linear 1 forwards',animationDelay:'0.3s'}} />
-
-      {/* ── AI PREDICTING FUTURE indicator ── */}
-      <div style={{
-        position: 'sticky', top: 68, zIndex: 49, pointerEvents: 'none',
-        textAlign: 'center', padding: '6px 0',
-        background: 'transparent',
-      }}>
-        <span style={{
-          fontFamily: '"Share Tech Mono", monospace',
-          fontSize: 11, letterSpacing: '0.3em', color: G.gold,
-          opacity: 0.8,
-          animation: 'textPulse 2.5s ease-in-out infinite',
-        }}>
-          AI PREDICTING FUTURE
-        </span>
-        <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',textAlign:'center',opacity:0.6,marginTop:3}}>
-          Predictions may be inaccurate · Not financial advice · For educational purposes only
-        </div>
-      </div>
 
       {/* ── HEADER ── */}
       <header className="header-inner" style={{
