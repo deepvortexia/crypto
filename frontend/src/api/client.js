@@ -107,12 +107,15 @@ function _calcBollinger(closes, period = 20) {
 // --- Public API ---
 
 export async function fetchLivePrice() {
-  const data = await get(`${BINANCE}/ticker/24hr?symbol=BTCUSDT`)
+  const [ticker, cgData] = await Promise.all([
+    get(`${BINANCE}/ticker/24hr?symbol=BTCUSDT`),
+    get('/coingecko/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_market_cap=true'),
+  ])
   return {
-    price: parseFloat(data.lastPrice),
-    change_24h_pct: parseFloat(data.priceChangePercent),
-    volume_24h: parseFloat(data.quoteVolume),
-    market_cap: 0,
+    price: parseFloat(ticker.lastPrice),
+    change_24h_pct: parseFloat(ticker.priceChangePercent),
+    volume_24h: parseFloat(ticker.quoteVolume),
+    market_cap: cgData?.bitcoin?.usd_market_cap ?? 0,
     last_updated: new Date().toISOString(),
   }
 }

@@ -373,7 +373,7 @@ export default function App() {
               {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
               {onchain.hash_rate  != null && <IndCard label="Hash Rate"       value={`${(onchain.hash_rate / 1e18).toFixed(2)} EH/s`} sub="Network difficulty" />}
               {onchain.minutes_between_blocks != null && <IndCard label="Block Time" value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" />}
-              {onchain.total_fees_btc != null && <IndCard label="Total Fees"  value={`${Number(onchain.total_fees_btc).toFixed(4)} BTC`} sub="Last 24h" />}
+              {onchain.total_fees_btc != null && <IndCard label="Total Fees"  value={`${Math.abs(Number(onchain.total_fees_btc)).toFixed(4)} BTC`} sub="Last 24h" />}
             </div>
           </div>
         )}

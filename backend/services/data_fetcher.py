@@ -139,12 +139,12 @@ async def fetch_onchain() -> dict:
             return {"error": "Blockchain.com API unavailable"}
 
     return {
-        "hash_rate_th": round(stats.get("hash_rate", 0), 2),
+        "hash_rate": round(stats.get("hash_rate", 0) / 1e18, 2),
         "difficulty": stats.get("difficulty", 0),
         "blocks_mined_today": stats.get("n_blocks_mined", 0),
         "btc_mined_today": round(stats.get("n_btc_mined", 0) / 1e8, 4),
         "mempool_size": stats.get("n_tx", 0),
-        "total_fees_btc": round(stats.get("total_fees_btc", 0) / 1e8, 6),
+        "total_fees_btc": round(abs(stats.get("total_fees_btc", 0)) / 1e8, 6),
         "minutes_between_blocks": round(stats.get("minutes_between_blocks", 10), 2),
         "market_price_usd": stats.get("market_price_usd", 0),
         "trade_volume_usd": round(stats.get("trade_volume_usd", 0), 2),
