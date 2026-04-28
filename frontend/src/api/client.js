@@ -1,4 +1,4 @@
-const COINCAP = 'https://api.coincap.io/v2'
+const COINCAP = '/coincap'
 
 class ApiError extends Error {
   constructor(status, message) {

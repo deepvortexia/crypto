@@ -26,7 +26,7 @@ const TIMEFRAMES = [
   { label: '30D', days: 30 },
 ]
 
-const COINCAP_HISTORY = 'https://api.coincap.io/v2/assets/bitcoin/history'
+const COINCAP_HISTORY = '/coincap/assets/bitcoin/history'
 
 async function fetchHistory(days) {
   const end = Date.now()

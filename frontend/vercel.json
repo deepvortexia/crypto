@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/coincap/(.*)", "destination": "https://api.coincap.io/v2/$1" },
     { "source": "/alternativeme/(.*)", "destination": "https://api.alternative.me/$1" },
     { "source": "/blockchain/(.*)", "destination": "https://api.blockchain.info/$1" }
   ]
