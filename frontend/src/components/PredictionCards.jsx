@@ -165,9 +165,13 @@ export default function PredictionCards() {
         </span>
       </div>
 
-      {/* Cards grid: 1 col → 2 col → 3 col → 5 col */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-        {HORIZONS.map(h => <PredCard key={h.key} horizon={h} />)}
+      {/* Mobile: horizontal scroll snap. sm+: grid */}
+      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:pb-0 sm:grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 sm:gap-4 scrollbar-thin">
+        {HORIZONS.map(h => (
+          <div key={h.key} className="snap-start shrink-0 w-[72vw] min-w-[200px] sm:w-auto sm:min-w-0">
+            <PredCard horizon={h} />
+          </div>
+        ))}
       </div>
     </section>
   )
