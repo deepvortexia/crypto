@@ -5,11 +5,11 @@ export default {
     extend: {
       colors: {
         neon: {
-          cyan:  '#00e5ff',
-          green: '#00ff88',
+          cyan:  '#FFD700',
+          green: '#FFC200',
           red:   '#ff3355',
           blue:  '#3d5afe',
-          gold:  '#ffd600',
+          gold:  '#FFD700',
         },
         surface: {
           DEFAULT: '#0a0a0f',
@@ -23,12 +23,12 @@ export default {
         mono:    ['"Share Tech Mono"', 'monospace'],
       },
       boxShadow: {
-        'glow-cyan':  '0 0 8px #00e5ff, 0 0 24px rgba(0,229,255,0.35)',
-        'glow-green': '0 0 8px #00ff88, 0 0 24px rgba(0,255,136,0.35)',
+        'glow-cyan':  '0 0 8px #FFD700, 0 0 24px rgba(255,215,0,0.35)',
+        'glow-green': '0 0 8px #FFC200, 0 0 24px rgba(255,194,0,0.35)',
         'glow-red':   '0 0 8px #ff3355, 0 0 24px rgba(255,51,85,0.35)',
-        'glow-gold':  '0 0 8px #ffd600, 0 0 24px rgba(255,214,0,0.35)',
+        'glow-gold':  '0 0 8px #FFD700, 0 0 24px rgba(255,215,0,0.35)',
         'card':       '0 0 0 1px #1a1a2e, 0 4px 32px rgba(0,0,0,0.6)',
-        'card-hover': '0 0 0 1px #00e5ff44, 0 4px 32px rgba(0,229,255,0.12)',
+        'card-hover': '0 0 0 1px #FFD70044, 0 4px 32px rgba(255,215,0,0.12)',
       },
       animation: {
         'pulse-slow':   'pulse 3s cubic-bezier(0.4,0,0.6,1) infinite',
@@ -59,8 +59,8 @@ export default {
           '100%': { backgroundPosition: '60px 60px' },
         },
         'border-glow': {
-          from: { boxShadow: '0 0 4px #00e5ff, 0 0 12px rgba(0,229,255,0.2)' },
-          to:   { boxShadow: '0 0 12px #00e5ff, 0 0 32px rgba(0,229,255,0.5)' },
+          from: { boxShadow: '0 0 4px #FFD700, 0 0 12px rgba(255,215,0,0.2)' },
+          to:   { boxShadow: '0 0 12px #FFD700, 0 0 32px rgba(255,215,0,0.5)' },
         },
       },
     },

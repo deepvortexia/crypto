@@ -20,9 +20,9 @@ function RsiGauge({ value }) {
   const ey = (cy - r * Math.sin(angle)).toFixed(3)
 
   const color =
-    v < 30 ? '#00ff88' :
+    v < 30 ? '#FFC200' :
     v > 70 ? '#ff3355' :
-    '#00e5ff'
+    '#FFD700'
 
   // Tick marks at 30 and 70
   const ticks = [0.3, 0.7].map(z => {
@@ -92,7 +92,7 @@ function rsiStatus(v) {
 function MacdDisplay({ macd_line, signal_line, histogram }) {
   const h = histogram ?? 0
   const isPos = h >= 0
-  const color = isPos ? '#00ff88' : '#ff3355'
+  const color = isPos ? '#FFC200' : '#ff3355'
   const barW = Math.min(100,
     macd_line != null && macd_line !== 0
       ? Math.abs(h / (Math.abs(macd_line) + 0.0001)) * 100
@@ -143,8 +143,8 @@ function BollingerDisplay({ upper, middle, lower, price }) {
 
   const posColor =
     pricePct > 80 ? '#ff3355' :
-    pricePct < 20 ? '#00ff88' :
-    '#00e5ff'
+    pricePct < 20 ? '#FFC200' :
+    '#FFD700'
 
   return (
     <div className="space-y-0">

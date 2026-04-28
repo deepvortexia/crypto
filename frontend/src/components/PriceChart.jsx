@@ -13,7 +13,7 @@ import { Line } from 'react-chartjs-2'
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
 const C = {
-  cyan:    '#00e5ff',
+  cyan:    '#FFD700',
   grid:    'rgba(26, 26, 46, 0.9)',
   tick:    '#4b5563',
   tooltipBg: '#0d0d1a',
@@ -191,7 +191,7 @@ export default function PriceChart() {
             <div className="flex flex-col items-center gap-3">
               <svg viewBox="0 0 40 40" className="w-8 h-8 animate-spin" style={{ animationDuration: '1.5s' }}>
                 <circle cx="20" cy="20" r="16" stroke="#1a1a2e" strokeWidth="3" fill="none" />
-                <circle cx="20" cy="20" r="16" stroke="#00e5ff" strokeWidth="3" fill="none"
+                <circle cx="20" cy="20" r="16" stroke="#FFD700" strokeWidth="3" fill="none"
                   strokeDasharray="28 72" strokeLinecap="round" />
               </svg>
               <span className="font-mono text-xs text-gray-500 tracking-widest">LOADING CHART</span>

@@ -27,7 +27,7 @@ function fmtMape(v) {
 
 function accColor(v) {
   if (v == null) return '#4b5563'
-  if (v >= 0.70) return '#00ff88'
+  if (v >= 0.70) return '#FFC200'
   if (v >= 0.55) return '#ffd600'
   return '#ff3355'
 }

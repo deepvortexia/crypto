@@ -6,7 +6,7 @@ const ZONES = [
   { min: 25, max: 45,  label: 'Fear',           color: '#ff7043', textCls: 'text-orange-400' },
   { min: 45, max: 55,  label: 'Neutral',        color: '#ffd600', textCls: 'text-neon-gold'  },
   { min: 55, max: 75,  label: 'Greed',          color: '#69f080', textCls: 'text-green-400'  },
-  { min: 75, max: 101, label: 'Extreme Greed',  color: '#00ff88', textCls: 'text-neon-green' },
+  { min: 75, max: 101, label: 'Extreme Greed',  color: '#FFC200', textCls: 'text-neon-green' },
 ]
 
 function zoneOf(v) {
@@ -51,7 +51,7 @@ function GaugeArc({ value }) {
         <linearGradient id="gauge-grad" x1={cx - r} y1="0" x2={cx + r} y2="0" gradientUnits="userSpaceOnUse">
           <stop offset="0%"   stopColor="#ff3355" />
           <stop offset="45%"  stopColor="#ffd600" />
-          <stop offset="100%" stopColor="#00ff88" />
+          <stop offset="100%" stopColor="#FFC200" />
         </linearGradient>
         <filter id="needle-glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />

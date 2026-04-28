@@ -17,7 +17,7 @@ function fmtPrice(n) {
 function ArrowUp() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-      <path d="M7 11V3M7 3L3 7M7 3L11 7" stroke="#00ff88" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7 11V3M7 3L3 7M7 3L11 7" stroke="#FFC200" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -34,7 +34,7 @@ function ConfidenceBar({ value }) {
   // value is already 0–100
   const pct = Math.round(value ?? 0)
   const color =
-    pct >= 70 ? '#00ff88' :
+    pct >= 70 ? '#FFC200' :
     pct >= 40 ? '#ffd600' :
     '#ff3355'
 
@@ -120,7 +120,7 @@ function PredCard({ horizon }) {
         </span>
         <span
           className="font-display text-xs font-bold tracking-widest"
-          style={{ color: isUp ? '#00ff88' : '#ff3355' }}
+          style={{ color: isUp ? '#FFC200' : '#ff3355' }}
         >
           {horizon.short}
         </span>

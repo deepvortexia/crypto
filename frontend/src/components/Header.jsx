@@ -7,31 +7,8 @@ function fmt(n) {
   return n == null ? '—' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })
 }
 
-function HexLogo() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <polygon
-        points="16,2 28,9 28,23 16,30 4,23 4,9"
-        stroke="#00e5ff"
-        strokeWidth="1.5"
-        fill="rgba(0,229,255,0.06)"
-      />
-      <polygon
-        points="16,8 23,12 23,20 16,24 9,20 9,12"
-        fill="rgba(0,229,255,0.12)"
-      />
-      <text
-        x="16" y="20"
-        textAnchor="middle"
-        fontSize="9"
-        fontFamily="Orbitron, sans-serif"
-        fontWeight="700"
-        fill="#00e5ff"
-      >
-        DV
-      </text>
-    </svg>
-  )
+function Logo() {
+  return <img src="/logo.png" alt="DeepVortex" className="h-8 w-8 object-contain" />
 }
 
 function Countdown({ seconds }) {
@@ -42,7 +19,7 @@ function Countdown({ seconds }) {
         <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.4" />
         <circle
           cx="7" cy="7" r="5.5"
-          stroke="#00e5ff"
+          stroke="#FFD700"
           strokeWidth="1.2"
           fill="none"
           strokeDasharray={`${2 * Math.PI * 5.5}`}
@@ -102,7 +79,7 @@ export default function Header() {
 
         {/* ── Logo ── */}
         <div className="flex items-center gap-3 shrink-0">
-          <HexLogo />
+          <Logo />
           <div className="flex flex-col leading-none">
             <span
               className="font-display text-base sm:text-lg font-bold tracking-widest text-neon-cyan text-glow-cyan"
