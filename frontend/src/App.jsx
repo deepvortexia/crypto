@@ -260,7 +260,7 @@ export default function App() {
           fontFamily: '"Share Tech Mono", monospace',
           fontSize: 10, letterSpacing: '0.2em', color: G.gold,
         }}>
-          AI THINKING...
+          AI PREDICTING FUTURE
         </span>
       </div>
 
