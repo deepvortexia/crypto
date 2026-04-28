@@ -262,6 +262,9 @@ export default function App() {
         }}>
           AI PREDICTING FUTURE
         </span>
+        <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',textAlign:'center',opacity:0.6,marginTop:3}}>
+          Predictions may be inaccurate · Not financial advice · For educational purposes only
+        </div>
       </div>
 
       {/* ── HEADER ── */}
