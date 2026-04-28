@@ -2,10 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   fetchLivePrice,
   fetchSentiment,
-  fetchPrediction,
+  fetchPredictions,
   fetchIndicators,
-  fetchPriceHistory,
-  fetchOnchain,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -199,25 +197,16 @@ export default function App() {
   const [countdown,setCountdown]= useState(REFRESH_MS / 1000)
 
   const loadAll = useCallback(async () => {
-    const [p, s, ind] = await Promise.allSettled([
+    const [p, s, ind, pred] = await Promise.allSettled([
       fetchLivePrice(),
       fetchSentiment(),
       fetchIndicators(),
+      fetchPredictions(),
     ])
-    if (p.status  === 'fulfilled') setPrice(p.value)
-    if (s.status  === 'fulfilled') setSentiment(s.value)
-    if (ind.status=== 'fulfilled') setIndics(ind.value)
-
-    // predictions in parallel
-    const predResults = await Promise.allSettled(PRED_HORIZONS.map(h => fetchPrediction(h)))
-    const map = {}
-    PRED_HORIZONS.forEach((h, i) => {
-      if (predResults[i].status === 'fulfilled') map[h] = predResults[i].value
-    })
-    setPreds(map)
-
-    // onchain (may fail — proxied)
-    try { setOnchain(await fetchOnchain()) } catch {}
+    if (p.status    === 'fulfilled') setPrice(p.value)
+    if (s.status    === 'fulfilled') setSentiment(s.value)
+    if (ind.status  === 'fulfilled') setIndics(ind.value)
+    if (pred.status === 'fulfilled') setPreds(pred.value)
 
     setLoading(false)
     setLastAt(new Date())
