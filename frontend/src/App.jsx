@@ -248,20 +248,17 @@ export default function App() {
       <div style={{position:'fixed',top:0,left:'-2px',width:'2px',height:'100vh',zIndex:999,pointerEvents:'none',background:`linear-gradient(180deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScan 1.2s linear 1 forwards'}} />
       <div style={{position:'fixed',top:'-2px',left:0,width:'100vw',height:'2px',zIndex:999,pointerEvents:'none',background:`linear-gradient(90deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScanH 1.2s linear 1 forwards',animationDelay:'0.3s'}} />
 
-      {/* ── AI THINKING indicator ── */}
+      {/* ── AI PREDICTING FUTURE indicator ── */}
       <div style={{
-        position: 'fixed', bottom: 18, left: 20, zIndex: 99, pointerEvents: 'none',
-        display: 'flex', alignItems: 'center', gap: 7, opacity: 0.6,
+        position: 'sticky', top: 68, zIndex: 49, pointerEvents: 'none',
+        textAlign: 'center', padding: '6px 0',
+        background: 'transparent',
       }}>
         <span style={{
-          display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
-          background: G.gold,
-          boxShadow: `0 0 6px ${G.gold}`,
-          animation: 'blink 1.5s ease-in-out infinite',
-        }} />
-        <span style={{
           fontFamily: '"Share Tech Mono", monospace',
-          fontSize: 10, letterSpacing: '0.2em', color: G.gold,
+          fontSize: 11, letterSpacing: '0.3em', color: G.gold,
+          opacity: 0.8,
+          animation: 'textPulse 2.5s ease-in-out infinite',
         }}>
           AI PREDICTING FUTURE
         </span>
@@ -408,7 +405,7 @@ export default function App() {
       </main>
 
       <style>{`
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+        @keyframes textPulse { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
         @media (max-width: 768px) {
           .grid-4    { grid-template-columns: 1fr 1fr !important; }
           .grid-5    { grid-template-columns: 1fr 1fr !important; overflow-x: auto; }
