@@ -10,8 +10,6 @@ import {
   Legend,
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
-import { fetchPriceHistory } from '../api/client'
-
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
 const C = {
@@ -28,15 +26,17 @@ const TIMEFRAMES = [
   { label: '30D', days: 30 },
 ]
 
-const COINGECKO_URL = '/coingecko/coins/bitcoin/market_chart'
+const COINCAP_HISTORY = 'https://api.coincap.io/v2/assets/bitcoin/history'
 
 async function fetchHistory(days) {
-  const interval = days <= 1 ? 'minutely' : 'hourly'
-  const url = `${COINGECKO_URL}?vs_currency=usd&days=${days}&interval=${interval}`
+  const end = Date.now()
+  const start = end - days * 24 * 60 * 60 * 1000
+  const interval = days <= 1 ? 'h1' : days <= 7 ? 'h6' : 'd1'
+  const url = `${COINCAP_HISTORY}?interval=${interval}&start=${start}&end=${end}`
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`CoinGecko ${res.status}`)
+  if (!res.ok) throw new Error(`CoinCap ${res.status}`)
   const body = await res.json()
-  return body.prices
+  return body.data.map(d => [d.time, parseFloat(d.priceUsd)])
 }
 
 const tooltipPlugin = {

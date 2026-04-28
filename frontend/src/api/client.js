@@ -1,3 +1,5 @@
+const COINCAP = 'https://api.coincap.io/v2'
+
 class ApiError extends Error {
   constructor(status, message) {
     super(message)
@@ -17,14 +19,16 @@ async function get(url) {
   return res.json()
 }
 
-// Shared OHLC cache so fetchPrediction and fetchIndicators share one request per 5 min
+// Shared close-price cache (30-day daily history) — shared by fetchPrediction + fetchIndicators
 let _ohlcCache = null
 let _ohlcCacheTime = 0
 
 async function getOhlc() {
   const now = Date.now()
   if (_ohlcCache && now - _ohlcCacheTime < 5 * 60 * 1000) return _ohlcCache
-  _ohlcCache = await get('/coingecko/coins/bitcoin/ohlc?vs_currency=usd&days=30')
+  const data = await get(`${COINCAP}/assets/bitcoin/history?interval=d1`)
+  // Returns array of close prices (numbers)
+  _ohlcCache = data.data.map(d => parseFloat(d.priceUsd))
   _ohlcCacheTime = now
   return _ohlcCache
 }
@@ -77,7 +81,6 @@ function _calcMacd(closes) {
   if (closes.length < 35) return null
   const ema12 = _ema(closes, 12)
   const ema26 = _ema(closes, 26)
-  // ema12 is longer by 14 values; align to ema26 indices
   const offset = ema12.length - ema26.length
   const macdLine = ema26.map((v, i) => ema12[i + offset] - v)
   const signal = _ema(macdLine, 9)
@@ -105,23 +108,20 @@ function _calcBollinger(closes, period = 20) {
 // --- Public API ---
 
 export async function fetchLivePrice() {
-  const data = await get(
-    '/coingecko/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true'
-  )
-  const btc = data.bitcoin
+  const data = await get(`${COINCAP}/assets/bitcoin`)
+  const d = data.data
   return {
-    price: btc.usd,
-    change_24h_pct: btc.usd_24h_change,
-    market_cap: btc.usd_market_cap,
-    volume_24h: btc.usd_24h_vol,
+    price: parseFloat(d.priceUsd),
+    change_24h_pct: parseFloat(d.changePercent24Hr),
+    market_cap: parseFloat(d.marketCapUsd),
+    volume_24h: parseFloat(d.volumeUsd24Hr),
     last_updated: new Date().toISOString(),
   }
 }
 
 export async function fetchPriceHistory() {
-  return get(
-    '/coingecko/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily'
-  )
+  const data = await get(`${COINCAP}/assets/bitcoin/history?interval=d1`)
+  return data.data.map(d => [d.time, parseFloat(d.priceUsd)])
 }
 
 export async function fetchSentiment() {
@@ -144,8 +144,7 @@ export async function fetchPrediction(horizon) {
   if (!(horizon in HORIZON_DAYS)) {
     throw new Error(`Invalid horizon "${horizon}". Must be one of: ${Object.keys(HORIZON_DAYS).join(', ')}`)
   }
-  const ohlc = await getOhlc()
-  const closes = ohlc.map(c => c[4])
+  const closes = await getOhlc()
   const currentPrice = closes[closes.length - 1]
 
   const sma7 = _sma(closes, 7)
@@ -153,13 +152,11 @@ export async function fetchPrediction(horizon) {
   const lastSma7 = sma7[sma7.length - 1]
   const lastSma14 = sma14[sma14.length - 1]
 
-  // Daily momentum rate from short/long SMA divergence
   const dailyTrend = (lastSma7 - lastSma14) / lastSma14
   const projectedChange = dailyTrend * HORIZON_DAYS[horizon]
   const predictedPrice = currentPrice * (1 + projectedChange)
   const changePct = projectedChange * 100
 
-  // Confidence: stronger trend signal = higher confidence, bounded 50–95 %
   const confidence = parseFloat((50 + Math.min(Math.abs(dailyTrend) * 100, 1) * 45).toFixed(1))
 
   return {
@@ -171,8 +168,7 @@ export async function fetchPrediction(horizon) {
 }
 
 export async function fetchIndicators() {
-  const ohlc = await getOhlc()
-  const closes = ohlc.map(c => c[4])
+  const closes = await getOhlc()
   return {
     rsi: _calcRsi(closes),
     macd: _calcMacd(closes),
