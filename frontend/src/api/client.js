@@ -1,4 +1,5 @@
 const BINANCE = 'https://api.binance.com/api/v3'
+const BASE = 'https://crypto-production-f7c5.up.railway.app'
 
 class ApiError extends Error {
   constructor(status, message) {
