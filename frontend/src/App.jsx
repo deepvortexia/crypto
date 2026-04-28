@@ -305,9 +305,9 @@ export default function App() {
       {/* ── BODY ── */}
       <main className="main-pad" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
 
-        <div style={{textAlign:'center',padding:'8px 0',position:'relative',pointerEvents:'none'}}>
-          <span style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
-          <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
+        <div style={{textAlign:'center',padding:'16px 0 12px 0',position:'relative',pointerEvents:'none'}}>
+          <span className="ai-title" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
+          <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
         </div>
 
         {/* row 1 — market overview */}
@@ -397,11 +397,13 @@ export default function App() {
         @keyframes textPulse { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
         @media (max-width: 768px) {
           .grid-4    { grid-template-columns: 1fr 1fr !important; }
-          .grid-5    { grid-template-columns: 1fr 1fr !important; overflow-x: auto; }
+          .grid-5    { grid-template-columns: 1fr 1fr !important; }
           .grid-2col { grid-template-columns: 1fr !important; }
-          .grid-6    { grid-template-columns: 1fr 1fr 1fr !important; }
+          .grid-6    { grid-template-columns: 1fr 1fr !important; }
           .main-pad  { padding: 16px !important; }
           .header-inner { flex-wrap: wrap; gap: 8px !important; }
+          .ai-title  { font-size: 13px !important; }
+          .ai-sub    { font-size: 8px !important; }
         }
         @keyframes introScan  { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
         @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
