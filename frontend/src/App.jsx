@@ -392,9 +392,36 @@ export default function App() {
         </div>
       </main>
 
+      {/* ── AI THINKING vertical scanline ── */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0,
+        width: '2px', height: '100vh',
+        zIndex: 98, pointerEvents: 'none',
+        background: `linear-gradient(180deg, transparent 0%, ${G.gold} 20%, ${G.gold} 80%, transparent 100%)`,
+        boxShadow: `0 0 8px ${G.gold}, 0 0 20px ${G.goldGlow}, 0 0 40px ${G.goldDim}`,
+        animation: 'aiScan 4s linear infinite',
+      }}>
+        <div style={{
+          position: 'absolute', bottom: -22, left: '50%',
+          transform: 'translateX(-50%)',
+          fontFamily: '"Share Tech Mono", monospace',
+          fontSize: 8, letterSpacing: '0.2em',
+          color: G.gold, opacity: 0.7,
+          whiteSpace: 'nowrap',
+        }}>
+          AI THINKING
+        </div>
+      </div>
+
       <style>{`
         @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0.2} }
         @keyframes scan   { 0%{top:-2px} 100%{top:100vh} }
+        @keyframes aiScan {
+          0%   { left: -2px;   opacity: 0; }
+          5%   { opacity: 1; }
+          95%  { opacity: 1; }
+          100% { left: 100vw;  opacity: 0; }
+        }
       `}</style>
     </div>
   )
