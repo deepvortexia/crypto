@@ -147,7 +147,7 @@ export default function OnchainPanel() {
     {
       label: 'Total Fees',
       value: data?.total_fees_btc != null
-        ? `${Number(data.total_fees_btc).toFixed(4)} ₿`
+        ? `${(Number(data.total_fees_btc) / 100_000_000).toFixed(4)} ₿`
         : '—',
       sub:   '24h fees paid',
       color: 'text-neon-gold',

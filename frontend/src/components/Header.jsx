@@ -118,18 +118,14 @@ export default function Header() {
 
         {/* ── Ticker ── */}
         <div className="flex items-center gap-3 sm:gap-4">
-          {error && (
-            <span className="font-mono text-xs text-neon-red">API unavailable</span>
-          )}
-
-          {!error && !data && (
+          {!data && (
             <div className="flex items-center gap-2 animate-pulse">
               <div className="h-4 w-28 bg-surface-border rounded" />
               <div className="h-5 w-16 bg-surface-border rounded" />
             </div>
           )}
 
-          {!error && data && (
+          {data && (
             <>
               {/* Live dot + label */}
               <div className="hidden sm:flex items-center gap-1.5">
