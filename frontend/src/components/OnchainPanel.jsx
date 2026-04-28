@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { fetchOnchain } from '../api/client'
 
-function fmtHashRate(th) {
-  if (th == null) return '—'
-  if (th >= 1e9)  return `${(th / 1e9).toFixed(2)} EH/s`
-  if (th >= 1e6)  return `${(th / 1e6).toFixed(2)} PH/s`
-  if (th >= 1e3)  return `${(th / 1e3).toFixed(2)} TH/s`
-  return `${Number(th).toFixed(2)} GH/s`
+// blockchain.info/stats returns hash_rate in GH/s
+function fmtHashRate(gh) {
+  if (gh == null) return '—'
+  if (gh >= 1e9)  return `${(gh / 1e9).toFixed(2)} EH/s`
+  if (gh >= 1e6)  return `${(gh / 1e6).toFixed(2)} PH/s`
+  if (gh >= 1e3)  return `${(gh / 1e3).toFixed(2)} TH/s`
+  return `${Number(gh).toFixed(2)} GH/s`
 }
 
 function fmtBig(n, prefix = '$') {
@@ -23,7 +24,6 @@ function fmtNum(n, dec = 0) {
   return Number(n).toLocaleString('en-US', { maximumFractionDigits: dec })
 }
 
-// ── Single metric row ─────────────────────────────────────────────────────────
 function MetricRow({ label, value, sub, color }) {
   return (
     <div className="flex items-center justify-between min-h-[44px] py-1 border-b border-surface-border last:border-0">
@@ -40,7 +40,6 @@ function MetricRow({ label, value, sub, color }) {
   )
 }
 
-// ── Card with a title + metric rows ──────────────────────────────────────────
 function MetricCard({ title, metrics }) {
   return (
     <div className="card">
@@ -76,7 +75,6 @@ function Skeleton() {
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 export default function OnchainPanel() {
   const [data, setData]       = useState(null)
   const [loading, setLoading] = useState(true)
@@ -103,12 +101,15 @@ export default function OnchainPanel() {
     )
   }
 
-  const memHigh = data?.mempool_size != null && data.mempool_size > 50_000
+  // blockchain.info/stats field names:
+  // hash_rate (GH/s), difficulty, minutes_between_blocks,
+  // n_blocks_mined (24h blocks), n_tx (24h txns), total_fees_btc,
+  // trade_volume_usd, estimated_transaction_volume_usd, market_price_usd
 
   const networkMetrics = [
     {
       label: 'Hash Rate',
-      value: fmtHashRate(data?.hash_rate_th),
+      value: fmtHashRate(data?.hash_rate),
       sub:   'Network security',
       color: 'text-neon-cyan',
     },
@@ -133,17 +134,15 @@ export default function OnchainPanel() {
   const activityMetrics = [
     {
       label: 'Blocks Today',
-      value: fmtNum(data?.blocks_mined_today),
+      value: fmtNum(data?.n_blocks_mined),
       sub:   'Target: 144/day',
       color: 'text-white',
     },
     {
-      label: 'Mempool',
-      value: data?.mempool_size != null
-        ? `${fmtNum(data.mempool_size)} tx`
-        : '—',
-      sub:   'Unconfirmed txns',
-      color: memHigh ? 'text-neon-red' : 'text-white',
+      label: 'Transactions',
+      value: data?.n_tx != null ? `${fmtNum(data.n_tx)} tx` : '—',
+      sub:   '24h confirmed',
+      color: 'text-white',
     },
     {
       label: 'Total Fees',
@@ -155,43 +154,28 @@ export default function OnchainPanel() {
     },
   ]
 
-  // Build flows metrics, only include fields the backend actually returned
-  const flowsRaw = [
+  const flowMetrics = [
     {
       label: 'Trade Volume',
       value: fmtBig(data?.trade_volume_usd, '$'),
       sub:   '24h on-chain',
       color: 'text-neon-cyan',
-      show:  data?.trade_volume_usd != null,
     },
     {
-      label: 'Active Addresses',
-      value: fmtNum(data?.active_addresses),
-      sub:   'Unique wallets',
+      label: 'Est. Sent',
+      value: fmtBig(data?.estimated_transaction_volume_usd, '$'),
+      sub:   '24h USD value',
       color: 'text-white',
-      show:  data?.active_addresses != null,
     },
     {
-      label: 'Exchange Inflow',
-      value: fmtBig(data?.exchange_inflow, '$'),
-      sub:   '24h inflow',
-      color: data?.exchange_inflow > (data?.exchange_outflow ?? 0) ? 'text-neon-red' : 'text-neon-green',
-      show:  data?.exchange_inflow != null,
-    },
-    {
-      label: 'Exchange Outflow',
-      value: fmtBig(data?.exchange_outflow, '$'),
-      sub:   '24h outflow',
+      label: 'BTC Price',
+      value: data?.market_price_usd != null
+        ? `$${Number(data.market_price_usd).toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+        : '—',
+      sub:   'Market reference',
       color: 'text-white',
-      show:  data?.exchange_outflow != null,
     },
   ]
-  const flowMetrics = flowsRaw.filter(m => m.show)
-
-  // Pad flows card if too few entries
-  while (flowMetrics.length < 3) {
-    flowMetrics.push({ label: '—', value: '—', color: 'text-gray-600' })
-  }
 
   return (
     <section aria-labelledby="onchain-heading">
