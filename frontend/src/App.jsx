@@ -243,7 +243,7 @@ export default function App() {
   const bb      = indics?.bollinger_bands
 
   return (
-    <div style={{ minHeight: '100vh', background: G.bg, paddingBottom: 64 }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
 
       {/* ── AI THINKING indicator ── */}
       <div style={{

@@ -58,7 +58,7 @@ html {
 }
 
 body {
-  background-color: var(--color-bg);
+  background-color: #0a0a0a;
   color: #e0e0e0;
   font-family: var(--font-mono);
   min-height: 100dvh;
@@ -93,19 +93,6 @@ body {
   animation: grid-drift 20s linear infinite;
 }
 
-/* Radial vignette */
-#root::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse 120% 80% at 50% 0%,
-    transparent 40%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-}
 
 /* Subtle horizontal scan line */
 .scan-line {
