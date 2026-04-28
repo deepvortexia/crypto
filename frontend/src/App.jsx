@@ -268,7 +268,7 @@ export default function App() {
       </div>
 
       {/* ── HEADER ── */}
-      <header style={{
+      <header className="header-inner" style={{
         position: 'sticky', top: 0, zIndex: 50,
         background: 'rgba(10,10,10,0.85)',
         backdropFilter: 'blur(14px)',
@@ -322,12 +322,12 @@ export default function App() {
       </header>
 
       {/* ── BODY ── */}
-      <main style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
+      <main className="main-pad" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
 
         {/* row 1 — market overview */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Market Overview</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
             <StatCard label="BTC Price"   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
             <StatCard label="24h Change"  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
             <StatCard label="24h Volume"  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
@@ -338,7 +338,7 @@ export default function App() {
         {/* row 2 — AI predictions */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>AI Price Predictions</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
+          <div className="grid-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
             {PRED_HORIZONS.map(h => (
               <PredCard key={h} horizon={h.toUpperCase()} data={preds[h]} loading={loading} />
             ))}
@@ -348,9 +348,9 @@ export default function App() {
         {/* row 3 — indicators + sentiment */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Technical Indicators</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 5fr', gap: 16, alignItems: 'start' }}>
+          <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '2fr 5fr', gap: 16, alignItems: 'start' }}>
             <SentimentMeter value={sentiment?.value} label={sentiment?.classification} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14 }}>
+            <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14 }}>
               <IndCard
                 label="RSI (14)"
                 value={rsi != null ? fmtNum(rsi, 1) : '—'}
@@ -384,7 +384,7 @@ export default function App() {
         {onchain && (
           <div style={{ marginBottom: 40 }}>
             <div style={sectionLabel}>On-Chain Data</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
               {onchain.hash_rate  != null && <IndCard label="Hash Rate"       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" />}
               {onchain.minutes_between_blocks != null && <IndCard label="Block Time" value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" />}
@@ -409,6 +409,14 @@ export default function App() {
 
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+        @media (max-width: 768px) {
+          .grid-4    { grid-template-columns: 1fr 1fr !important; }
+          .grid-5    { grid-template-columns: 1fr 1fr !important; overflow-x: auto; }
+          .grid-2col { grid-template-columns: 1fr !important; }
+          .grid-6    { grid-template-columns: 1fr 1fr 1fr !important; }
+          .main-pad  { padding: 16px !important; }
+          .header-inner { flex-wrap: wrap; gap: 8px !important; }
+        }
         @keyframes introScan  { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
         @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
       `}</style>
