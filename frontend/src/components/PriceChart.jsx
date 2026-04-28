@@ -28,7 +28,7 @@ const TIMEFRAMES = [
   { label: '30D', days: 30 },
 ]
 
-const COINGECKO_URL = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart'
+const COINGECKO_URL = '/coingecko/coins/bitcoin/market_chart'
 
 async function fetchHistory(days) {
   const interval = days <= 1 ? 'minutely' : 'hourly'

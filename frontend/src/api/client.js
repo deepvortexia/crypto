@@ -24,7 +24,7 @@ let _ohlcCacheTime = 0
 async function getOhlc() {
   const now = Date.now()
   if (_ohlcCache && now - _ohlcCacheTime < 5 * 60 * 1000) return _ohlcCache
-  _ohlcCache = await get('https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=30')
+  _ohlcCache = await get('/coingecko/coins/bitcoin/ohlc?vs_currency=usd&days=30')
   _ohlcCacheTime = now
   return _ohlcCache
 }
@@ -106,7 +106,7 @@ function _calcBollinger(closes, period = 20) {
 
 export async function fetchLivePrice() {
   const data = await get(
-    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true'
+    '/coingecko/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true'
   )
   const btc = data.bitcoin
   return {
@@ -120,12 +120,12 @@ export async function fetchLivePrice() {
 
 export async function fetchPriceHistory() {
   return get(
-    'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily'
+    '/coingecko/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily'
   )
 }
 
 export async function fetchSentiment() {
-  const data = await get('https://api.alternative.me/fng/?limit=1')
+  const data = await get('/alternativeme/fng/?limit=1')
   const entry = data.data[0]
   return {
     value: parseInt(entry.value, 10),
@@ -135,7 +135,7 @@ export async function fetchSentiment() {
 }
 
 export async function fetchOnchain() {
-  return get('https://api.blockchain.info/stats')
+  return get('/blockchain/stats')
 }
 
 const HORIZON_DAYS = { '4h': 4 / 24, '8h': 8 / 24, '12h': 12 / 24, '24h': 1, '1month': 30 }
