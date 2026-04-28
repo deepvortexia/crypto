@@ -19,16 +19,15 @@ function GaugeArc({ value }) {
   const v  = Math.max(0, Math.min(100, value ?? 0))
   const zone = zoneOf(v)
 
-  // Map value → angle on the semicircle
-  // v=0 → angle=π (left), v=100 → angle=0 (right)
-  const angle = Math.PI * (1 - v / 100)
-  const ex = cx + r * Math.cos(angle)
-  const ey = cy - r * Math.sin(angle)
+  // Arc geometry (for the gradient fill arc)
+  const arcAngle = Math.PI * (1 - v / 100)
+  const ex = cx + r * Math.cos(arcAngle)
+  const ey = cy - r * Math.sin(arcAngle)
 
-  // Needle tip sits at 88% of radius
+  // Needle: CSS rotation avoids animating SVG x2/y2 (broken on mobile)
+  // -90deg = far left (v=0), 0deg = top (v=50), +90deg = far right (v=100)
+  const cssAngle = -90 + (v / 100) * 180
   const nr = r * 0.88
-  const nx = cx + nr * Math.cos(angle)
-  const ny = cy - nr * Math.sin(angle)
 
   // Active arc spans from left endpoint to current value point
   // largeArc = 1 only when v > 50 (arc > 90°, but ≤ 180° total so always 0 for SVG)
@@ -83,16 +82,22 @@ function GaugeArc({ value }) {
         />
       )}
 
-      {/* Needle */}
-      <line
-        x1={cx} y1={cy}
-        x2={nx.toFixed(3)} y2={ny.toFixed(3)}
-        stroke="rgba(255,255,255,0.92)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        filter="url(#needle-glow)"
-        style={{ transition: 'x2 0.9s cubic-bezier(0.25,0.8,0.25,1), y2 0.9s cubic-bezier(0.25,0.8,0.25,1)' }}
-      />
+      {/* Needle — rotated via CSS transform so mobile browsers animate correctly */}
+      <g transform={`translate(${cx} ${cy})`}>
+        <line
+          x1="0" y1="0"
+          x2="0" y2={-nr}
+          stroke="rgba(255,255,255,0.92)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          filter="url(#needle-glow)"
+          style={{
+            transformOrigin: '0px 0px',
+            transform: `rotate(${cssAngle}deg)`,
+            transition: 'transform 1s cubic-bezier(0.25,0.8,0.25,1)',
+          }}
+        />
+      </g>
       {/* Needle pivot */}
       <circle cx={cx} cy={cy} r="5.5"
         fill="#0d0d1a"
