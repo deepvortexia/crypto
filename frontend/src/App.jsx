@@ -306,7 +306,7 @@ export default function App() {
           }}>
             DEEPVORTEX AI
           </div>
-          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.35em', color: G.text, textTransform: 'uppercase', marginTop: 2 }}>
+          <div className="hide-mobile" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.35em', color: G.text, textTransform: 'uppercase', marginTop: 2 }}>
             BTC Prediction Engine · deepvortexai.com
           </div>
         </div>
@@ -441,7 +441,7 @@ export default function App() {
           .grid-2col    { grid-template-columns: 1fr !important; }
           .grid-6       { grid-template-columns: 1fr 1fr !important; }
           .main-pad     { padding: 16px !important; }
-          .header-inner { display: flex; flex-direction: column; align-items: flex-start !important; gap: 4px !important; padding: 8px 12px !important; }
+          .header-inner { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 10px 12px !important; flex-wrap: nowrap !important; }
           .header-right { position: static !important; }
           .hide-mobile  { display: none !important; }
           .ai-title     { font-size: 13px !important; }
