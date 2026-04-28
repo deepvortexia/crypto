@@ -312,7 +312,7 @@ export default function App() {
         </div>
 
         {/* live ticker */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           {lastAt && (
             <div className="hide-mobile" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.text, letterSpacing: '0.2em', textAlign: 'right' }}>
               <div>REFRESHES IN {countdown}s</div>
@@ -340,13 +340,13 @@ export default function App() {
         </div>
       </header>
 
+      <div style={{padding:'10px 16px',borderBottom:'1px solid #1a1a1a',textAlign:'center',background:'#0a0a0a'}}>
+        <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
+        <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
+      </div>
+
       {/* ── BODY ── */}
       <main className="main-pad" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
-
-        <div style={{textAlign:'center',padding:'16px 0 12px 0',position:'relative',pointerEvents:'none',marginBottom:16}}>
-          <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
-          <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
-        </div>
 
         {/* row 1 — market overview */}
         <div style={{ marginBottom: 40 }}>
@@ -441,7 +441,8 @@ export default function App() {
           .grid-2col    { grid-template-columns: 1fr !important; }
           .grid-6       { grid-template-columns: 1fr 1fr !important; }
           .main-pad     { padding: 16px !important; }
-          .header-inner { padding: 8px 12px !important; flex-wrap: wrap; gap: 8px !important; }
+          .header-inner { display: flex; flex-direction: column; align-items: flex-start !important; gap: 4px !important; padding: 8px 12px !important; }
+          .header-right { position: static !important; }
           .hide-mobile  { display: none !important; }
           .ai-title     { font-size: 13px !important; }
           .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
