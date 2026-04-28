@@ -245,6 +245,9 @@ export default function App() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
 
+      <div style={{position:'fixed',top:0,left:'-2px',width:'2px',height:'100vh',zIndex:999,pointerEvents:'none',background:`linear-gradient(180deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScan 1.2s linear 1 forwards'}} />
+      <div style={{position:'fixed',top:0,left:'-2px',width:'2px',height:'100vh',zIndex:999,pointerEvents:'none',background:`linear-gradient(180deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScan 1.2s linear 1 forwards',animationDelay:'0.3s'}} />
+
       {/* ── AI THINKING indicator ── */}
       <div style={{
         position: 'fixed', bottom: 18, left: 20, zIndex: 99, pointerEvents: 'none',
@@ -406,6 +409,7 @@ export default function App() {
 
       <style>{`
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+        @keyframes introScan { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
       `}</style>
     </div>
   )
