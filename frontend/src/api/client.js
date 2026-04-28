@@ -1,4 +1,4 @@
-const COINCAP = '/coincap'
+const BINANCE = 'https://api.binance.com/api/v3'
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -26,9 +26,8 @@ let _ohlcCacheTime = 0
 async function getOhlc() {
   const now = Date.now()
   if (_ohlcCache && now - _ohlcCacheTime < 5 * 60 * 1000) return _ohlcCache
-  const data = await get(`${COINCAP}/assets/bitcoin/history?interval=d1`)
-  // Returns array of close prices (numbers)
-  _ohlcCache = data.data.map(d => parseFloat(d.priceUsd))
+  const data = await get(`${BINANCE}/klines?symbol=BTCUSDT&interval=1d&limit=60`)
+  _ohlcCache = data.map(k => parseFloat(k[4]))
   _ohlcCacheTime = now
   return _ohlcCache
 }
@@ -108,20 +107,19 @@ function _calcBollinger(closes, period = 20) {
 // --- Public API ---
 
 export async function fetchLivePrice() {
-  const data = await get(`${COINCAP}/assets/bitcoin`)
-  const d = data.data
+  const data = await get(`${BINANCE}/ticker/24hr?symbol=BTCUSDT`)
   return {
-    price: parseFloat(d.priceUsd),
-    change_24h_pct: parseFloat(d.changePercent24Hr),
-    market_cap: parseFloat(d.marketCapUsd),
-    volume_24h: parseFloat(d.volumeUsd24Hr),
+    price: parseFloat(data.lastPrice),
+    change_24h_pct: parseFloat(data.priceChangePercent),
+    volume_24h: parseFloat(data.quoteVolume),
+    market_cap: 0,
     last_updated: new Date().toISOString(),
   }
 }
 
 export async function fetchPriceHistory() {
-  const data = await get(`${COINCAP}/assets/bitcoin/history?interval=d1`)
-  return data.data.map(d => [d.time, parseFloat(d.priceUsd)])
+  const data = await get(`${BINANCE}/klines?symbol=BTCUSDT&interval=1d&limit=60`)
+  return data.map(k => [k[0], parseFloat(k[4])])
 }
 
 export async function fetchSentiment() {

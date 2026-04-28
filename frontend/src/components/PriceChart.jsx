@@ -26,17 +26,16 @@ const TIMEFRAMES = [
   { label: '30D', days: 30 },
 ]
 
-const COINCAP_HISTORY = '/coincap/assets/bitcoin/history'
+const BINANCE_KLINES = 'https://api.binance.com/api/v3/klines'
 
 async function fetchHistory(days) {
-  const end = Date.now()
-  const start = end - days * 24 * 60 * 60 * 1000
-  const interval = days <= 1 ? 'h1' : days <= 7 ? 'h6' : 'd1'
-  const url = `${COINCAP_HISTORY}?interval=${interval}&start=${start}&end=${end}`
+  const interval = days <= 1 ? '1h' : days <= 7 ? '4h' : '1d'
+  const limit    = days <= 1 ? 24   : days <= 7 ? 42   : 30
+  const url = `${BINANCE_KLINES}?symbol=BTCUSDT&interval=${interval}&limit=${limit}`
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`CoinCap ${res.status}`)
+  if (!res.ok) throw new Error(`Binance ${res.status}`)
   const body = await res.json()
-  return body.data.map(d => [d.time, parseFloat(d.priceUsd)])
+  return body.map(k => [k[0], parseFloat(k[4])])
 }
 
 const tooltipPlugin = {
