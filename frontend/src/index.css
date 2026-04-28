@@ -6,33 +6,33 @@
 
 /* ─── Design tokens ────────────────────────────────────────────────────────── */
 :root {
-  --color-bg:           #000000;
-  --color-surface:      #0a0a0f;
-  --color-card:         #0d0d1a;
-  --color-border:       #1a1a2e;
-  --color-muted:        #111122;
+  --color-bg:           #0a0a0a;
+  --color-surface:      #111111;
+  --color-card:         #141414;
+  --color-border:       #2a1f00;
+  --color-muted:        #1a1400;
 
-  --color-cyan:         #FFD700;
-  --color-cyan-dim:     rgba(255, 215, 0, 0.15);
-  --color-cyan-glow:    rgba(255, 215, 0, 0.4);
+  --color-cyan:         #f59e0b;
+  --color-cyan-dim:     rgba(245, 158, 11, 0.15);
+  --color-cyan-glow:    rgba(245, 158, 11, 0.4);
 
-  --color-green:        #FFC200;
-  --color-green-dim:    rgba(255, 194, 0, 0.15);
-  --color-green-glow:   rgba(255, 194, 0, 0.4);
+  --color-green:        #10b981;
+  --color-green-dim:    rgba(16, 185, 129, 0.15);
+  --color-green-glow:   rgba(16, 185, 129, 0.4);
 
-  --color-red:          #ff3355;
-  --color-red-dim:      rgba(255, 51, 85, 0.15);
-  --color-red-glow:     rgba(255, 51, 85, 0.4);
+  --color-red:          #ef4444;
+  --color-red-dim:      rgba(239, 68, 68, 0.15);
+  --color-red-glow:     rgba(239, 68, 68, 0.4);
 
-  --color-gold:         #ffd600;
-  --color-gold-glow:    rgba(255, 214, 0, 0.4);
+  --color-gold:         #f59e0b;
+  --color-gold-glow:    rgba(245, 158, 11, 0.4);
 
   --font-display:       'Orbitron', sans-serif;
   --font-mono:          'Share Tech Mono', monospace;
 
   --grid-size:          60px;
-  --grid-color:         rgba(255, 215, 0, 0.04);
-  --grid-color-strong:  rgba(255, 215, 0, 0.07);
+  --grid-color:         rgba(245, 158, 11, 0.03);
+  --grid-color-strong:  rgba(245, 158, 11, 0.06);
 }
 
 /* ─── Base reset ────────────────────────────────────────────────────────────── */
