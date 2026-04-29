@@ -197,12 +197,15 @@ export async function fetchOpenInterest() {
 }
 
 export async function fetchWhales() {
-  const data = await get('https://api.binance.com/api/v3/trades?symbol=BTCUSDT&limit=1000')
-  const large = data.filter(t => parseFloat(t.qty) * parseFloat(t.price) > 50000)
-  console.log('Total trades:', data.length, 'Large:', large.length, 'Sample price:', data[0]?.price, 'qty:', data[0]?.qty)
-  const buyVol = large.filter(t=>!t.isBuyerMaker).reduce((a,t)=>a+parseFloat(t.qty)*parseFloat(t.price),0)
-  const sellVol = large.filter(t=>t.isBuyerMaker).reduce((a,t)=>a+parseFloat(t.qty)*parseFloat(t.price),0)
-  return { largeCount:large.length, buyVol, sellVol, signal: buyVol>sellVol*1.2?'Whales buying':sellVol>buyVol*1.2?'Whales selling':'Neutral' }
+  const data = await get('https://fapi.binance.com/futures/data/takerlongshortRatio?symbol=BTCUSDT&period=1h&limit=1')
+  const buyRatio = parseFloat(data[0].buyVol) / (parseFloat(data[0].buyVol) + parseFloat(data[0].sellVol)) * 100
+  const sellRatio = 100 - buyRatio
+  return {
+    largeCount: Math.round(buyRatio) + '% buy / ' + Math.round(sellRatio) + '% sell',
+    buyVol: parseFloat(data[0].buyVol),
+    sellVol: parseFloat(data[0].sellVol),
+    signal: buyRatio > 55 ? 'Whales buying' : buyRatio < 45 ? 'Whales selling' : 'Neutral'
+  }
 }
 
 export async function fetchNews() {
