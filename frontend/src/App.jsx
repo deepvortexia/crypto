@@ -294,6 +294,7 @@ export default function App() {
   const [deepLogs,      setDeepLogs]      = useState([])
   const [deepResult,    setDeepResult]    = useState(null)
   const [deepRunning,   setDeepRunning]   = useState(false)
+  const [deepHorizon,   setDeepHorizon]   = useState(null)
   const [loading,     setLoading]     = useState(true)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -354,9 +355,27 @@ export default function App() {
     return () => ws.close()
   }, [])
 
-  async function runDeepAnalysis() {
+  async function runDeepAnalysis(horizon) {
     setDeepOpen(true); setDeepRunning(true); setDeepLogs([]); setDeepResult(null)
-    const L = ['Connecting...','BTC: $'+price?.price?.toLocaleString(),'RSI '+indics?.rsi,'MACD: '+(indics?.macd?.histogram>0?'Bullish':'Bearish'),'Fear: '+sentiment?.value,'EMA: '+(indics?.ema50>indics?.ema200?'Golden Cross':'Death Cross'),'Funding: '+fundingRate?.signal,'Order Book: '+orderBook?.signal,'Running model...','CONSENSUS REACHED']
+    const L = [
+      'Connecting...',
+      'BTC: $'+price?.price?.toLocaleString(),
+      'RSI '+indics?.rsi,
+      'MACD: '+(indics?.macd?.histogram>0?'Bullish':'Bearish'),
+      'Fear: '+sentiment?.value,
+      'EMA: '+(indics?.ema50>indics?.ema200?'Golden Cross':'Death Cross'),
+      'Funding: '+fundingRate?.signal,
+      'Order Book: '+orderBook?.signal,
+      'Bollinger: $'+indics?.bollinger_bands?.middle,
+      'Open Interest: $'+fmtLarge((openInterest?.value||0)*(price?.price||0)),
+      'Long/Short: '+longShort?.ratio?.toFixed(2),
+      'Mempool: '+mempool?.signal,
+      'Key level: '+(keyLevels?.nearLevel?'Fib '+(keyLevels.nearLevel.level*100)+'%':'None'),
+      'OI Change: '+liquidations?.change+'%',
+      'Horizon: '+horizon,
+      'Predicted: $'+preds[horizon?.toLowerCase()]?.predicted_price?.toLocaleString(),
+      'Running model...','CONSENSUS REACHED',
+    ]
     for(const l of L){await new Promise(r=>setTimeout(r,500));setDeepLogs(p=>[...p,l])}
     const s=Math.round([indics?.rsi<50,indics?.macd?.histogram>0,sentiment?.value<40,indics?.ema50>indics?.ema200,longShort?.ratio<1,orderBook?.ratio>1].filter(Boolean).length/6*100)
     setDeepResult({score:s,direction:s>50?'BULLISH':'BEARISH',recommendation:s>65?'Strong Buy':s>50?'Weak Buy':s>35?'Hold':'Sell'})
@@ -757,12 +776,25 @@ export default function App() {
                 DEEP ANALYSIS
               </span>
               {!deepRunning && (
-                <button onClick={() => setDeepOpen(false)}
+                <button onClick={() => { setDeepOpen(false); setDeepHorizon(null) }}
                   style={{ background: 'none', border: 'none', color: G.text, cursor: 'pointer', fontSize: 18 }}>✕</button>
               )}
             </div>
 
+            {/* horizon selector */}
+            {!deepHorizon && (
+              <div style={{textAlign:'center',padding:20}}>
+                <div style={{fontFamily:'"Orbitron",sans-serif',color:'#f59e0b',marginBottom:20}}>SELECT HORIZON</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+                  {['4h','8h','12h','24h','1week','1month'].map(h=>(
+                    <button key={h} onClick={()=>{setDeepHorizon(h);runDeepAnalysis(h)}} style={{fontFamily:'"Orbitron",sans-serif',padding:'14px',background:'#1a1a1a',border:'1px solid #f59e0b',borderRadius:8,color:'#f59e0b',cursor:'pointer',fontSize:13,letterSpacing:'0.2em'}}>{h.toUpperCase()}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* log stream */}
+            {deepHorizon && (
             <div style={{
               flex: 1, overflowY: 'auto', padding: '20px 24px',
               fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text,
@@ -803,16 +835,17 @@ export default function App() {
                 </div>
               )}
             </div>
+            )}
 
             {/* footer */}
-            {!deepRunning && (
+            {!deepRunning && deepHorizon && (
               <div style={{ padding: '12px 24px', borderTop: `1px solid ${G.border}`, display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button onClick={runDeepAnalysis} style={{
+                <button onClick={() => { setDeepHorizon(null); setDeepLogs([]); setDeepResult(null) }} style={{
                   fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                   background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 6,
                   color: G.gold, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
                 }}>Re-run</button>
-                <button onClick={() => setDeepOpen(false)} style={{
+                <button onClick={() => { setDeepOpen(false); setDeepHorizon(null) }} style={{
                   fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                   background: 'none', border: `1px solid ${G.border}`, borderRadius: 6,
                   color: G.text, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
