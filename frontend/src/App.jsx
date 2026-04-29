@@ -164,7 +164,7 @@ function SentimentMeter({ value, label }) {
 
   return (
     <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
-      <div style={labelStyle}>Fear & Greed Index</div>
+      <div style={labelStyle}>Fear & Greed<Tooltip text="0=buy opportunity 100=sell signal"/></div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
 
         {/* ── futuristic circle ── */}
@@ -225,6 +225,17 @@ function SentimentMeter({ value, label }) {
 // ── main ─────────────────────────────────────────────────────────────────────
 const PRED_HORIZONS = ['4h', '8h', '12h', '24h', '1month']
 const REFRESH_MS    = 60_000
+
+function Tooltip({text}) {
+  const [show, setShow] = React.useState(false)
+  return (
+    <span style={{position:'relative',display:'inline-block',marginLeft:6}}>
+      <span onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} onClick={()=>setShow(!show)}
+        style={{cursor:'pointer',fontSize:9,color:'#f59e0b',border:'1px solid #f59e0b',borderRadius:'50%',padding:'0 4px',opacity:0.7,fontFamily:'monospace'}}>?</span>
+      {show && <div style={{position:'absolute',bottom:'120%',left:'50%',transform:'translateX(-50%)',background:'#1a1a1a',border:'1px solid #f59e0b33',borderRadius:6,padding:'8px 10px',width:200,fontSize:10,color:'#d1d5db',fontFamily:'"Share Tech Mono",monospace',lineHeight:1.5,zIndex:200,pointerEvents:'none'}}>{text}</div>}
+    </span>
+  )
+}
 
 export default function App() {
   const [price,    setPrice]    = useState(null)
@@ -343,10 +354,10 @@ export default function App() {
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Market Overview</div>
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-            <StatCard label="BTC Price"   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
-            <StatCard label="24h Change"  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
-            <StatCard label="24h Volume"  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
-            <StatCard label="Market Cap"  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
+            <StatCard label={<>BTC Price<Tooltip text="Live Bitcoin price USD"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
+            <StatCard label={<>24h Change<Tooltip text="Green=bullish Red=bearish"/></>}  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
+            <StatCard label={<>24h Volume<Tooltip text="Total USD traded 24h"/></>}  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
+            <StatCard label={<>Market Cap<Tooltip text="Total Bitcoin value in circulation"/></>}  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
           </div>
         </div>
 
@@ -367,12 +378,12 @@ export default function App() {
             <SentimentMeter value={sentiment?.value} label={sentiment?.classification} />
             <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14 }}>
               <IndCard
-                label="RSI (14)"
+                label={<>RSI (14)<Tooltip text="70+=overbought 30-=oversold"/></>}
                 value={rsi != null ? fmtNum(rsi, 1) : '—'}
                 sub={rsi == null ? '' : rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral'}
               />
               <IndCard
-                label="MACD"
+                label={<>MACD<Tooltip text="Positive=bullish Negative=bearish"/></>}
                 value={macd ? fmtNum(macd.macd, 1) : '—'}
                 sub={macd ? (macd.macd > 0 ? 'Bullish' : 'Bearish') : ''}
               />
@@ -401,9 +412,9 @@ export default function App() {
             <div style={sectionLabel}>On-Chain Data</div>
             <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
-              {onchain.hash_rate  != null && <IndCard label="Hash Rate"       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" />}
-              {onchain.minutes_between_blocks != null && <IndCard label="Block Time" value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" />}
-              {onchain.total_fees_btc != null && <IndCard label="Total Fees"  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" />}
+              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Network computing power"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" />}
+              {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Target 10 min per block"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" />}
+              {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Miner fees last 24h"/></>}  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" />}
             </div>
           </div>
         )}
