@@ -369,6 +369,10 @@ export default function App() {
         <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
       </div>
 
+      <div style={{textAlign:'center',padding:'12px 0',borderBottom:'1px solid #1a1a1a'}}>
+        <span style={{fontFamily:'"Orbitron",sans-serif',fontSize:22,letterSpacing:'0.2em',color:'#f59e0b',fontWeight:'bold'}}>₿ BITCOIN</span>
+      </div>
+
       {/* ── BODY ── */}
       <main className="main-pad" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
 
