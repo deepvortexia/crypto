@@ -298,17 +298,7 @@ export default function App() {
       }}>
         {/* logo */}
         <div>
-          <div style={{
-            fontFamily: '"Orbitron", sans-serif',
-            fontSize: 22, fontWeight: 700, letterSpacing: '0.14em',
-            color: G.gold,
-            textShadow: `0 0 18px ${G.goldGlow}, 0 0 40px ${G.goldGlow}`,
-          }}>
-            DEEPVORTEX AI
-          </div>
-          <div className="hide-mobile" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.35em', color: G.text, textTransform: 'uppercase', marginTop: 2 }}>
-            BTC Prediction Engine · deepvortexai.com
-          </div>
+          <img src="/logotrans.png" alt="DeepVortex" style={{height:'40px',objectFit:'contain'}} />
         </div>
 
         {/* live ticker */}
