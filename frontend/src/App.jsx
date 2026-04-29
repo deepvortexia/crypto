@@ -165,13 +165,17 @@ function getBarValue(name, value) {
 function IndCard({ label, value, sub, barName, barRaw }) {
   const bar = barName ? getBarValue(barName, barRaw ?? value) : null
   return (
-    <div style={{ ...cardStyle, padding: '14px 18px' }}>
-      <div style={labelStyle}>{label}</div>
-      <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 17, ...goldText }}>{value}</div>
-      {sub && <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: G.text, marginTop: 4 }}>{sub}</div>}
+    <div className="ind-card" style={{ ...cardStyle, padding: '14px 18px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.1em', color: '#9ca3af', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center' }}>{label}</span>
+      </div>
+      <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 20, marginTop: 6, marginBottom: 4, color: G.gold, textShadow: `0 0 8px ${G.goldGlow}` }}>{value}</div>
+      {sub && <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: '#6b7280' }}>{sub}</div>}
       {bar && (
-        <div style={{marginTop:8,height:3,borderRadius:2,background:'#1a1a1a',overflow:'hidden'}}>
-          <div style={{height:'100%',width:`${bar.pct}%`,background:bar.color,borderRadius:2,boxShadow:`0 0 6px ${bar.color}`,transition:'width 0.8s ease'}}/>
+        <div style={{ marginTop: 8 }}>
+          <div style={{height:3,borderRadius:2,background:'#1a1a1a',overflow:'hidden'}}>
+            <div style={{height:'100%',width:`${bar.pct}%`,background:bar.color,borderRadius:2,boxShadow:`0 0 6px ${bar.color}`,transition:'width 0.8s ease'}}/>
+          </div>
         </div>
       )}
     </div>
@@ -497,6 +501,7 @@ export default function App() {
           .grid-2col      { grid-template-columns: 1fr !important; }
           .sentiment-card { width: 100% !important; min-width: 0 !important; }
           .grid-6       { grid-template-columns: 1fr 1fr !important; }
+          .ind-card     { min-height: 90px !important; }
           .main-pad     { padding: 16px !important; }
           .header-inner { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 10px 12px !important; flex-wrap: nowrap !important; }
           .header-right { position: static !important; }
