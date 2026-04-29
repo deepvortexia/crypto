@@ -164,7 +164,7 @@ function SentimentMeter({ value, label }) {
 
   return (
     <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
-      <div style={labelStyle}>Fear & Greed<Tooltip text="0=buy opportunity 100=sell signal"/></div>
+      <div style={labelStyle}>Fear & Greed<Tooltip text="0-25=Extreme Fear best buy zone. 75-100=Extreme Greed consider selling"/></div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
 
         {/* ── futuristic circle ── */}
@@ -354,10 +354,10 @@ export default function App() {
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Market Overview</div>
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-            <StatCard label={<>BTC Price<Tooltip text="Live Bitcoin price USD"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
-            <StatCard label={<>24h Change<Tooltip text="Green=bullish Red=bearish"/></>}  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
-            <StatCard label={<>24h Volume<Tooltip text="Total USD traded 24h"/></>}  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
-            <StatCard label={<>Market Cap<Tooltip text="Total Bitcoin value in circulation"/></>}  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
+            <StatCard label={<>BTC Price<Tooltip text="Live Bitcoin price in USD updated every 60s from Binance"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
+            <StatCard label={<>24h Change<Tooltip text="Price change last 24h. Green=bullish momentum Red=bearish"/></>}  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
+            <StatCard label={<>24h Volume<Tooltip text="Total USD traded on Binance in the last 24 hours"/></>}  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
+            <StatCard label={<>Market Cap<Tooltip text="Total market value of all 19.7M Bitcoin in circulation"/></>}  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
           </div>
         </div>
 
@@ -365,9 +365,11 @@ export default function App() {
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>AI Price Predictions</div>
           <div className="grid-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
-            {PRED_HORIZONS.map(h => (
-              <PredCard key={h} horizon={h.toUpperCase()} data={preds[h]} loading={loading} />
-            ))}
+            <PredCard key="4h"     horizon={<>4H<Tooltip text="AI prediction 4 hours ahead using SMA7 vs SMA14 momentum"/></>}     data={preds['4h']}     loading={loading} />
+            <PredCard key="8h"     horizon={<>8H<Tooltip text="AI prediction 8 hours ahead based on short-term trend"/></>}          data={preds['8h']}     loading={loading} />
+            <PredCard key="12h"    horizon={<>12H<Tooltip text="AI prediction 12 hours using moving average divergence"/></>}         data={preds['12h']}    loading={loading} />
+            <PredCard key="24h"    horizon={<>24H<Tooltip text="AI prediction 24 hours ahead. Most reliable forecast"/></>}           data={preds['24h']}    loading={loading} />
+            <PredCard key="1month" horizon={<>1MONTH<Tooltip text="30 day projection. Long-term trend higher uncertainty"/></>}       data={preds['1month']} loading={loading} />
           </div>
         </div>
 
@@ -378,12 +380,12 @@ export default function App() {
             <SentimentMeter value={sentiment?.value} label={sentiment?.classification} />
             <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14 }}>
               <IndCard
-                label={<>RSI (14)<Tooltip text="70+=overbought 30-=oversold"/></>}
+                label={<>RSI (14)<Tooltip text="Above 70=overbought likely drop. Below 30=oversold likely rise. 30-70=neutral"/></>}
                 value={rsi != null ? fmtNum(rsi, 1) : '—'}
                 sub={rsi == null ? '' : rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral'}
               />
               <IndCard
-                label={<>MACD<Tooltip text="Positive=bullish Negative=bearish"/></>}
+                label={<>MACD<Tooltip text="Positive histogram=bullish momentum. Negative=bearish pressure"/></>}
                 value={macd ? fmtNum(macd.macd, 1) : '—'}
                 sub={macd ? (macd.macd > 0 ? 'Bullish' : 'Bearish') : ''}
               />
@@ -412,9 +414,9 @@ export default function App() {
             <div style={sectionLabel}>On-Chain Data</div>
             <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
-              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Network computing power"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" />}
-              {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Target 10 min per block"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" />}
-              {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Miner fees last 24h"/></>}  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" />}
+              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Total computing power mining Bitcoin. Higher=more secure"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" />}
+              {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Avg minutes between blocks. Target 10 min"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" />}
+              {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" />}
             </div>
           </div>
         )}
