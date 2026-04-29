@@ -227,7 +227,7 @@ const PRED_HORIZONS = ['4h', '8h', '12h', '24h', '1month']
 const REFRESH_MS    = 60_000
 
 function Tooltip({text}) {
-  const [show, setShow] = React.useState(false)
+  const [show, setShow] = useState(false)
   return (
     <span style={{position:'relative',display:'inline-block',marginLeft:6}}>
       <span onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} onClick={()=>setShow(!show)}
