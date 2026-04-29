@@ -178,3 +178,14 @@ export async function fetchIndicators() {
     timestamp: new Date().toISOString(),
   }
 }
+
+export async function fetchNews() {
+  const data = await get('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories=BTC&limit=5')
+  return data.Data.slice(0, 5).map(n => ({
+    title: n.title,
+    url: n.url,
+    source: n.source,
+    sentiment: n.downvotes > n.upvotes ? 'bearish' : 'bullish',
+    time: new Date(n.published_on * 1000).toLocaleDateString()
+  }))
+}

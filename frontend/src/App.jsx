@@ -6,6 +6,7 @@ import {
   fetchIndicators,
   fetchPriceHistory,
   fetchOnchain,
+  fetchNews,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -269,6 +270,7 @@ export default function App() {
   const [preds,    setPreds]    = useState({})
   const [indics,   setIndics]   = useState(null)
   const [onchain,  setOnchain]  = useState(null)
+  const [news,     setNews]     = useState([])
   const [loading,  setLoading]  = useState(true)
   const [lastAt,   setLastAt]   = useState(null)
   const [countdown,setCountdown]= useState(REFRESH_MS / 1000)
@@ -293,6 +295,7 @@ export default function App() {
 
     // onchain (may fail — proxied)
     try { setOnchain(await fetchOnchain()) } catch {}
+    try { setNews(await fetchNews()) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -483,6 +486,47 @@ export default function App() {
               {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Total computing power mining Bitcoin. Higher=more secure"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" barName="hashRate" />}
               {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Avg minutes between blocks. Target 10 min"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" barName="blockTime" barRaw={onchain.minutes_between_blocks} />}
               {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" barName="fees" />}
+            </div>
+          </div>
+        )}
+
+        {/* row 5 — news */}
+        {news.length > 0 && (
+          <div style={{ marginBottom: 40 }}>
+            <div style={sectionLabel}>Latest BTC News</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {news.map((n, i) => (
+                <a key={i} href={n.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    ...cardStyle, padding: '12px 16px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                    cursor: 'pointer', transition: 'border-color 0.2s',
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = G.gold}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = G.border}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 12, color: '#e5e7eb', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {n.title.length > 60 ? n.title.slice(0, 60) + '…' : n.title}
+                      </div>
+                      <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: G.text, letterSpacing: '0.1em' }}>
+                        {n.source} · {n.time}
+                      </div>
+                    </div>
+                    <div style={{
+                      flexShrink: 0,
+                      fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.15em',
+                      padding: '3px 8px', borderRadius: 4,
+                      background: n.sentiment === 'bullish' ? `${G.green}22` : `${G.red}22`,
+                      color: n.sentiment === 'bullish' ? G.green : G.red,
+                      border: `1px solid ${n.sentiment === 'bullish' ? G.green : G.red}44`,
+                      textTransform: 'uppercase',
+                    }}>
+                      {n.sentiment === 'bullish' ? '▲ Bullish' : '▼ Bearish'}
+                    </div>
+                  </div>
+                </a>
+              ))}
             </div>
           </div>
         )}
