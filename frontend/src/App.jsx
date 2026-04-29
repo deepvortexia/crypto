@@ -13,6 +13,7 @@ import {
   fetchWhales,
   fetchMempool,
   fetchOrderBook,
+  fetchKeyLevels,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -285,6 +286,7 @@ export default function App() {
   const [whales,      setWhales]      = useState(null)
   const [mempool,     setMempool]     = useState(null)
   const [orderBook,   setOrderBook]   = useState(null)
+  const [keyLevels,   setKeyLevels]   = useState(null)
   const [loading,     setLoading]     = useState(true)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -316,6 +318,7 @@ export default function App() {
     try { setWhales(await fetchWhales()) } catch {}
     try { setMempool(await fetchMempool()) } catch {}
     try { setOrderBook(await fetchOrderBook()) } catch {}
+    try { setKeyLevels(await fetchKeyLevels(price?.price || 77000)) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -565,7 +568,62 @@ export default function App() {
           </div>
         </div>
 
-        {/* row 7 — mempool */}
+        {/* row 7 — key levels */}
+        {keyLevels && (
+          <div style={{ marginBottom: 40 }}>
+            <div style={sectionLabel}>Key Levels</div>
+            <div style={{ ...cardStyle, padding: '20px 24px' }}>
+
+              {/* Pivot */}
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.2em', color: G.text, textTransform: 'uppercase' }}>Pivot</span>
+                <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 22, ...goldText, marginTop: 4 }}>{fmtPrice(keyLevels.pivot)}</div>
+              </div>
+
+              {/* Resistance / Support grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                {/* Support */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[['S1', keyLevels.s1], ['S2', keyLevels.s2], ['S3', keyLevels.s3]].map(([lbl, val]) => (
+                    <div key={lbl} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: `${G.green}11`, borderRadius: 6, padding: '8px 12px', border: `1px solid ${G.green}33` }}>
+                      <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.15em', color: G.green }}>{lbl}</span>
+                      <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 14, color: G.green }}>{fmtPrice(val)}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* Resistance */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[['R1', keyLevels.r1], ['R2', keyLevels.r2], ['R3', keyLevels.r3]].map(([lbl, val]) => (
+                    <div key={lbl} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: `${G.red}11`, borderRadius: 6, padding: '8px 12px', border: `1px solid ${G.red}33` }}>
+                      <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.15em', color: G.red }}>{lbl}</span>
+                      <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 14, color: G.red }}>{fmtPrice(val)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Fibonacci badges */}
+              <div style={{ borderTop: `1px solid ${G.border}`, paddingTop: 14 }}>
+                <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.2em', color: G.text, textTransform: 'uppercase', marginBottom: 10 }}>Fibonacci Retracements</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {keyLevels.fib.map(f => (
+                    <div key={f.level} style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, padding: '5px 10px', borderRadius: 5, background: G.goldDim, border: `1px solid ${G.gold}44`, color: G.gold, letterSpacing: '0.1em' }}>
+                      {(f.level * 100).toFixed(1)}% · {fmtPrice(f.price)}
+                    </div>
+                  ))}
+                </div>
+                {keyLevels.nearLevel && (
+                  <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 11, ...goldText, marginTop: 12, letterSpacing: '0.15em' }}>
+                    ⚠️ Near Fibonacci level {(keyLevels.nearLevel.level * 100).toFixed(1)}% · {fmtPrice(keyLevels.nearLevel.price)}
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* row 8 — mempool */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Mempool</div>
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>

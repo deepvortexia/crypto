@@ -242,3 +242,19 @@ export async function fetchNews() {
     time: n.publishedAt ? new Date(n.publishedAt).toLocaleDateString() : ''
   }))
 }
+
+export async function fetchKeyLevels(currentPrice) {
+  const data = await get('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=30')
+  const highs = data.map(k=>parseFloat(k[2]))
+  const lows = data.map(k=>parseFloat(k[3]))
+  const closes = data.map(k=>parseFloat(k[4]))
+  const H = Math.max(...highs), L = Math.min(...lows)
+  const P = (H + L + closes[closes.length-1]) / 3
+  const fib = [0.236,0.382,0.5,0.618,0.786].map(f=>({level:f,price:parseFloat((H-(H-L)*f).toFixed(0))}))
+  return {
+    pivot:parseFloat(P.toFixed(0)),
+    r1:parseFloat((2*P-L).toFixed(0)), r2:parseFloat((P+(H-L)).toFixed(0)), r3:parseFloat((H+2*(P-L)).toFixed(0)),
+    s1:parseFloat((2*P-H).toFixed(0)), s2:parseFloat((P-(H-L)).toFixed(0)), s3:parseFloat((L-2*(H-P)).toFixed(0)),
+    fib, nearLevel:fib.find(f=>Math.abs(f.price-currentPrice)/currentPrice<0.01)
+  }
+}
