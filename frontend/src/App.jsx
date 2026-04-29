@@ -146,33 +146,34 @@ function PredCard({ horizon, data, loading }) {
   )
 }
 
-function getStatus(name, value) {
-  if (value == null) return 'orange'
+
+function getBarValue(name, value) {
   const n = parseFloat(value)
   switch (name) {
-    case 'rsi':       return n < 30 ? 'green' : n > 70 ? 'red' : 'orange'
-    case 'macd':      return n > 0 ? 'green' : 'red'
-    case 'macdSig':   return n > 0 ? 'green' : 'red'
-    case 'bbUpper':   return value ? 'red' : 'green'
-    case 'bbLower':   return value ? 'green' : 'orange'
-    case 'hashRate':  return 'green'
-    case 'blockTime': return n < 8 ? 'green' : n > 12 ? 'red' : 'orange'
-    case 'fees':      return 'orange'
-    case 'fg':        return n < 25 ? 'green' : n > 75 ? 'red' : 'orange'
-    default:          return 'orange'
+    case 'rsi':       return { pct: isNaN(n) ? 50 : Math.min(100, Math.max(0, n)), color: n < 30 ? '#10b981' : n > 70 ? '#ef4444' : '#f59e0b' }
+    case 'macd':      return { pct: isNaN(n) ? 50 : n > 0 ? 80 : 20,              color: n > 0 ? '#10b981' : '#ef4444' }
+    case 'macdSig':   return { pct: isNaN(n) ? 50 : n > 0 ? 80 : 20,              color: n > 0 ? '#10b981' : '#ef4444' }
+    case 'bbUpper':   return { pct: 50,  color: '#f59e0b' }
+    case 'bbLower':   return { pct: 50,  color: '#f59e0b' }
+    case 'hashRate':  return { pct: 80,  color: '#10b981' }
+    case 'blockTime': return { pct: isNaN(n) ? 60 : n < 8 ? 90 : n > 12 ? 30 : 60, color: n < 8 ? '#10b981' : n > 12 ? '#ef4444' : '#f59e0b' }
+    case 'fees':      return { pct: 50,  color: '#f59e0b' }
+    default:          return { pct: 50,  color: '#f59e0b' }
   }
 }
 
-const STATUS_COLORS = { green: G.green, orange: '#f97316', red: G.red }
-
-function IndCard({ label, value, sub, status }) {
-  const dotColor = STATUS_COLORS[status] ?? null
+function IndCard({ label, value, sub, barName, barRaw }) {
+  const bar = barName ? getBarValue(barName, barRaw ?? value) : null
   return (
-    <div style={{ ...cardStyle, padding: '14px 18px', position: 'relative' }}>
-      {dotColor && <div style={{position:'absolute',top:8,right:8,width:8,height:8,borderRadius:'50%',background:dotColor,boxShadow:`0 0 6px ${dotColor}`}} />}
+    <div style={{ ...cardStyle, padding: '14px 18px' }}>
       <div style={labelStyle}>{label}</div>
       <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 17, ...goldText }}>{value}</div>
       {sub && <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: G.text, marginTop: 4 }}>{sub}</div>}
+      {bar && (
+        <div style={{marginTop:8,height:3,borderRadius:2,background:'#1a1a1a',overflow:'hidden'}}>
+          <div style={{height:'100%',width:`${bar.pct}%`,background:bar.color,borderRadius:2,boxShadow:`0 0 6px ${bar.color}`,transition:'width 0.8s ease'}}/>
+        </div>
+      )}
     </div>
   )
 }
@@ -404,31 +405,31 @@ export default function App() {
                 label={<>RSI (14)<Tooltip text="Above 70=overbought likely drop. Below 30=oversold likely rise. 30-70=neutral"/></>}
                 value={rsi != null ? fmtNum(rsi, 1) : '—'}
                 sub={rsi == null ? '' : rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral'}
-                status={getStatus('rsi', rsi)}
+                barName="rsi" barRaw={rsi}
               />
               <IndCard
                 label={<>MACD<Tooltip text="Positive histogram=bullish momentum. Negative=bearish pressure"/></>}
                 value={macd ? fmtNum(macd.macd, 1) : '—'}
                 sub={macd ? (macd.macd > 0 ? 'Bullish' : 'Bearish') : ''}
-                status={getStatus('macd', macd?.macd)}
+                barName="macd" barRaw={macd?.macd}
               />
               <IndCard
                 label={<>MACD Signal<Tooltip text="Signal line crossover. MACD above signal=bullish, below=bearish"/></>}
                 value={macd ? fmtNum(macd.signal, 1) : '—'}
                 sub={macd ? `Hist: ${fmtNum(macd.histogram, 1)}` : ''}
-                status={getStatus('macdSig', macd?.histogram)}
+                barName="macdSig" barRaw={macd?.histogram}
               />
               <IndCard
                 label={<>BB Upper<Tooltip text="Upper Bollinger Band. Price touching upper=overbought sell signal"/></>}
                 value={bb ? fmtPrice(bb.upper) : '—'}
                 sub="Bollinger Band"
-                status={getStatus('bbUpper', bb && indics?.price && (bb.upper - indics.price) / bb.upper < 0.02)}
+                barName="bbUpper"
               />
               <IndCard
                 label={<>BB Lower<Tooltip text="Lower Bollinger Band. Price touching lower=oversold buy signal"/></>}
                 value={bb ? fmtPrice(bb.lower) : '—'}
                 sub="Bollinger Band"
-                status={getStatus('bbLower', bb && indics?.price && (indics.price - bb.lower) / bb.lower < 0.02)}
+                barName="bbLower"
               />
             </div>
           </div>
@@ -440,9 +441,9 @@ export default function App() {
             <div style={sectionLabel}>On-Chain Data</div>
             <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
-              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Total computing power mining Bitcoin. Higher=more secure"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" status={getStatus('hashRate', onchain.hash_rate)} />}
-              {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Avg minutes between blocks. Target 10 min"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" status={getStatus('blockTime', onchain.minutes_between_blocks)} />}
-              {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" status={getStatus('fees', 1)} />}
+              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Total computing power mining Bitcoin. Higher=more secure"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" barName="hashRate" />}
+              {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Avg minutes between blocks. Target 10 min"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" barName="blockTime" barRaw={onchain.minutes_between_blocks} />}
+              {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" barName="fees" />}
             </div>
           </div>
         )}
