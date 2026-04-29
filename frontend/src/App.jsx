@@ -11,6 +11,7 @@ import {
   fetchLongShortRatio,
   fetchOpenInterest,
   fetchWhales,
+  fetchMempool,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -281,6 +282,7 @@ export default function App() {
   const [longShort,   setLongShort]   = useState(null)
   const [openInterest,setOpenInterest]= useState(null)
   const [whales,      setWhales]      = useState(null)
+  const [mempool,     setMempool]     = useState(null)
   const [loading,     setLoading]     = useState(true)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -310,6 +312,7 @@ export default function App() {
     try { setLongShort(await fetchLongShortRatio()) } catch {}
     try { setOpenInterest(await fetchOpenInterest()) } catch {}
     try { setWhales(await fetchWhales()) } catch {}
+    try { setMempool(await fetchMempool()) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -535,7 +538,29 @@ export default function App() {
           </div>
         </div>
 
-        {/* row 6 — news */}
+        {/* row 6 — mempool */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={sectionLabel}>Mempool</div>
+          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            <IndCard
+              label="Pending Txns"
+              value={mempool?.count != null ? mempool.count.toLocaleString() : '—'}
+              sub={mempool?.signal}
+            />
+            <IndCard
+              label="Fast Fee"
+              value={mempool?.fastestFee != null ? (mempool.fastestFee + ' sat/vB') : '—'}
+              sub="Next block"
+            />
+            <IndCard
+              label="Hour Fee"
+              value={mempool?.hourFee != null ? (mempool.hourFee + ' sat/vB') : '—'}
+              sub="Within 1 hour"
+            />
+          </div>
+        </div>
+
+        {/* row 8 — news */}
         {news.length > 0 && (
           <div style={{ marginBottom: 40 }}>
             <div style={sectionLabel}>Latest BTC News</div>

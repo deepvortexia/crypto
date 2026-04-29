@@ -208,6 +208,21 @@ export async function fetchWhales() {
   }
 }
 
+export async function fetchMempool() {
+  const [stats, fees] = await Promise.all([
+    get('https://mempool.space/api/mempool'),
+    get('https://mempool.space/api/v1/fees/recommended')
+  ])
+  return {
+    count: stats.count,
+    vsize: stats.vsize,
+    fastestFee: fees.fastestFee,
+    halfHourFee: fees.halfHourFee,
+    hourFee: fees.hourFee,
+    signal: stats.count > 50000 ? 'Network congested' : stats.count > 20000 ? 'Moderate activity' : 'Network clear'
+  }
+}
+
 export async function fetchNews() {
   const data = await get('/coinstats/news?limit=5')
   const articles = data.news || data || []
