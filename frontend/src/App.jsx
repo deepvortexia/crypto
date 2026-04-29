@@ -245,7 +245,7 @@ function SentimentMeter({ value, label }) {
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────
-const PRED_HORIZONS = ['4h', '8h', '12h', '24h', '1month']
+const PRED_HORIZONS = ['4h', '8h', '12h', '24h', '1week', '1month']
 const REFRESH_MS    = 60_000
 
 function Tooltip({text}) {
@@ -390,11 +390,12 @@ export default function App() {
         {/* row 2 — AI predictions */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>AI Price Predictions</div>
-          <div className="grid-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
+          <div className="grid-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16 }}>
             <PredCard key="4h"     horizon={<>4H<Tooltip text="AI prediction 4 hours ahead using SMA7 vs SMA14 momentum"/></>}     data={preds['4h']}     loading={loading} />
             <PredCard key="8h"     horizon={<>8H<Tooltip text="AI prediction 8 hours ahead based on short-term trend"/></>}          data={preds['8h']}     loading={loading} />
             <PredCard key="12h"    horizon={<>12H<Tooltip text="AI prediction 12 hours using moving average divergence"/></>}         data={preds['12h']}    loading={loading} />
             <PredCard key="24h"    horizon={<>24H<Tooltip text="AI prediction 24 hours ahead. Most reliable forecast"/></>}           data={preds['24h']}    loading={loading} />
+            <PredCard key="1week"  horizon={<>1WEEK<Tooltip text="AI prediction 7 days ahead. Medium-term trend projection"/></>}      data={preds['1week']}  loading={loading} />
             <PredCard key="1month" horizon={<>1MONTH<Tooltip text="30 day projection. Long-term trend higher uncertainty"/></>}       data={preds['1month']} loading={loading} />
           </div>
         </div>
