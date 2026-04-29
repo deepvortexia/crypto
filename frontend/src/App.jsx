@@ -295,7 +295,7 @@ export default function App() {
 
     // onchain (may fail — proxied)
     try { setOnchain(await fetchOnchain()) } catch {}
-    try { setNews(await fetchNews()) } catch {}
+    try { const n = await fetchNews(); console.log('NEWS:', n); setNews(n) } catch(e) { console.error('NEWS ERROR:', e) }
 
     setLoading(false)
     setLastAt(new Date())
