@@ -181,7 +181,8 @@ export async function fetchIndicators() {
 
 export async function fetchNews() {
   const data = await get('/cryptocompare/data/v2/news/?lang=EN&categories=BTC&limit=5')
-  return data.Data.slice(0, 5).map(n => ({
+  const articles = data.Data || data.data || []
+  return articles.slice(0, 5).map(n => ({
     title: n.title,
     url: n.url,
     source: n.source,
