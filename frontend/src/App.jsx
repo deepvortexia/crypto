@@ -163,7 +163,7 @@ function SentimentMeter({ value, label }) {
   const ticks = Array.from({ length: 10 }, (_, i) => i * 36)
 
   return (
-    <div style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
+    <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
       <div style={labelStyle}>Fear & Greed Index</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
 
@@ -429,7 +429,8 @@ export default function App() {
         @media (max-width: 768px) {
           .grid-4       { grid-template-columns: 1fr 1fr !important; }
           .grid-5       { grid-template-columns: 1fr 1fr !important; }
-          .grid-2col    { grid-template-columns: 1fr !important; }
+          .grid-2col      { grid-template-columns: 1fr !important; }
+          .sentiment-card { width: 100% !important; min-width: 0 !important; }
           .grid-6       { grid-template-columns: 1fr 1fr !important; }
           .main-pad     { padding: 16px !important; }
           .header-inner { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 10px 12px !important; flex-wrap: nowrap !important; }
