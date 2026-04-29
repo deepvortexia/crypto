@@ -10,6 +10,7 @@ import {
   fetchFundingRate,
   fetchLongShortRatio,
   fetchOpenInterest,
+  fetchWhales,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -279,6 +280,7 @@ export default function App() {
   const [fundingRate, setFundingRate] = useState(null)
   const [longShort,   setLongShort]   = useState(null)
   const [openInterest,setOpenInterest]= useState(null)
+  const [whales,      setWhales]      = useState(null)
   const [loading,     setLoading]     = useState(true)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -307,6 +309,7 @@ export default function App() {
     try { setFundingRate(await fetchFundingRate()) } catch {}
     try { setLongShort(await fetchLongShortRatio()) } catch {}
     try { setOpenInterest(await fetchOpenInterest()) } catch {}
+    try { setWhales(await fetchWhales()) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -523,6 +526,11 @@ export default function App() {
               label="Open Interest"
               value={openInterest?.value && price?.price ? fmtLarge(openInterest.value * price.price) : '—'}
               sub="BTC futures open"
+            />
+            <IndCard
+              label="Whale Activity"
+              value={whales != null ? (whales.largeCount + ' trades') : '—'}
+              sub={whales?.signal}
             />
           </div>
         </div>
