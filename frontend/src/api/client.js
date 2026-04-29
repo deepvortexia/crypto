@@ -180,13 +180,13 @@ export async function fetchIndicators() {
 }
 
 export async function fetchNews() {
-  const data = await get('/cryptocompare/data/v2/news/?lang=EN&categories=BTC&limit=5')
-  const articles = data.Data || data.data || []
+  const data = await get('/coinstats/news?limit=5')
+  const articles = data.news || data || []
   return articles.slice(0, 5).map(n => ({
-    title: n.title,
-    url: n.url,
-    source: n.source,
-    sentiment: n.downvotes > n.upvotes ? 'bearish' : 'bullish',
-    time: new Date(n.published_on * 1000).toLocaleDateString()
+    title: n.title || n.feedTitle || '',
+    url: n.link || n.url || '#',
+    source: n.source || n.feedTitle || 'CoinStats',
+    sentiment: n.sentiment === 'positive' ? 'bullish' : n.sentiment === 'negative' ? 'bearish' : 'neutral',
+    time: n.publishedAt ? new Date(n.publishedAt).toLocaleDateString() : ''
   }))
 }
