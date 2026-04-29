@@ -297,8 +297,9 @@ export default function App() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         {/* logo */}
-        <div>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
           <img src="/logotrans.png" alt="DeepVortex" style={{height:'40px',objectFit:'contain'}} />
+          <span style={{fontFamily:'"Orbitron",sans-serif',fontSize:12,letterSpacing:'0.15em',color:'#f59e0b',opacity:0.9}}>DEEPVORTEX AI</span>
         </div>
 
         {/* live ticker */}
