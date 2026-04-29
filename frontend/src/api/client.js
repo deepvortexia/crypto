@@ -179,6 +179,23 @@ export async function fetchIndicators() {
   }
 }
 
+export async function fetchFundingRate() {
+  const data = await get('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1')
+  const rate = parseFloat(data[0].fundingRate) * 100
+  return { rate, signal: rate > 0.05 ? 'Longs overloaded' : rate < -0.05 ? 'Shorts overloaded' : 'Neutral' }
+}
+
+export async function fetchLongShortRatio() {
+  const data = await get('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=1h&limit=1')
+  const ratio = parseFloat(data[0].longShortRatio)
+  return { ratio, longPct: parseFloat(data[0].longAccount)*100, shortPct: parseFloat(data[0].shortAccount)*100, signal: ratio > 1.5 ? 'Too many longs' : ratio < 0.7 ? 'Too many shorts' : 'Balanced' }
+}
+
+export async function fetchOpenInterest() {
+  const data = await get('https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT')
+  return { value: parseFloat(data.openInterest) }
+}
+
 export async function fetchNews() {
   const data = await get('/coinstats/news?limit=5')
   const articles = data.news || data || []

@@ -7,6 +7,9 @@ import {
   fetchPriceHistory,
   fetchOnchain,
   fetchNews,
+  fetchFundingRate,
+  fetchLongShortRatio,
+  fetchOpenInterest,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -158,8 +161,10 @@ function getBarValue(name, value) {
     case 'bbLower':   return { pct: 50,  color: '#f59e0b' }
     case 'hashRate':  return { pct: 80,  color: '#10b981' }
     case 'blockTime': return { pct: isNaN(n) ? 60 : n < 8 ? 90 : n > 12 ? 30 : 60, color: n < 8 ? '#10b981' : n > 12 ? '#ef4444' : '#f59e0b' }
-    case 'fees':      return { pct: 50,  color: '#f59e0b' }
-    default:          return { pct: 50,  color: '#f59e0b' }
+    case 'fees':        return { pct: 50,  color: '#f59e0b' }
+    case 'fundingRate': return { pct: isNaN(n) ? 50 : Math.min(100, Math.max(0, 50 + n * 500)), color: n > 0.05 ? '#ef4444' : n < -0.05 ? '#10b981' : '#f59e0b' }
+    case 'longShort':   return { pct: isNaN(n) ? 50 : Math.min(100, Math.max(0, (n / 3) * 100)), color: n > 1.5 ? '#ef4444' : n < 0.7 ? '#10b981' : '#f59e0b' }
+    default:            return { pct: 50,  color: '#f59e0b' }
   }
 }
 
@@ -265,15 +270,18 @@ function Tooltip({text}) {
 }
 
 export default function App() {
-  const [price,    setPrice]    = useState(null)
-  const [sentiment,setSentiment]= useState(null)
-  const [preds,    setPreds]    = useState({})
-  const [indics,   setIndics]   = useState(null)
-  const [onchain,  setOnchain]  = useState(null)
-  const [news,     setNews]     = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [lastAt,   setLastAt]   = useState(null)
-  const [countdown,setCountdown]= useState(REFRESH_MS / 1000)
+  const [price,       setPrice]       = useState(null)
+  const [sentiment,   setSentiment]   = useState(null)
+  const [preds,       setPreds]       = useState({})
+  const [indics,      setIndics]      = useState(null)
+  const [onchain,     setOnchain]     = useState(null)
+  const [news,        setNews]        = useState([])
+  const [fundingRate, setFundingRate] = useState(null)
+  const [longShort,   setLongShort]   = useState(null)
+  const [openInterest,setOpenInterest]= useState(null)
+  const [loading,     setLoading]     = useState(true)
+  const [lastAt,      setLastAt]      = useState(null)
+  const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
 
   const loadAll = useCallback(async () => {
     const [p, s, ind] = await Promise.allSettled([
@@ -296,6 +304,9 @@ export default function App() {
     // onchain (may fail — proxied)
     try { setOnchain(await fetchOnchain()) } catch {}
     try { const n = await fetchNews(); console.log('NEWS:', n); setNews(n) } catch(e) { console.error('NEWS ERROR:', e) }
+    try { setFundingRate(await fetchFundingRate()) } catch {}
+    try { setLongShort(await fetchLongShortRatio()) } catch {}
+    try { setOpenInterest(await fetchOpenInterest()) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -490,7 +501,33 @@ export default function App() {
           </div>
         )}
 
-        {/* row 5 — news */}
+        {/* row 5 — futures market */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={sectionLabel}>Futures Market</div>
+          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            <IndCard
+              label="Funding Rate"
+              value={fundingRate != null ? (fundingRate.rate.toFixed(4) + '%') : '—'}
+              sub={fundingRate?.signal}
+              barName="fundingRate"
+              barRaw={fundingRate?.rate}
+            />
+            <IndCard
+              label="Long/Short Ratio"
+              value={longShort != null ? longShort.ratio.toFixed(2) : '—'}
+              sub={longShort?.signal}
+              barName="longShort"
+              barRaw={longShort?.ratio}
+            />
+            <IndCard
+              label="Open Interest"
+              value={openInterest?.value && price?.price ? fmtLarge(openInterest.value * price.price) : '—'}
+              sub="BTC futures open"
+            />
+          </div>
+        </div>
+
+        {/* row 6 — news */}
         {news.length > 0 && (
           <div style={{ marginBottom: 40 }}>
             <div style={sectionLabel}>Latest BTC News</div>
