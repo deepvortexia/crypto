@@ -12,6 +12,7 @@ import {
   fetchOpenInterest,
   fetchWhales,
   fetchMempool,
+  fetchOrderBook,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -283,6 +284,7 @@ export default function App() {
   const [openInterest,setOpenInterest]= useState(null)
   const [whales,      setWhales]      = useState(null)
   const [mempool,     setMempool]     = useState(null)
+  const [orderBook,   setOrderBook]   = useState(null)
   const [loading,     setLoading]     = useState(true)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -313,6 +315,7 @@ export default function App() {
     try { setOpenInterest(await fetchOpenInterest()) } catch {}
     try { setWhales(await fetchWhales()) } catch {}
     try { setMempool(await fetchMempool()) } catch {}
+    try { setOrderBook(await fetchOrderBook()) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -538,7 +541,31 @@ export default function App() {
           </div>
         </div>
 
-        {/* row 6 — mempool */}
+        {/* row 6 — order book */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={sectionLabel}>Order Book</div>
+          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            <IndCard
+              label="Best Bid"
+              value={orderBook?.topBid != null ? fmtPrice(orderBook.topBid) : '—'}
+              sub="Highest buy order"
+            />
+            <IndCard
+              label="Best Ask"
+              value={orderBook?.topAsk != null ? fmtPrice(orderBook.topAsk) : '—'}
+              sub="Lowest sell order"
+            />
+            <IndCard
+              label="Bid/Ask Ratio"
+              value={orderBook?.ratio != null ? orderBook.ratio.toFixed(2) : '—'}
+              sub={orderBook?.signal}
+              barName="longShort"
+              barRaw={orderBook?.ratio}
+            />
+          </div>
+        </div>
+
+        {/* row 7 — mempool */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Mempool</div>
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>

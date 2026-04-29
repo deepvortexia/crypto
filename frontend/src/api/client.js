@@ -208,6 +208,14 @@ export async function fetchWhales() {
   }
 }
 
+export async function fetchOrderBook() {
+  const data = await get('https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=20')
+  const bidVol = data.bids.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
+  const askVol = data.asks.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
+  const ratio = bidVol/askVol
+  return { topBid:parseFloat(data.bids[0][0]), topAsk:parseFloat(data.asks[0][0]), ratio, signal:ratio>1.3?'Strong buy wall':ratio<0.7?'Strong sell wall':'Balanced' }
+}
+
 export async function fetchMempool() {
   const [stats, fees] = await Promise.all([
     get('https://mempool.space/api/mempool'),
