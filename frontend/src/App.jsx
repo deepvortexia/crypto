@@ -252,7 +252,7 @@ function Tooltip({text}) {
   return (
     <span style={{position:'relative',display:'inline-block',marginLeft:6}}>
       <span onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} onClick={()=>setShow(!show)}
-        style={{cursor:'pointer',fontSize:12,color:'#f59e0b',border:'1px solid #f59e0b',borderRadius:4,padding:'1px 5px',opacity:0.7,fontFamily:'monospace',display:'inline-flex',alignItems:'center',justifyContent:'center',minWidth:20,minHeight:20}}>ⓘ</span>
+        style={{cursor:'pointer',fontSize:12,marginLeft:4}}>💡</span>
       {show && <div style={{position:'absolute',bottom:'120%',left:'50%',transform:'translateX(-50%)',background:'#1a1a1a',border:'1px solid #f59e0b33',borderRadius:6,padding:'8px 10px',width:200,fontSize:10,color:'#d1d5db',fontFamily:'"Share Tech Mono",monospace',lineHeight:1.5,zIndex:200,pointerEvents:'none'}}>{text}</div>}
     </span>
   )
