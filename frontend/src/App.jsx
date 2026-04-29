@@ -310,6 +310,16 @@ export default function App() {
     return () => clearInterval(tick)
   }, [])
 
+  useEffect(() => {
+    const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker')
+    ws.onmessage = (e) => {
+      const d = JSON.parse(e.data)
+      setPrice(prev => ({ ...prev, price: parseFloat(d.c), change_24h_pct: parseFloat(d.P), volume_24h: parseFloat(d.q) }))
+    }
+    ws.onerror = () => ws.close()
+    return () => ws.close()
+  }, [])
+
   const change  = price?.change_24h_pct ?? null
   const isUp    = change != null && change >= 0
   const chgColor = change == null ? G.gold : isUp ? G.green : G.red
@@ -354,7 +364,7 @@ export default function App() {
             <span style={{
               display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
               background: G.green, boxShadow: `0 0 8px ${G.green}`,
-              animation: 'blink 1.5s ease-in-out infinite',
+              animation: 'blink 0.5s ease-in-out infinite',
             }} />
             <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.3em', color: G.green }}>LIVE</span>
           </div>
