@@ -807,33 +807,7 @@ export default function App() {
               ))}
               {deepRunning && <div style={{ color: G.gold, marginTop: 8, animation: 'blink 0.5s ease-in-out infinite' }}>▌</div>}
 
-              {deepResult && (
-                <div style={{
-                  marginTop: 20, padding: '18px 22px',
-                  background: deepResult.direction === 'BULLISH' ? `${G.green}18` : `${G.red}18`,
-                  border: `1px solid ${deepResult.direction === 'BULLISH' ? G.green : G.red}55`,
-                  borderRadius: 10,
-                }}>
-                  <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 22, color: deepResult.direction === 'BULLISH' ? G.green : G.red, marginBottom: 8 }}>
-                    {deepResult.direction === 'BULLISH' ? '▲' : '▼'} {deepResult.direction}
-                  </div>
-                  <div style={{ fontSize: 13, color: G.bright, marginBottom: 6 }}>
-                    Recommendation: <strong>{deepResult.recommendation}</strong>
-                  </div>
-                  <div style={{ fontSize: 11, color: G.text, letterSpacing: '0.15em' }}>
-                    BULLISH SIGNAL SCORE: {deepResult.score}%
-                  </div>
-                  <div style={{ marginTop: 12, background: '#1a1a1a', borderRadius: 4, height: 4, overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%', width: `${deepResult.score}%`,
-                      background: deepResult.direction === 'BULLISH'
-                        ? `linear-gradient(90deg,${G.green},${G.gold})`
-                        : `linear-gradient(90deg,${G.red},${G.gold})`,
-                      borderRadius: 4, transition: 'width 0.8s ease',
-                    }} />
-                  </div>
-                </div>
-              )}
+              {deepResult && <div style={{textAlign:'center',padding:20}}><div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div><div style={{fontFamily:'"Orbitron",sans-serif',fontSize:40,color:'#f59e0b',marginBottom:12}}>${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}</div><div style={{fontSize:18,color:deepResult.score>50?'#10b981':'#ef4444',marginBottom:8}}>{deepResult.direction} — {deepResult.recommendation}</div><div style={{fontFamily:'"Orbitron",sans-serif',fontSize:24,color:'#fff'}}>{deepResult.score}%</div></div>}
             </div>
             )}
 
