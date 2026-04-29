@@ -14,6 +14,7 @@ import {
   fetchMempool,
   fetchOrderBook,
   fetchKeyLevels,
+  fetchLiquidations,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -168,6 +169,7 @@ function getBarValue(name, value) {
     case 'fees':        return { pct: 50,  color: '#f59e0b' }
     case 'fundingRate': return { pct: isNaN(n) ? 50 : Math.min(100, Math.max(0, 50 + n * 500)), color: n > 0.05 ? '#ef4444' : n < -0.05 ? '#10b981' : '#f59e0b' }
     case 'longShort':   return { pct: isNaN(n) ? 50 : Math.min(100, Math.max(0, (n / 3) * 100)), color: n > 1.5 ? '#ef4444' : n < 0.7 ? '#10b981' : '#f59e0b' }
+    case 'oiChange':    return { pct: isNaN(n) ? 50 : Math.min(100, Math.max(0, 50 + n * 5)),    color: n > 0 ? '#10b981' : '#ef4444' }
     default:            return { pct: 50,  color: '#f59e0b' }
   }
 }
@@ -286,7 +288,8 @@ export default function App() {
   const [whales,      setWhales]      = useState(null)
   const [mempool,     setMempool]     = useState(null)
   const [orderBook,   setOrderBook]   = useState(null)
-  const [keyLevels,   setKeyLevels]   = useState(null)
+  const [keyLevels,     setKeyLevels]     = useState(null)
+  const [liquidations,  setLiquidations]  = useState(null)
   const [loading,     setLoading]     = useState(true)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -319,6 +322,7 @@ export default function App() {
     try { setMempool(await fetchMempool()) } catch {}
     try { setOrderBook(await fetchOrderBook()) } catch {}
     try { setKeyLevels(await fetchKeyLevels(price?.price || 77000)) } catch {}
+    try { setLiquidations(await fetchLiquidations()) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -540,6 +544,13 @@ export default function App() {
               label="Whale Activity"
               value={whales != null ? (whales.largeCount + ' trades') : '—'}
               sub={whales?.signal}
+            />
+            <IndCard
+              label="Open Int. Change"
+              value={liquidations?.change != null ? (liquidations.change + '%') : '—'}
+              sub={liquidations?.signal}
+              barName="oiChange"
+              barRaw={liquidations?.change}
             />
           </div>
         </div>

@@ -208,6 +208,15 @@ export async function fetchWhales() {
   }
 }
 
+export async function fetchLiquidations() {
+  const data = await get('https://fapi.binance.com/futures/data/openInterestHist?symbol=BTCUSDT&period=1h&limit=24')
+  const latest = parseFloat(data[data.length-1].sumOpenInterest)
+  const prev = parseFloat(data[0].sumOpenInterest)
+  const change = ((latest-prev)/prev*100).toFixed(2)
+  const latestUsd = parseFloat(data[data.length-1].sumOpenInterestValue)
+  return { current: latestUsd, change: parseFloat(change), signal: change > 5 ? 'OI rising - trend strengthening' : change < -5 ? 'OI dropping - trend weakening' : 'OI stable' }
+}
+
 export async function fetchOrderBook() {
   const data = await get('https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=20')
   const bidVol = data.bids.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
