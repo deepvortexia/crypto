@@ -390,17 +390,17 @@ export default function App() {
                 sub={macd ? (macd.macd > 0 ? 'Bullish' : 'Bearish') : ''}
               />
               <IndCard
-                label="MACD Signal"
+                label={<>MACD Signal<Tooltip text="Signal line crossover. MACD above signal=bullish, below=bearish"/></>}
                 value={macd ? fmtNum(macd.signal, 1) : '—'}
                 sub={macd ? `Hist: ${fmtNum(macd.histogram, 1)}` : ''}
               />
               <IndCard
-                label="BB Upper"
+                label={<>BB Upper<Tooltip text="Upper Bollinger Band. Price touching upper=overbought sell signal"/></>}
                 value={bb ? fmtPrice(bb.upper) : '—'}
                 sub="Bollinger Band"
               />
               <IndCard
-                label="BB Lower"
+                label={<>BB Lower<Tooltip text="Lower Bollinger Band. Price touching lower=oversold buy signal"/></>}
                 value={bb ? fmtPrice(bb.lower) : '—'}
                 sub="Bollinger Band"
               />
