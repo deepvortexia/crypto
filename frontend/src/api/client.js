@@ -221,7 +221,6 @@ export async function fetchOrderBook() {
   const data = await get('https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=5')
   const bestBid = parseFloat(data.bids[0][0])  // highest buy price
   const bestAsk = parseFloat(data.asks[0][0])  // lowest sell price
-  if (bestBid >= bestAsk) throw new Error(`Invalid spread: bid ${bestBid} >= ask ${bestAsk}`)
   const bidVol = data.bids.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
   const askVol = data.asks.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
   const ratio = bidVol/askVol

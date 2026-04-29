@@ -595,7 +595,7 @@ export default function App() {
         {/* row 6 — order book */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Order Book</div>
-          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
             <IndCard
               label="Best Bid"
               value={orderBook?.topBid != null ? fmtPrice(orderBook.topBid) : '—'}
@@ -612,6 +612,11 @@ export default function App() {
               sub={orderBook?.signal}
               barName="longShort"
               barRaw={orderBook?.ratio}
+            />
+            <IndCard
+              label="SPREAD"
+              value={orderBook?.topBid != null && orderBook?.topAsk != null ? `$${(orderBook.topAsk - orderBook.topBid).toFixed(2)}` : '—'}
+              sub="Bid/Ask gap"
             />
           </div>
         </div>
