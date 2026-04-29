@@ -312,6 +312,9 @@ export default function App() {
   const rsi     = indics?.rsi
   const macd    = indics?.macd
   const bb      = indics?.bollinger_bands
+  const ema50   = indics?.ema50
+  const ema200  = indics?.ema200
+  const curPrice = indics?.price ?? price?.price
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
@@ -405,7 +408,7 @@ export default function App() {
           <div style={sectionLabel}>Technical Indicators</div>
           <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '2fr 5fr', gap: 16, alignItems: 'start' }}>
             <SentimentMeter value={sentiment?.value} label={sentiment?.classification} />
-            <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14 }}>
+            <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14 }}>
               <IndCard
                 label={<>RSI (14)<Tooltip text="Above 70=overbought likely drop. Below 30=oversold likely rise. 30-70=neutral"/></>}
                 value={rsi != null ? fmtNum(rsi, 1) : '—'}
@@ -436,7 +439,24 @@ export default function App() {
                 sub="Bollinger Band"
                 barName="bbLower"
               />
+              <IndCard
+                label={<>EMA 50<Tooltip text="50-day exponential moving average. Short-term trend"/></>}
+                value={ema50 ? fmtPrice(ema50) : '—'}
+                sub={ema50 && curPrice ? (curPrice > ema50 ? 'Price above' : 'Price below') : ''}
+                barName="macd" barRaw={ema50 && curPrice ? curPrice - ema50 : null}
+              />
+              <IndCard
+                label={<>EMA 200<Tooltip text="200-day exponential moving average. Long-term trend"/></>}
+                value={ema200 ? fmtPrice(ema200) : '—'}
+                sub={ema200 && curPrice ? (curPrice > ema200 ? 'Price above' : 'Price below') : ''}
+                barName="macd" barRaw={ema200 && curPrice ? curPrice - ema200 : null}
+              />
             </div>
+            {ema50 != null && ema200 != null && (
+              <div style={{ marginTop: 12, fontFamily: '"Share Tech Mono", monospace', fontSize: 12, letterSpacing: '0.15em', color: ema50 > ema200 ? G.green : G.red }}>
+                {ema50 > ema200 ? '🟢 GOLDEN CROSS — Bullish' : '🔴 DEATH CROSS — Bearish'}
+              </div>
+            )}
           </div>
         </div>
 

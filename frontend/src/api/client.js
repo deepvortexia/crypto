@@ -26,7 +26,7 @@ let _ohlcCacheTime = 0
 async function getOhlc() {
   const now = Date.now()
   if (_ohlcCache && now - _ohlcCacheTime < 5 * 60 * 1000) return _ohlcCache
-  const data = await get(`${BINANCE}/klines?symbol=BTCUSDT&interval=1d&limit=60`)
+  const data = await get(`${BINANCE}/klines?symbol=BTCUSDT&interval=1d&limit=200`)
   _ohlcCache = data.map(k => parseFloat(k[4]))
   _ohlcCacheTime = now
   return _ohlcCache
@@ -172,6 +172,8 @@ export async function fetchIndicators() {
     rsi: _calcRsi(closes),
     macd: _calcMacd(closes),
     bollinger_bands: _calcBollinger(closes),
+    ema50:  parseFloat(_ema(closes, 50).at(-1).toFixed(2)),
+    ema200: parseFloat(_ema(closes, 200).at(-1).toFixed(2)),
     price: closes[closes.length - 1],
     timestamp: new Date().toISOString(),
   }
