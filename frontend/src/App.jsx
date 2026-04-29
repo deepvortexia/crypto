@@ -290,6 +290,10 @@ export default function App() {
   const [orderBook,   setOrderBook]   = useState(null)
   const [keyLevels,     setKeyLevels]     = useState(null)
   const [liquidations,  setLiquidations]  = useState(null)
+  const [deepOpen,      setDeepOpen]      = useState(false)
+  const [deepLogs,      setDeepLogs]      = useState([])
+  const [deepResult,    setDeepResult]    = useState(null)
+  const [deepRunning,   setDeepRunning]   = useState(false)
   const [loading,     setLoading]     = useState(true)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -349,6 +353,15 @@ export default function App() {
     ws.onerror = () => ws.close()
     return () => ws.close()
   }, [])
+
+  async function runDeepAnalysis() {
+    setDeepOpen(true); setDeepRunning(true); setDeepLogs([]); setDeepResult(null)
+    const L = ['Connecting...','BTC: $'+price?.price?.toLocaleString(),'RSI '+indics?.rsi,'MACD: '+(indics?.macd?.histogram>0?'Bullish':'Bearish'),'Fear: '+sentiment?.value,'EMA: '+(indics?.ema50>indics?.ema200?'Golden Cross':'Death Cross'),'Funding: '+fundingRate?.signal,'Order Book: '+orderBook?.signal,'Running model...','CONSENSUS REACHED']
+    for(const l of L){await new Promise(r=>setTimeout(r,500));setDeepLogs(p=>[...p,l])}
+    const s=Math.round([indics?.rsi<50,indics?.macd?.histogram>0,sentiment?.value<40,indics?.ema50>indics?.ema200,longShort?.ratio<1,orderBook?.ratio>1].filter(Boolean).length/6*100)
+    setDeepResult({score:s,direction:s>50?'BULLISH':'BEARISH',recommendation:s>65?'Strong Buy':s>50?'Weak Buy':s>35?'Hold':'Sell'})
+    setDeepRunning(false)
+  }
 
   const change  = price?.change_24h_pct ?? null
   const isUp    = change != null && change >= 0
@@ -414,6 +427,11 @@ export default function App() {
       <div style={{padding:'10px 16px',borderBottom:'1px solid #1a1a1a',textAlign:'center',background:'#0a0a0a'}}>
         <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
         <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
+      </div>
+      <div style={{textAlign:'center',padding:'12px 0'}}>
+        <button onClick={runDeepAnalysis} style={{fontFamily:'"Orbitron",sans-serif',fontSize:13,letterSpacing:'0.2em',background:'#f59e0b',color:'#000',border:'none',borderRadius:8,padding:'14px 40px',cursor:'pointer',fontWeight:'bold',boxShadow:'0 0 20px #f59e0b66'}}>
+          🧠 DEEP ANALYSIS
+        </button>
       </div>
 
       <div style={{textAlign:'center',padding:'12px 0',borderBottom:'1px solid #1a1a1a'}}>
@@ -710,6 +728,100 @@ export default function App() {
           </div>
         </div>
       </main>
+
+      {/* ── deep analysis modal ── */}
+      {deepOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 200,
+          background: 'rgba(0,0,0,0.88)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(6px)',
+        }}>
+          <div style={{
+            background: G.card,
+            border: `1px solid ${G.gold}55`,
+            borderRadius: 12,
+            boxShadow: `0 0 40px ${G.goldGlow}`,
+            width: '90%', maxWidth: 680,
+            maxHeight: '80vh',
+            display: 'flex', flexDirection: 'column',
+            overflow: 'hidden',
+          }}>
+            {/* header */}
+            <div style={{
+              padding: '16px 24px',
+              borderBottom: `1px solid ${G.border}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}>
+              <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.25em', color: G.gold }}>
+                DEEP ANALYSIS
+              </span>
+              {!deepRunning && (
+                <button onClick={() => setDeepOpen(false)}
+                  style={{ background: 'none', border: 'none', color: G.text, cursor: 'pointer', fontSize: 18 }}>✕</button>
+              )}
+            </div>
+
+            {/* log stream */}
+            <div style={{
+              flex: 1, overflowY: 'auto', padding: '20px 24px',
+              fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text,
+            }}>
+              {deepLogs.map((line, i) => (
+                <div key={i} style={{ marginBottom: 7, color: i === deepLogs.length - 1 && deepRunning ? G.gold : G.text }}>
+                  <span style={{ color: `${G.gold}66`, marginRight: 10 }}>[{String(i + 1).padStart(2, '0')}]</span>
+                  {line}
+                </div>
+              ))}
+              {deepRunning && <div style={{ color: G.gold, marginTop: 8, animation: 'blink 0.5s ease-in-out infinite' }}>▌</div>}
+
+              {deepResult && (
+                <div style={{
+                  marginTop: 20, padding: '18px 22px',
+                  background: deepResult.direction === 'BULLISH' ? `${G.green}18` : `${G.red}18`,
+                  border: `1px solid ${deepResult.direction === 'BULLISH' ? G.green : G.red}55`,
+                  borderRadius: 10,
+                }}>
+                  <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 22, color: deepResult.direction === 'BULLISH' ? G.green : G.red, marginBottom: 8 }}>
+                    {deepResult.direction === 'BULLISH' ? '▲' : '▼'} {deepResult.direction}
+                  </div>
+                  <div style={{ fontSize: 13, color: G.bright, marginBottom: 6 }}>
+                    Recommendation: <strong>{deepResult.recommendation}</strong>
+                  </div>
+                  <div style={{ fontSize: 11, color: G.text, letterSpacing: '0.15em' }}>
+                    BULLISH SIGNAL SCORE: {deepResult.score}%
+                  </div>
+                  <div style={{ marginTop: 12, background: '#1a1a1a', borderRadius: 4, height: 4, overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%', width: `${deepResult.score}%`,
+                      background: deepResult.direction === 'BULLISH'
+                        ? `linear-gradient(90deg,${G.green},${G.gold})`
+                        : `linear-gradient(90deg,${G.red},${G.gold})`,
+                      borderRadius: 4, transition: 'width 0.8s ease',
+                    }} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* footer */}
+            {!deepRunning && (
+              <div style={{ padding: '12px 24px', borderTop: `1px solid ${G.border}`, display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <button onClick={runDeepAnalysis} style={{
+                  fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
+                  background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 6,
+                  color: G.gold, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
+                }}>Re-run</button>
+                <button onClick={() => setDeepOpen(false)} style={{
+                  fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
+                  background: 'none', border: `1px solid ${G.border}`, borderRadius: 6,
+                  color: G.text, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
+                }}>Close</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes textPulse   { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
