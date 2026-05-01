@@ -450,8 +450,25 @@ export default function App() {
         <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
       </div>
       <div style={{textAlign:'center',padding:'12px 0'}}>
-        <button onClick={runDeepAnalysis} style={{fontFamily:'"Orbitron",sans-serif',fontSize:13,letterSpacing:'0.2em',background:'#f59e0b',color:'#000',border:'none',borderRadius:8,padding:'14px 40px',cursor:'pointer',fontWeight:'bold',boxShadow:'0 0 20px #f59e0b66'}}>
-          🧠 DEEP ANALYSIS
+        <button onClick={() => { setDeepOpen(true) }}
+          style={{
+            fontFamily:'"Orbitron",sans-serif',
+            fontSize:13,
+            letterSpacing:'0.3em',
+            padding:'12px 32px',
+            background:'linear-gradient(135deg, #f59e0b, #d97706)',
+            border:'none',
+            borderRadius:12,
+            color:'#000',
+            cursor:'pointer',
+            boxShadow:'0 0 20px #f59e0b44',
+            transition:'all 0.2s ease',
+            fontWeight:700
+          }}
+          onMouseEnter={e => { e.target.style.boxShadow='0 0 40px #f59e0b88'; e.target.style.transform='scale(1.03)' }}
+          onMouseLeave={e => { e.target.style.boxShadow='0 0 20px #f59e0b44'; e.target.style.transform='scale(1)' }}
+        >
+          DEEP ANALYSIS
         </button>
       </div>
 
