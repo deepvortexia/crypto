@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 FEATURE_COLS = ["close", "volume", "rsi", "macd", "macd_signal", "bb_pct", "ema50", "ema200", "atr", "obv_ema"]
 HORIZON_HOURS = {"4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
-SEQUENCE_LEN = 24  # 1 day of hourly data
+SEQUENCE_LEN = 12  # 12 hours of hourly data
 
 
 # ── Numerics ──────────────────────────────────────────────────────────────────
@@ -266,7 +266,7 @@ class BTCLSTMModel:
 
         return np.array(X), np.array(y), scaler, price_scaler
 
-    def train(self, df: pd.DataFrame, epochs: int = 40, batch_size: int = 32):
+    def train(self, df: pd.DataFrame, epochs: int = 5, batch_size: int = 64):
         logger.info("Training LSTM models for all horizons…")
         for horizon_key, horizon_h in HORIZON_HOURS.items():
             logger.info(f"  Training LSTM for {horizon_key}")
