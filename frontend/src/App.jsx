@@ -15,14 +15,7 @@ import {
   fetchOrderBook,
   fetchKeyLevels,
   fetchLiquidations,
-  fetchOHLCCandles,
 } from './api/client'
-import { Chart as ChartJS, CategoryScale, LinearScale, TimeScale, Tooltip as ChartTooltip, Legend, LineElement, PointElement } from 'chart.js'
-import { CandlestickController, CandlestickElement, OhlcController, OhlcElement } from 'chartjs-chart-financial'
-import { Chart } from 'react-chartjs-2'
-import 'chartjs-adapter-luxon'
-import Annotation from 'chartjs-plugin-annotation'
-ChartJS.register(CategoryScale, LinearScale, TimeScale, ChartTooltip, Legend, LineElement, PointElement, CandlestickController, CandlestickElement, OhlcController, OhlcElement, Annotation)
 
 // ── tokens ───────────────────────────────────────────────────────────────────
 const G = {
@@ -299,8 +292,7 @@ export default function App() {
   const [orderBook,   setOrderBook]   = useState(null)
   const [keyLevels,     setKeyLevels]     = useState(null)
   const [liquidations,  setLiquidations]  = useState(null)
-  const [candles,       setCandles]       = useState([])
-  const [deepOpen,      setDeepOpen]      = useState(false)
+const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepLogs,      setDeepLogs]      = useState([])
   const [deepResult,    setDeepResult]    = useState(null)
   const [deepRunning,   setDeepRunning]   = useState(false)
@@ -350,11 +342,6 @@ export default function App() {
     return () => clearInterval(id)
   }, [loadAll])
 
-  useEffect(() => {
-    fetchOHLCCandles(100).then(setCandles)
-    const t = setInterval(() => fetchOHLCCandles(100).then(setCandles), 60000)
-    return () => clearInterval(t)
-  }, [])
 
   useEffect(() => {
     const tick = setInterval(() => setCountdown(c => Math.max(0, c - 1)), 1000)
@@ -771,30 +758,6 @@ export default function App() {
             </div>
           </div>
         )}
-
-        <div style={{marginBottom:40}}>
-          <div style={sectionLabel}>PRICE CHART — LIVE</div>
-          <div style={{background:G.card,borderRadius:12,padding:16,border:`1px solid ${G.border}`}}>
-            {candles.length > 0 && console.log('candles ready', candles[0])}
-            {candles.length > 0 ? (
-              <Chart type='candlestick'
-                data={{datasets:[{label:'BTC/USDT',data:candles,
-                  color:{up:'#10b981',down:'#ef4444',unchanged:'#6b7280'}}]}}
-                options={{responsive:true,plugins:{legend:{display:false},annotation:{annotations:{
-                    pivot:{type:'line',yMin:keyLevels?.pivot,yMax:keyLevels?.pivot,borderColor:'#f59e0b',borderWidth:1,borderDash:[4,4]},
-                    r1:{type:'line',yMin:keyLevels?.r1,yMax:keyLevels?.r1,borderColor:'#ef4444',borderWidth:1},
-                    s1:{type:'line',yMin:keyLevels?.s1,yMax:keyLevels?.s1,borderColor:'#10b981',borderWidth:1},
-                  }}},
-                  scales:{
-                    x:{type:'time',time:{unit:'hour'},ticks:{color:'#6b7280'},grid:{color:'#ffffff11'}},
-                    y:{ticks:{color:'#6b7280',callback:v=>`$${v.toLocaleString()}`},grid:{color:'#ffffff11'},min:candles.length?Math.min(...candles.map(c=>c.l))*0.995:undefined,max:candles.length?Math.max(...candles.map(c=>c.h))*1.005:undefined}
-                  }}}
-              />
-            ) : (
-              <div style={{color:'#6b7280',textAlign:'center',padding:40}}>Loading chart...</div>
-            )}
-          </div>
-        </div>
 
         {/* footer */}
         <div style={{borderTop:`1px solid ${G.border}`,paddingTop:24,marginTop:8,
