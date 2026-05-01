@@ -21,7 +21,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, TimeScale, Tooltip as Cha
 import { CandlestickController, CandlestickElement, OhlcController, OhlcElement } from 'chartjs-chart-financial'
 import { Chart } from 'react-chartjs-2'
 import 'chartjs-adapter-luxon'
-ChartJS.register(CategoryScale, LinearScale, TimeScale, ChartTooltip, Legend, LineElement, PointElement, CandlestickController, CandlestickElement, OhlcController, OhlcElement)
+import Annotation from 'chartjs-plugin-annotation'
+ChartJS.register(CategoryScale, LinearScale, TimeScale, ChartTooltip, Legend, LineElement, PointElement, CandlestickController, CandlestickElement, OhlcController, OhlcElement, Annotation)
 
 // ── tokens ───────────────────────────────────────────────────────────────────
 const G = {
