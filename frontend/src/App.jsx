@@ -414,7 +414,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* logo */}
         <div style={{display:'flex',alignItems:'center',gap:10}}>
           <img src="/logotrans.png" alt="DeepVortex" style={{height:'40px',objectFit:'contain'}} />
-          <span style={{fontFamily:'"Orbitron",sans-serif',fontSize:12,letterSpacing:'0.15em',color:'#f59e0b',opacity:0.9}}>PREDICTALPHA</span>
+          <span style={{fontFamily:'"Orbitron",sans-serif',fontSize:12,letterSpacing:'0.15em',color:'#f59e0b',opacity:0.9}}>PREDICT ALPHA</span>
         </div>
 
         {/* live ticker */}
@@ -764,7 +764,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           display:'flex',flexWrap:'wrap',justifyContent:'center',
           alignItems:'center',gap:12,textAlign:'center'}}>
           <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:13,letterSpacing:'0.12em',color:'#f59e0b'}}>
-            PREDICTALPHA
+            PREDICT ALPHA
           </div>
           <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:'#6b7280',letterSpacing:'0.2em'}}>
             NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
