@@ -269,3 +269,15 @@ export async function fetchKeyLevels(currentPrice) {
     fib, nearLevel:fib.find(f=>Math.abs(f.price-currentPrice)/currentPrice<0.005)
   }
 }
+
+export async function fetchOHLCCandles(limit = 100) {
+  const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=${limit}`)
+  const data = await res.json()
+  return data.map(k => ({
+    x: k[0],
+    o: parseFloat(k[1]),
+    h: parseFloat(k[2]),
+    l: parseFloat(k[3]),
+    c: parseFloat(k[4]),
+  }))
+}
