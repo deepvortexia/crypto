@@ -266,6 +266,6 @@ export async function fetchKeyLevels(currentPrice) {
     pivot:parseFloat(P.toFixed(0)),
     r1:parseFloat((2*P-L).toFixed(0)), r2:parseFloat((P+(H-L)).toFixed(0)), r3:parseFloat((H+2*(P-L)).toFixed(0)),
     s1:parseFloat((2*P-H).toFixed(0)), s2:parseFloat((P-(H-L)).toFixed(0)), s3:parseFloat((L-2*(H-P)).toFixed(0)),
-    fib, nearLevel:fib.find(f=>Math.abs(f.price-currentPrice)/currentPrice<0.01)
+    fib, nearLevel:fib.find(f=>Math.abs(f.price-currentPrice)/currentPrice<0.005)
   }
 }

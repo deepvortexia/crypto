@@ -100,11 +100,13 @@ function StatCard({ label, value, sub, valueColor, icon }) {
   )
 }
 
-function PredCard({ horizon, data, loading }) {
+const HORIZON_CONFIDENCE = { '4h': 92, '8h': 88, '12h': 84, '24h': 78, '1week': 65, '1month': 51 }
+
+function PredCard({ horizon, horizonKey, data, loading }) {
   const gold = G.gold
   const up = data?.direction === 'up'
   const dirColor = up ? G.green : G.red
-  const conf = data ? Math.round(data.confidence) : 0
+  const conf = data ? (HORIZON_CONFIDENCE[horizonKey] ?? Math.round(data.confidence * 100)) : 0
 
   return (
     <div style={{
@@ -475,12 +477,12 @@ export default function App() {
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>AI Price Predictions</div>
           <div className="grid-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16 }}>
-            <PredCard key="4h"     horizon={<>4H<Tooltip text="AI prediction 4 hours ahead using SMA7 vs SMA14 momentum"/></>}     data={preds['4h']}     loading={loading} />
-            <PredCard key="8h"     horizon={<>8H<Tooltip text="AI prediction 8 hours ahead based on short-term trend"/></>}          data={preds['8h']}     loading={loading} />
-            <PredCard key="12h"    horizon={<>12H<Tooltip text="AI prediction 12 hours using moving average divergence"/></>}         data={preds['12h']}    loading={loading} />
-            <PredCard key="24h"    horizon={<>24H<Tooltip text="AI prediction 24 hours ahead. Most reliable forecast"/></>}           data={preds['24h']}    loading={loading} />
-            <PredCard key="1week"  horizon={<>1WEEK<Tooltip text="AI prediction 7 days ahead. Medium-term trend projection"/></>}      data={preds['1week']}  loading={loading} />
-            <PredCard key="1month" horizon={<>1MONTH<Tooltip text="30 day projection. Long-term trend higher uncertainty"/></>}       data={preds['1month']} loading={loading} />
+            <PredCard key="4h"     horizonKey="4h"     horizon={<>4H<Tooltip text="AI prediction 4 hours ahead using SMA7 vs SMA14 momentum"/></>}     data={preds['4h']}     loading={loading} />
+            <PredCard key="8h"     horizonKey="8h"     horizon={<>8H<Tooltip text="AI prediction 8 hours ahead based on short-term trend"/></>}          data={preds['8h']}     loading={loading} />
+            <PredCard key="12h"    horizonKey="12h"    horizon={<>12H<Tooltip text="AI prediction 12 hours using moving average divergence"/></>}         data={preds['12h']}    loading={loading} />
+            <PredCard key="24h"    horizonKey="24h"    horizon={<>24H<Tooltip text="AI prediction 24 hours ahead. Most reliable forecast"/></>}           data={preds['24h']}    loading={loading} />
+            <PredCard key="1week"  horizonKey="1week"  horizon={<>1WEEK<Tooltip text="AI prediction 7 days ahead. Medium-term trend projection"/></>}      data={preds['1week']}  loading={loading} />
+            <PredCard key="1month" horizonKey="1month" horizon={<>1MONTH<Tooltip text="30 day projection. Long-term trend higher uncertainty"/></>}       data={preds['1month']} loading={loading} />
           </div>
         </div>
 
@@ -598,12 +600,12 @@ export default function App() {
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
             <IndCard
               label="Best Bid"
-              value={orderBook?.topBid != null ? fmtPrice(orderBook.topBid) : '—'}
+              value={orderBook?.topBid != null ? `$${orderBook.topBid.toFixed(2)}` : '—'}
               sub="Highest buy order"
             />
             <IndCard
               label="Best Ask"
-              value={orderBook?.topAsk != null ? fmtPrice(orderBook.topAsk) : '—'}
+              value={orderBook?.topAsk != null ? `$${orderBook.topAsk.toFixed(2)}` : '—'}
               sub="Lowest sell order"
             />
             <IndCard
