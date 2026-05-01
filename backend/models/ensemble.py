@@ -39,7 +39,7 @@ class BTCEnsemble:
 
     @property
     def is_ready(self) -> bool:
-        return self.lstm.is_trained or self.xgb.is_trained
+        return self.lstm.is_trained or self.xgb.is_trained or self.prophet.is_trained
 
     def load_models(self) -> bool:
         lstm_ok = self.lstm.load()

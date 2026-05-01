@@ -58,7 +58,7 @@ async def fetch_live_price() -> dict:
     }
 
 
-async def fetch_hourly_ohlcv(days: int = 90) -> pd.DataFrame:
+async def fetch_hourly_ohlcv(days: int = 730) -> pd.DataFrame:
     """Returns hourly OHLCV DataFrame. CoinGecko free tier gives hourly for ≤90 days."""
     async with httpx.AsyncClient() as client:
         ohlc_raw, chart_raw = await asyncio.gather(
