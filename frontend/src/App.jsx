@@ -17,11 +17,11 @@ import {
   fetchLiquidations,
   fetchOHLCCandles,
 } from './api/client'
-import { Chart as ChartJS, TimeScale, LinearScale, Tooltip } from 'chart.js'
-import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial'
+import { Chart as ChartJS, CategoryScale, LinearScale, TimeScale, Tooltip, Legend, LineElement, PointElement } from 'chart.js'
+import { CandlestickController, CandlestickElement, OhlcController, OhlcElement } from 'chartjs-chart-financial'
 import { Chart } from 'react-chartjs-2'
 import 'chartjs-adapter-luxon'
-ChartJS.register(TimeScale, LinearScale, Tooltip, CandlestickController, CandlestickElement)
+ChartJS.register(CategoryScale, LinearScale, TimeScale, Tooltip, Legend, LineElement, PointElement, CandlestickController, CandlestickElement, OhlcController, OhlcElement)
 
 // ── tokens ───────────────────────────────────────────────────────────────────
 const G = {
