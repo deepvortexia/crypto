@@ -785,8 +785,8 @@ export default function App() {
             border: `1px solid ${G.gold}55`,
             borderRadius: 12,
             boxShadow: `0 0 40px ${G.goldGlow}`,
-            width: '90%', maxWidth: 680,
-            maxHeight: '80vh',
+            width: '95%', maxWidth: 680,
+            maxHeight: '90vh',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
           }}>
@@ -821,7 +821,7 @@ export default function App() {
             {deepHorizon && (
             <div style={{ display:'flex', flexDirection:'column', overflow:'hidden' }}>
               <div style={{
-                maxHeight:'300px', overflowY:'auto', padding: '20px 24px',
+                maxHeight:'180px', overflowY:'auto', padding: '20px 24px',
                 fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text,
               }}>
                 {deepLogs.map((line, i) => (
@@ -840,7 +840,7 @@ export default function App() {
               {deepResult && (
                 <div style={{textAlign:'center',padding:20,borderTop:`1px solid ${G.border}`}}>
                   <div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
-                  <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:52,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
+                  <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:36,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
                     ${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}
                   </div>
                   <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:20}}>USD PREDICTED PRICE</div>
