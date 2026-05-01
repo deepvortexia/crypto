@@ -829,7 +829,11 @@ export default function App() {
                   {line}
                 </div>
               ))}
-              {deepRunning && <div style={{ color: G.gold, marginTop: 8, animation: 'blink 0.5s ease-in-out infinite' }}>▌</div>}
+              {deepRunning && (
+                <div style={{position:'relative',overflow:'hidden',height:3,background:'#1a1a1a',margin:'8px 0',borderRadius:2}}>
+                  <div style={{position:'absolute',top:0,height:'100%',width:'30%',background:'linear-gradient(90deg,transparent,#f59e0b,transparent)',animation:'scanLine 1.5s linear infinite'}}/>
+                </div>
+              )}
 
               {deepResult && <div style={{textAlign:'center',padding:20}}><div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div><div style={{fontFamily:'"Orbitron",sans-serif',fontSize:40,color:'#f59e0b',marginBottom:12}}>${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}</div><div style={{fontSize:18,color:deepResult.score>50?'#10b981':'#ef4444',marginBottom:8}}>{deepResult.direction} — {deepResult.recommendation}</div><div style={{fontFamily:'"Orbitron",sans-serif',fontSize:24,color:'#fff'}}>{deepResult.score}%</div></div>}
             </div>
@@ -858,6 +862,10 @@ export default function App() {
         @keyframes textPulse   { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
         @keyframes rotateDash  { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
         @keyframes circlePulse { 0%,100%{box-shadow:0 0 15px currentColor} 50%{box-shadow:0 0 30px currentColor, 0 0 60px currentColor} }
+        @keyframes goldPulse   { 0%,100%{text-shadow:0 0 20px #f59e0b} 50%{text-shadow:0 0 60px #f59e0b} }
+        @keyframes fadeUp      { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes scanLine    { 0%{left:-100%} 100%{left:200%} }
+        @keyframes fillBar     { from{width:0} to{width:var(--w)} }
         @media (max-width: 768px) {
           .grid-4       { grid-template-columns: 1fr 1fr !important; }
           .grid-5       { grid-template-columns: 1fr 1fr !important; }
