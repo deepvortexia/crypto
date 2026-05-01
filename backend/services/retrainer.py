@@ -43,14 +43,11 @@ async def retrain_all():
 
         loop = asyncio.get_event_loop()
 
-        logger.info("Training LSTM…")
-        await loop.run_in_executor(None, _ensemble.lstm.train, hourly_df)
-
-        logger.info("Training XGBoost (short horizons)…")
-        await loop.run_in_executor(None, _ensemble.xgb.train, hourly_df)
-
-        logger.info("Training Prophet…")
-        await loop.run_in_executor(None, _ensemble.prophet.train, hourly_df, daily_df)
+        logger.info("Training XGBoost and Prophet in parallel…")
+        await asyncio.gather(
+            loop.run_in_executor(None, _ensemble.xgb.train, hourly_df),
+            loop.run_in_executor(None, _ensemble.prophet.train, hourly_df, daily_df),
+        )
 
         _last_trained = datetime.now(timezone.utc)
         logger.info(f"Retraining completed at {_last_trained.isoformat()}")
