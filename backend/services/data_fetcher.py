@@ -59,24 +59,39 @@ async def fetch_live_price() -> dict:
 
 
 async def fetch_hourly_ohlcv(days: int = 90) -> pd.DataFrame:
-    """Returns hourly OHLCV DataFrame. CoinGecko free tier gives hourly for ≤90 days."""
+    """Returns hourly OHLCV DataFrame (~2160 rows). market_chart is the primary source
+    for close price and volume; OHLC enriches with open/high/low where timestamps align."""
     async with httpx.AsyncClient() as client:
         ohlc_raw, chart_raw = await asyncio.gather(
             _get(client, f"{COINGECKO_BASE}/coins/bitcoin/ohlc", {"vs_currency": "usd", "days": 90}),
             _get(client, f"{COINGECKO_BASE}/coins/bitcoin/market_chart", {
-                "vs_currency": "usd", "days": days, "interval": "hourly",
+                "vs_currency": "usd", "days": 90, "interval": "hourly",
             }),
         )
 
-    ohlc_df = pd.DataFrame(ohlc_raw, columns=["timestamp", "open", "high", "low", "close"])
-    ohlc_df["timestamp"] = pd.to_datetime(ohlc_df["timestamp"], unit="ms", utc=True)
-    ohlc_df = ohlc_df.set_index("timestamp").sort_index()
+    # Primary: market_chart gives true hourly close + volume (~2160 rows for 90 days)
+    prices = pd.DataFrame(chart_raw["prices"], columns=["timestamp", "close"])
+    prices["timestamp"] = pd.to_datetime(prices["timestamp"], unit="ms", utc=True)
+    prices = prices.set_index("timestamp").sort_index()
 
     vols = pd.DataFrame(chart_raw["total_volumes"], columns=["timestamp", "volume"])
     vols["timestamp"] = pd.to_datetime(vols["timestamp"], unit="ms", utc=True)
     vols = vols.set_index("timestamp").sort_index()
 
-    df = ohlc_df.join(vols, how="left").fillna(method="ffill")
+    df = prices.join(vols, how="left")
+
+    # Enrich: OHLC endpoint returns coarser candles (4h or daily); left-join then
+    # forward-fill so each hourly row inherits the open/high/low of its parent candle.
+    ohlc_df = pd.DataFrame(ohlc_raw, columns=["timestamp", "open", "high", "low", "_close"])
+    ohlc_df["timestamp"] = pd.to_datetime(ohlc_df["timestamp"], unit="ms", utc=True)
+    ohlc_df = ohlc_df.set_index("timestamp").sort_index()[["open", "high", "low"]]
+
+    df = df.join(ohlc_df, how="left")
+    df[["open", "high", "low"]] = df[["open", "high", "low"]].ffill()
+    # Any leading NaNs (before first OHLC candle) fall back to close
+    for col in ["open", "high", "low"]:
+        df[col] = df[col].fillna(df["close"])
+
     return df
 
 
