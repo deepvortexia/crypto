@@ -842,8 +842,14 @@ export default function App() {
                     ${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}
                   </div>
                   <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:20}}>USD PREDICTED PRICE</div>
-                  <div style={{fontSize:18,color:deepResult.score>50?'#10b981':'#ef4444',marginBottom:8}}>{deepResult.direction} — {deepResult.recommendation}</div>
-                  <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:24,color:'#fff'}}>{deepResult.score}%</div>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',marginBottom:12}}>
+                    <div style={{border:`1px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,borderRadius:8,padding:'8px 20px',color:deepResult.score>50?'#10b981':'#ef4444',fontFamily:'"Orbitron",sans-serif',fontSize:12}}>
+                      {deepResult.direction?.toUpperCase()}
+                    </div>
+                    <div style={{border:'1px solid #f59e0b',borderRadius:8,padding:'8px 20px',color:'#f59e0b',fontFamily:'"Orbitron",sans-serif',fontSize:12}}>
+                      {deepResult.score}% CONFIDENCE
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
