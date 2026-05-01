@@ -780,7 +780,11 @@ export default function App() {
               <Chart type='candlestick'
                 data={{datasets:[{label:'BTC/USDT',data:candles,
                   color:{up:'#10b981',down:'#ef4444',unchanged:'#6b7280'}}]}}
-                options={{responsive:true,plugins:{legend:{display:false}},
+                options={{responsive:true,plugins:{legend:{display:false},annotation:{annotations:{
+                    pivot:{type:'line',yMin:keyLevels?.pivot,yMax:keyLevels?.pivot,borderColor:'#f59e0b',borderWidth:1,borderDash:[4,4]},
+                    r1:{type:'line',yMin:keyLevels?.r1,yMax:keyLevels?.r1,borderColor:'#ef4444',borderWidth:1},
+                    s1:{type:'line',yMin:keyLevels?.s1,yMax:keyLevels?.s1,borderColor:'#10b981',borderWidth:1},
+                  }}},
                   scales:{
                     x:{type:'time',time:{unit:'hour'},ticks:{color:'#6b7280'},grid:{color:'#ffffff11'}},
                     y:{ticks:{color:'#6b7280',callback:v=>`$${v.toLocaleString()}`},grid:{color:'#ffffff11'}}
