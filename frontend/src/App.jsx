@@ -819,24 +819,26 @@ export default function App() {
 
             {/* log stream */}
             {deepHorizon && (
-            <div style={{
-              flex: 1, overflowY: 'auto', padding: '20px 24px',
-              fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text,
-            }}>
-              {deepLogs.map((line, i) => (
-                <div key={i} style={{ marginBottom: 7, color: i === deepLogs.length - 1 && deepRunning ? G.gold : G.text }}>
-                  <span style={{ color: `${G.gold}66`, marginRight: 10 }}>[{String(i + 1).padStart(2, '0')}]</span>
-                  {line}
-                </div>
-              ))}
-              {deepRunning && (
-                <div style={{position:'relative',overflow:'hidden',height:3,background:'#1a1a1a',margin:'8px 0',borderRadius:2}}>
-                  <div style={{position:'absolute',top:0,height:'100%',width:'30%',background:'linear-gradient(90deg,transparent,#f59e0b,transparent)',animation:'scanLine 1.5s linear infinite'}}/>
-                </div>
-              )}
+            <div style={{ display:'flex', flexDirection:'column', overflow:'hidden' }}>
+              <div style={{
+                maxHeight:'300px', overflowY:'auto', padding: '20px 24px',
+                fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text,
+              }}>
+                {deepLogs.map((line, i) => (
+                  <div key={i} style={{ marginBottom: 7, color: i === deepLogs.length - 1 && deepRunning ? G.gold : G.text }}>
+                    <span style={{ color: `${G.gold}66`, marginRight: 10 }}>[{String(i + 1).padStart(2, '0')}]</span>
+                    {line}
+                  </div>
+                ))}
+                {deepRunning && (
+                  <div style={{position:'relative',overflow:'hidden',height:3,background:'#1a1a1a',margin:'8px 0',borderRadius:2}}>
+                    <div style={{position:'absolute',top:0,height:'100%',width:'30%',background:'linear-gradient(90deg,transparent,#f59e0b,transparent)',animation:'scanLine 1.5s linear infinite'}}/>
+                  </div>
+                )}
+              </div>
 
               {deepResult && (
-                <div style={{textAlign:'center',padding:20}}>
+                <div style={{textAlign:'center',padding:20,borderTop:`1px solid ${G.border}`}}>
                   <div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
                   <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:52,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
                     ${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}
