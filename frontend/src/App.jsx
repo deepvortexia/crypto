@@ -759,14 +759,13 @@ export default function App() {
         )}
 
         {/* footer */}
-        <div style={{
-          borderTop: `1px solid ${G.border}`, paddingTop: 24, marginTop: 8,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <div style={{ fontFamily: '"Orbitron", sans-serif', fontSize: 13, letterSpacing: '0.12em', ...goldText }}>
+        <div style={{borderTop:`1px solid ${G.border}`,paddingTop:24,marginTop:8,
+          display:'flex',flexWrap:'wrap',justifyContent:'center',
+          alignItems:'center',gap:12,textAlign:'center'}}>
+          <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:13,letterSpacing:'0.12em',color:'#f59e0b'}}>
             DEEPVORTEX AI
           </div>
-          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: G.text, letterSpacing: '0.2em' }}>
+          <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:'#6b7280',letterSpacing:'0.2em'}}>
             NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
           </div>
         </div>
