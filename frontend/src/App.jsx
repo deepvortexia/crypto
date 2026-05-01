@@ -835,7 +835,17 @@ export default function App() {
                 </div>
               )}
 
-              {deepResult && <div style={{textAlign:'center',padding:20}}><div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div><div style={{fontFamily:'"Orbitron",sans-serif',fontSize:40,color:'#f59e0b',marginBottom:12}}>${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}</div><div style={{fontSize:18,color:deepResult.score>50?'#10b981':'#ef4444',marginBottom:8}}>{deepResult.direction} — {deepResult.recommendation}</div><div style={{fontFamily:'"Orbitron",sans-serif',fontSize:24,color:'#fff'}}>{deepResult.score}%</div></div>}
+              {deepResult && (
+                <div style={{textAlign:'center',padding:20}}>
+                  <div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
+                  <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:52,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
+                    ${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}
+                  </div>
+                  <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:20}}>USD PREDICTED PRICE</div>
+                  <div style={{fontSize:18,color:deepResult.score>50?'#10b981':'#ef4444',marginBottom:8}}>{deepResult.direction} — {deepResult.recommendation}</div>
+                  <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:24,color:'#fff'}}>{deepResult.score}%</div>
+                </div>
+              )}
             </div>
             )}
 
