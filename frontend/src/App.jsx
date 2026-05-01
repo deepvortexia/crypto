@@ -787,7 +787,7 @@ export default function App() {
                   }}},
                   scales:{
                     x:{type:'time',time:{unit:'hour'},ticks:{color:'#6b7280'},grid:{color:'#ffffff11'}},
-                    y:{ticks:{color:'#6b7280',callback:v=>`$${v.toLocaleString()}`},grid:{color:'#ffffff11'},min:keyLevels?.s1?keyLevels.s1*0.98:undefined,max:keyLevels?.r1?keyLevels.r1*1.02:undefined}
+                    y:{ticks:{color:'#6b7280',callback:v=>`$${v.toLocaleString()}`},grid:{color:'#ffffff11'},min:candles.length?Math.min(...candles.map(c=>c.l))*0.995:undefined,max:candles.length?Math.max(...candles.map(c=>c.h))*1.005:undefined}
                   }}}
               />
             ) : (
