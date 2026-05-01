@@ -223,7 +223,7 @@ export async function fetchOrderBook() {
   const bestAsk = parseFloat(data.asks[0][0])  // lowest sell price
   const bidVol = data.bids.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
   const askVol = data.asks.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
-  const ratio = bidVol/askVol
+  const ratio = Math.min(Math.max(bidVol/askVol, 0.1), 10.0)
   return { topBid: bestBid, topAsk: bestAsk, ratio, signal:ratio>1.3?'Strong buy wall':ratio<0.7?'Strong sell wall':'Balanced' }
 }
 
