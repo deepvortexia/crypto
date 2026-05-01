@@ -36,7 +36,7 @@ async def retrain_all():
 
         logger.info("Fetching training data from CoinGecko…")
         hourly_df, daily_df = await asyncio.gather(
-            fetch_hourly_ohlcv(days=90),
+            fetch_hourly_ohlcv(days=730),
             fetch_daily_ohlcv(days=365),
         )
         logger.info(f"Fetched {len(hourly_df)} hourly and {len(daily_df)} daily candles")
