@@ -15,7 +15,13 @@ import {
   fetchOrderBook,
   fetchKeyLevels,
   fetchLiquidations,
+  fetchOHLCCandles,
 } from './api/client'
+import { Chart as ChartJS, TimeScale, LinearScale, Tooltip } from 'chart.js'
+import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial'
+import { Chart } from 'react-chartjs-2'
+import 'chartjs-adapter-luxon'
+ChartJS.register(TimeScale, LinearScale, Tooltip, CandlestickController, CandlestickElement)
 
 // ── tokens ───────────────────────────────────────────────────────────────────
 const G = {
@@ -292,6 +298,7 @@ export default function App() {
   const [orderBook,   setOrderBook]   = useState(null)
   const [keyLevels,     setKeyLevels]     = useState(null)
   const [liquidations,  setLiquidations]  = useState(null)
+  const [candles,       setCandles]       = useState([])
   const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepLogs,      setDeepLogs]      = useState([])
   const [deepResult,    setDeepResult]    = useState(null)
@@ -341,6 +348,12 @@ export default function App() {
     const id = setInterval(loadAll, REFRESH_MS)
     return () => clearInterval(id)
   }, [loadAll])
+
+  useEffect(() => {
+    fetchOHLCCandles(100).then(setCandles)
+    const t = setInterval(() => fetchOHLCCandles(100).then(setCandles), 60000)
+    return () => clearInterval(t)
+  }, [])
 
   useEffect(() => {
     const tick = setInterval(() => setCountdown(c => Math.max(0, c - 1)), 1000)
