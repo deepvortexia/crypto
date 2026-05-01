@@ -774,15 +774,20 @@ export default function App() {
         <div style={{marginBottom:40}}>
           <div style={sectionLabel}>PRICE CHART — LIVE</div>
           <div style={{background:G.card,borderRadius:12,padding:16,border:`1px solid ${G.border}`}}>
-            <Chart type='candlestick'
-              data={{datasets:[{label:'BTC/USDT',data:candles,
-                color:{up:'#10b981',down:'#ef4444',unchanged:'#6b7280'}}]}}
-              options={{responsive:true,plugins:{legend:{display:false}},
-                scales:{
-                  x:{type:'time',time:{unit:'hour'},ticks:{color:'#6b7280'},grid:{color:'#ffffff11'}},
-                  y:{ticks:{color:'#6b7280',callback:v=>`$${v.toLocaleString()}`},grid:{color:'#ffffff11'}}
-                }}}
-            />
+            {candles.length > 0 && console.log('candles ready', candles[0])}
+            {candles.length > 0 ? (
+              <Chart type='candlestick'
+                data={{datasets:[{label:'BTC/USDT',data:candles,
+                  color:{up:'#10b981',down:'#ef4444',unchanged:'#6b7280'}}]}}
+                options={{responsive:true,plugins:{legend:{display:false}},
+                  scales:{
+                    x:{type:'time',time:{unit:'hour'},ticks:{color:'#6b7280'},grid:{color:'#ffffff11'}},
+                    y:{ticks:{color:'#6b7280',callback:v=>`$${v.toLocaleString()}`},grid:{color:'#ffffff11'}}
+                  }}}
+              />
+            ) : (
+              <div style={{color:'#6b7280',textAlign:'center',padding:40}}>Loading chart...</div>
+            )}
           </div>
         </div>
 
