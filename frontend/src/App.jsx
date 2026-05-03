@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, Link, useLocation } from 'react-router-dom'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
 import About from './pages/About'
 import {
   fetchLivePrice,
@@ -396,6 +402,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const curPrice = indics?.price ?? price?.price
 
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route path="/about" element={<About />} />
       <Route path="/" element={
@@ -926,5 +934,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     </div>
       } />
     </Routes>
+    </>
   )
 }
