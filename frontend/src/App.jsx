@@ -294,6 +294,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepResult,    setDeepResult]    = useState(null)
   const [deepRunning,   setDeepRunning]   = useState(false)
   const [deepHorizon,   setDeepHorizon]   = useState(null)
+  const [menuOpen,    setMenuOpen]    = useState(false)
   const [loading,     setLoading]     = useState(true)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -405,7 +406,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
       {/* ── HEADER ── */}
       <header className="header-inner" style={{
-        position: 'sticky', top: 0, zIndex: 50,
+        position: 'sticky', top: 0, zIndex: 50, overflow: 'visible',
         background: 'rgba(10,10,10,0.85)',
         backdropFilter: 'blur(14px)',
         borderBottom: `1px solid ${G.border}`,
@@ -417,7 +418,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{display:'flex',alignItems:'center',gap:10}}>
           <img src="/logoreal.png" alt="PredictAlpha" className="navbar-logo" style={{width:'auto',objectFit:'contain',verticalAlign:'middle'}} />
           <div style={{display:'flex',flexDirection:'column',gap:3}}>
-            <span className="navbar-brand" style={{fontFamily:'"Orbitron",sans-serif',letterSpacing:'0.05em',opacity:0.9}}>
+            <span className="navbar-brand" style={{fontFamily:'"Orbitron",sans-serif',letterSpacing:'0.05em',opacity:0.9,whiteSpace:'nowrap'}}>
               <span style={{color:'#f59e0b',fontWeight:400}}>PREDICT</span>{' '}<span style={{color:'#f59e0b',fontWeight:700,textShadow:'0 0 8px rgba(245,158,11,0.4)'}}>ALPHA</span>
             </span>
             <div style={{display:'flex',alignItems:'center',gap:5}}>
@@ -427,8 +428,30 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
         </div>
 
-        {/* learn link */}
+        {/* learn link — desktop only */}
         <Link to="/about" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
+
+        {/* hamburger — mobile only */}
+        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:22,lineHeight:1,padding:'4px 8px',display:'none'}}>☰</button>
+
+        {/* mobile dropdown */}
+        {menuOpen && (
+          <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:200,padding:'12px 0'}}>
+            {[
+              { label: 'Dashboard', to: '/', dim: false },
+              { label: 'Learn',     to: '/about', dim: false },
+            ].map(({ label, to }) => (
+              <Link key={label} to={to} onClick={() => setMenuOpen(false)} style={{display:'block',fontFamily:'"Share Tech Mono",monospace',fontSize:13,letterSpacing:'0.2em',color:'#f59e0b',textDecoration:'none',padding:'12px 24px',textTransform:'uppercase'}}>{label}</Link>
+            ))}
+            <div style={{borderTop:'1px solid #2a1f00',marginTop:8,paddingTop:8}}>
+              {['ETH','SOL','GOLD','FOREX'].map(item => (
+                <div key={item} style={{display:'block',fontFamily:'"Share Tech Mono",monospace',fontSize:13,letterSpacing:'0.2em',color:'#6b7280',padding:'12px 24px',textTransform:'uppercase',cursor:'default'}}>
+                  {item} <span style={{fontSize:9,letterSpacing:'0.15em',opacity:0.6}}>COMING SOON</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* live ticker */}
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
@@ -874,8 +897,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .header-right { position: static !important; gap: 8px !important; }
           .header-price { font-size: 20px !important; }
           .hide-mobile  { display: none !important; }
+          .show-mobile  { display: block !important; }
           .navbar-logo  { height: 62px !important; }
-          .navbar-brand { font-size: 17px !important; }
+          .navbar-brand { font-size: 13px !important; white-space: nowrap !important; }
           .ai-title     { font-size: 13px !important; }
           .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
           .ai-sub       { font-size: 7px !important; }
@@ -890,7 +914,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .grid-6       { grid-template-columns: 1fr 1fr !important; }
           .header-price { font-size: 18px !important; }
           .navbar-logo  { height: 50px !important; }
-          .navbar-brand { font-size: 14px !important; letter-spacing: 0.1em !important; }
+          .navbar-brand { font-size: 13px !important; letter-spacing: 0.05em !important; white-space: nowrap !important; }
           .main-pad     { padding: 12px !important; }
           .pred-horizon { font-size: 12px !important; }
         }
