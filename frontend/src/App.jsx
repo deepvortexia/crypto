@@ -487,10 +487,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Market Overview</div>
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-            <StatCard label={<>BTC Price<Tooltip text="Live Bitcoin price in USD updated every 60s from Binance"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
-            <StatCard label={<>24h Change<Tooltip text="Price change last 24h. Green=bullish momentum Red=bearish"/></>}  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
-            <StatCard label={<>24h Volume<Tooltip text="Total USD traded on Binance in the last 24 hours"/></>}  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
-            <StatCard label={<>Market Cap<Tooltip text="Total market value of all 19.7M Bitcoin in circulation"/></>}  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
+            <StatCard label={<>BTC Price<Tooltip text="Live price updated every 30s via Binance WebSocket"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
+            <StatCard label={<>24h Change<Tooltip text="Price change last 24h — positive means bullish momentum"/></>}  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
+            <StatCard label={<>24h Volume<Tooltip text="Total trading volume spot + derivatives"/></>}  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
+            <StatCard label={<>Market Cap<Tooltip text="Total market value = price × circulating supply"/></>}  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
           </div>
         </div>
 
@@ -498,12 +498,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>AI Price Predictions</div>
           <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16 }}>
-            <PredCard key="4h"     horizonKey="4h"     horizon={<>4H<Tooltip text="AI prediction 4 hours ahead using SMA7 vs SMA14 momentum"/></>}     data={preds['4h']}     loading={loading} />
-            <PredCard key="8h"     horizonKey="8h"     horizon={<>8H<Tooltip text="AI prediction 8 hours ahead based on short-term trend"/></>}          data={preds['8h']}     loading={loading} />
-            <PredCard key="12h"    horizonKey="12h"    horizon={<>12H<Tooltip text="AI prediction 12 hours using moving average divergence"/></>}         data={preds['12h']}    loading={loading} />
-            <PredCard key="24h"    horizonKey="24h"    horizon={<>24H<Tooltip text="AI prediction 24 hours ahead. Most reliable forecast"/></>}           data={preds['24h']}    loading={loading} />
-            <PredCard key="1week"  horizonKey="1week"  horizon={<>1WEEK<Tooltip text="AI prediction 7 days ahead. Medium-term trend projection"/></>}      data={preds['1week']}  loading={loading} />
-            <PredCard key="1month" horizonKey="1month" horizon={<>1MONTH<Tooltip text="30 day projection. Long-term trend higher uncertainty"/></>}       data={preds['1month']} loading={loading} />
+            <PredCard key="4h"     horizonKey="4h"     horizon={<>4H<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}     data={preds['4h']}     loading={loading} />
+            <PredCard key="8h"     horizonKey="8h"     horizon={<>8H<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}          data={preds['8h']}     loading={loading} />
+            <PredCard key="12h"    horizonKey="12h"    horizon={<>12H<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}         data={preds['12h']}    loading={loading} />
+            <PredCard key="24h"    horizonKey="24h"    horizon={<>24H<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}           data={preds['24h']}    loading={loading} />
+            <PredCard key="1week"  horizonKey="1week"  horizon={<>1WEEK<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}      data={preds['1week']}  loading={loading} />
+            <PredCard key="1month" horizonKey="1month" horizon={<>1MONTH<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}       data={preds['1month']} loading={loading} />
           </div>
         </div>
 
