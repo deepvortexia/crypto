@@ -114,7 +114,7 @@ export default function About() {
         </nav>
       </header>
 
-      <main style={{ maxWidth: 960, margin: '0 auto', padding: '60px 24px 80px' }}>
+      <main className="about-main" style={{ maxWidth: 960, margin: '0 auto', padding: '60px 24px 80px' }}>
 
         {/* ── SEO meta hint (visible heading for crawlers) ── */}
         <h1 style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}>
@@ -124,14 +124,14 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* HERO */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ textAlign: 'center', marginBottom: 80, paddingTop: 20 }}>
+        <section className="about-section" style={{ textAlign: 'center', marginBottom: 80, paddingTop: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
             <img src="/logoreal.png" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} alt="PREDICT ALPHA" />
           </div>
-          <h2 style={{ fontFamily: orb, fontSize: 'clamp(24px,5vw,42px)', letterSpacing: '0.18em', ...goldText, marginBottom: 18, lineHeight: 1.2 }}>
+          <h2 className="about-hero-title" style={{ fontFamily: orb, fontSize: 'clamp(20px,5vw,42px)', letterSpacing: '0.18em', ...goldText, marginBottom: 18, lineHeight: 1.2 }}>
             AI-POWERED MARKET INTELLIGENCE
           </h2>
-          <p style={{ fontFamily: mono, fontSize: 14, color: G.text, maxWidth: 660, margin: '0 auto 28px', lineHeight: 1.9, letterSpacing: '0.05em' }}>
+          <p className="about-body" style={{ fontFamily: mono, fontSize: 14, color: G.text, maxWidth: 660, margin: '0 auto 28px', lineHeight: 1.9, letterSpacing: '0.05em' }}>
             PREDICT ALPHA runs a stacked ensemble of neural networks and gradient-boosted models against a continuous stream of real-time market data — processing thousands of data points per minute across price action, on-chain flows, and derivatives markets to generate calibrated directional forecasts across six time horizons.
           </p>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -148,10 +148,10 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* WHAT IS PREDICT ALPHA */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 72 }}>
+        <section className="about-section" style={{ marginBottom: 72 }}>
           <SectionTitle>WHAT IS PREDICT ALPHA</SectionTitle>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20, marginBottom: 32 }}>
+          <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20, marginBottom: 32 }}>
             {[
               {
                 title: 'Real-Time Intelligence',
@@ -173,13 +173,13 @@ export default function About() {
                   </div>
                   <span style={{ fontFamily: orb, fontSize: 11, letterSpacing: '0.2em', color: G.gold }}>{title}</span>
                 </div>
-                <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
+                <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
               </div>
             ))}
           </div>
 
           <div style={{ ...cardStyle, borderColor: `${G.gold}33` }}>
-            <p style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, letterSpacing: '0.04em' }}>
+            <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, letterSpacing: '0.04em' }}>
               PREDICT ALPHA was built for traders who want more than a price chart. Whether you are a day trader watching the 4-hour signal, a swing trader tracking weekly momentum, or a long-term holder monitoring macro on-chain health, the platform surfaces the signals that matter at the horizon you care about. The dashboard is designed to be read in under 60 seconds — all critical data is above the fold, color-coded, and updated continuously.
             </p>
           </div>
@@ -188,14 +188,14 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* AI PREDICTIONS */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 72 }}>
+        <section className="about-section" style={{ marginBottom: 72 }}>
           <SectionTitle>AI PRICE PREDICTIONS · 4H TO 1 MONTH</SectionTitle>
 
-          <p style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 32, letterSpacing: '0.04em' }}>
+          <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 32, letterSpacing: '0.04em' }}>
             The prediction engine at the core of PREDICT ALPHA is a stacked ensemble of gradient-boosted decision trees, a short-term LSTM recurrent network, and a linear regression baseline. Each model is trained independently on historical OHLCV data and then combined using a meta-learner that weights each model's recent accuracy. The result is a predicted price and directional confidence score for each of six horizons.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16, marginBottom: 32 }}>
+          <div className="horizon-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16, marginBottom: 32 }}>
             {[
               { h: '4H', conf: 92, desc: 'Intraday momentum. Powered heavily by order book imbalance and 4-hour RSI divergence. Best for active traders entering or exiting within the same session.' },
               { h: '8H', conf: 88, desc: 'Extended intraday. Incorporates funding rate direction and MACD crossovers on the 4H chart. Useful for catching swing moves without overnight exposure.' },
@@ -215,13 +215,13 @@ export default function About() {
                 <div style={{ background: '#1a1a1a', borderRadius: 3, height: 3, overflow: 'hidden', marginBottom: 12 }}>
                   <div style={{ height: '100%', width: `${conf}%`, background: `linear-gradient(90deg,${G.green},${G.gold})`, borderRadius: 3 }} />
                 </div>
-                <p style={{ fontFamily: mono, fontSize: 11, color: G.text, lineHeight: 1.85, letterSpacing: '0.03em' }}>{desc}</p>
+                <p className="about-body" style={{ fontFamily: mono, fontSize: 11, color: G.text, lineHeight: 1.85, letterSpacing: '0.03em' }}>{desc}</p>
               </div>
             ))}
           </div>
 
           <div style={{ ...cardStyle }}>
-            <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
+            <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
               Each prediction is recalculated on page load and cached server-side for 5 minutes, ensuring that the model runs on the freshest available data without overloading the API. The Deep Analysis feature runs an extended multi-step reasoning chain that annotates each signal, explains its current reading, and synthesises a final directional conclusion — surfacing the why behind the number, not just the number itself.
             </p>
           </div>
@@ -230,14 +230,14 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* TECHNICAL INDICATORS */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 72 }}>
+        <section className="about-section" style={{ marginBottom: 72 }}>
           <SectionTitle>TECHNICAL INDICATORS</SectionTitle>
 
-          <p style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
+          <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
             Technical analysis describes the statistical patterns in price and volume data. While no single indicator predicts the future, the convergence of multiple indicators on the same signal significantly increases the probability of a directional move. PREDICT ALPHA tracks the following indicators in real time, all visualised with colour-coded bar gauges.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 18 }}>
+          <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 18 }}>
             {[
               {
                 name: 'RSI — Relative Strength Index',
@@ -263,7 +263,7 @@ export default function About() {
                   </div>
                   <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.gold }}>{name}</span>
                 </div>
-                <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
+                <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
               </div>
             ))}
           </div>
@@ -272,14 +272,14 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* ON-CHAIN */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 72 }}>
+        <section className="about-section" style={{ marginBottom: 72 }}>
           <SectionTitle>ON-CHAIN ANALYTICS</SectionTitle>
 
-          <p style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
+          <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
             On-chain data is the heartbeat of the Bitcoin network. Unlike price, which can be manipulated by short-term sentiment, on-chain metrics reflect the actual behaviour of participants — wallets moving, miners mining, transactions confirming. These signals are slower-moving but structurally more significant for medium and long-term analysis.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 18 }}>
+          <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 18 }}>
             {[
               {
                 name: 'Hash Rate',
@@ -313,7 +313,7 @@ export default function About() {
                   </div>
                   <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.gold }}>{name}</span>
                 </div>
-                <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
+                <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
               </div>
             ))}
           </div>
@@ -322,14 +322,14 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* FUTURES */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 72 }}>
+        <section className="about-section" style={{ marginBottom: 72 }}>
           <SectionTitle>FUTURES & DERIVATIVES INTELLIGENCE</SectionTitle>
 
-          <p style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
+          <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
             Bitcoin futures markets trade more volume than the spot market. Understanding the mechanics of funding rates, open interest, and long/short ratios is essential for reading short-term market sentiment and avoiding the traps that catch most retail traders. PREDICT ALPHA aggregates all key derivatives metrics from Binance perpetual futures into a single, colour-coded view.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 18, marginBottom: 28 }}>
+          <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 18, marginBottom: 28 }}>
             {[
               {
                 name: 'Funding Rate',
@@ -355,13 +355,13 @@ export default function About() {
                   </div>
                   <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.gold }}>{name}</span>
                 </div>
-                <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
+                <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
               </div>
             ))}
           </div>
 
           <div style={{ ...cardStyle, borderColor: `${G.gold}33` }}>
-            <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
+            <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
               The Order Book section adds another layer: it surfaces the best bid and best ask prices in real time, calculates the bid/ask ratio as a proxy for near-term buying or selling pressure, and displays the spread. A tightening spread indicates deep liquidity and efficient price discovery. A wide spread signals thin markets where price can move sharply on moderate volume.
             </p>
           </div>
@@ -370,20 +370,20 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* KEY LEVELS & FIBONACCI */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 72 }}>
+        <section className="about-section" style={{ marginBottom: 72 }}>
           <SectionTitle>KEY LEVELS & FIBONACCI RETRACEMENTS</SectionTitle>
 
-          <p style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
+          <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
             Price does not move randomly — it gravitates toward levels where large amounts of orders cluster. PREDICT ALPHA automatically calculates pivot points, support and resistance levels, and Fibonacci retracements from the most recent significant swing, updating them with each data refresh.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 24 }}>
+          <div className="levels-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 24 }}>
             <div style={{ ...cardStyle }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <div className="indicator-icon"><LogoIcon /></div>
                 <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.green }}>SUPPORT LEVELS — S1 / S2 / S3</span>
               </div>
-              <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>
+              <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>
                 Calculated using the classic pivot point formula from the prior session's high, low, and close. S1 is the first natural floor below the pivot — price often pauses here. S2 and S3 are deeper levels that come into play during larger corrections. These are the levels where buyers are expected to step in, making them high-probability zones to watch for reversals or bounces.
               </p>
             </div>
@@ -392,7 +392,7 @@ export default function About() {
                 <div className="indicator-icon"><LogoIcon /></div>
                 <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.red }}>RESISTANCE LEVELS — R1 / R2 / R3</span>
               </div>
-              <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>
+              <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>
                 Mirror calculations above the pivot. R1 is the first ceiling above the current price — bulls need to reclaim this to confirm an uptrend. R2 and R3 are extension targets in a strongly trending market. Resistance levels that flip to support after a breakout become the strongest holding zones in a bull market.
               </p>
             </div>
@@ -403,7 +403,7 @@ export default function About() {
               <div className="about-card-icon"><LogoIcon /></div>
               <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.gold }}>FIBONACCI RETRACEMENTS EXPLAINED</span>
             </div>
-            <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
+            <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
               The Fibonacci sequence — 0, 1, 1, 2, 3, 5, 8, 13, 21 — produces a ratio of approximately 1.618 between successive terms, known as the golden ratio. Its inverse, 0.618, is the most-watched Fibonacci retracement level in markets. The 0.382, 0.5, 0.618, and 0.786 levels are plotted between a swing high and swing low to identify where price might find support or resistance during a pullback. When the AI model detects that price is within 1% of a key Fibonacci level, it fires an alert banner on the dashboard. These near-level warnings have historically preceded significant price reactions in either direction.
             </p>
           </div>
@@ -412,7 +412,7 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* FAQ */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ marginBottom: 72 }}>
+        <section className="about-section" style={{ marginBottom: 72 }}>
           <SectionTitle>FREQUENTLY ASKED QUESTIONS</SectionTitle>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -420,9 +420,9 @@ export default function About() {
               <div key={i} style={{ ...cardStyle }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 12 }}>
                   <div className="indicator-icon" style={{ flexShrink: 0, marginTop: 2 }}><LogoIcon /></div>
-                  <span style={{ fontFamily: orb, fontSize: 11, letterSpacing: '0.15em', color: G.gold, lineHeight: 1.6 }}>{q}</span>
+                  <span className="faq-q" style={{ fontFamily: orb, fontSize: 11, letterSpacing: '0.15em', color: G.gold, lineHeight: 1.6 }}>{q}</span>
                 </div>
-                <p style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.95, letterSpacing: '0.03em', paddingLeft: 42 }}>{a}</p>
+                <p className="faq-answer about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.95, letterSpacing: '0.03em', paddingLeft: 42 }}>{a}</p>
               </div>
             ))}
           </div>
@@ -431,17 +431,17 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         {/* CTA */}
         {/* ══════════════════════════════════════════════════════════════════ */}
-        <section style={{ textAlign: 'center', padding: '48px 24px', background: G.goldDim, border: `1px solid ${G.gold}33`, borderRadius: 14 }}>
+        <section className="about-section cta-section" style={{ textAlign: 'center', padding: '48px 24px', background: G.goldDim, border: `1px solid ${G.gold}33`, borderRadius: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
             <img src="/logoreal.png" style={{ width: 48, height: 48, objectFit: 'contain', filter: `drop-shadow(0 0 12px ${G.goldGlow})` }} alt="" />
           </div>
           <h2 style={{ fontFamily: orb, fontSize: 'clamp(16px,3vw,26px)', letterSpacing: '0.2em', ...goldText, marginBottom: 14 }}>
             READY TO SEE THE SIGNAL?
           </h2>
-          <p style={{ fontFamily: mono, fontSize: 13, color: G.text, maxWidth: 480, margin: '0 auto 28px', lineHeight: 1.9 }}>
+          <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, maxWidth: 480, margin: '0 auto 28px', lineHeight: 1.9 }}>
             Open the live dashboard and get instant access to AI predictions, on-chain data, and real-time derivatives intelligence — all in one screen.
           </p>
-          <Link to="/" style={{
+          <Link to="/" className="cta-btn" style={{
             display: 'inline-block',
             fontFamily: orb, fontSize: 13, letterSpacing: '0.25em',
             color: G.bg,
@@ -473,6 +473,57 @@ export default function About() {
           NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
         </div>
       </footer>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .about-main {
+            padding: 32px 16px 48px !important;
+          }
+          .about-section {
+            margin-bottom: 40px !important;
+          }
+          .about-hero-title {
+            font-size: clamp(20px, 6vw, 32px) !important;
+            letter-spacing: 0.08em !important;
+          }
+          .about-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .horizon-grid {
+            grid-template-columns: 1fr 1fr !important;
+          }
+          .levels-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .about-body {
+            font-size: 12px !important;
+            line-height: 1.85 !important;
+          }
+          .faq-q {
+            font-size: 13px !important;
+            letter-spacing: 0.08em !important;
+          }
+          .faq-answer {
+            padding-left: 0 !important;
+            margin-top: 8px !important;
+          }
+          .cta-btn {
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            text-align: center !important;
+          }
+          .cta-section {
+            padding: 32px 16px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .horizon-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+          }
+        }
+      `}</style>
 
     </div>
   )
