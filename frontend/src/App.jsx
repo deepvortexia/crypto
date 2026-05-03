@@ -413,7 +413,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       }}>
         {/* logo */}
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <img src="/logotrans.png" alt="DeepVortex" style={{height:'40px',objectFit:'contain'}} />
+          <img src="/logo.png" alt="DeepVortex" style={{height:'45px',width:'auto',marginRight:'10px',objectFit:'contain',verticalAlign:'middle'}} />
           <span style={{fontFamily:'"Orbitron",sans-serif',fontSize:12,letterSpacing:'0.15em',color:'#f59e0b',opacity:0.9}}>PREDICT ALPHA</span>
         </div>
 
