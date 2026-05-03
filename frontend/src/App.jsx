@@ -432,7 +432,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <Link to="/about" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
 
         {/* hamburger — mobile only */}
-        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:22,lineHeight:1,padding:'4px 8px',display:'none'}}>☰</button>
+        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:32,lineHeight:1,padding:'8px',display:'none'}}>☰</button>
 
         {/* mobile dropdown */}
         {menuOpen && (
