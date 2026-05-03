@@ -4,7 +4,6 @@ import {
   fetchSentiment,
   fetchPrediction,
   fetchIndicators,
-  fetchPriceHistory,
   fetchOnchain,
   fetchNews,
   fetchFundingRate,
@@ -106,7 +105,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
   const gold = G.gold
   const up = data?.direction === 'up'
   const dirColor = up ? G.green : G.red
-  const conf = data ? (HORIZON_CONFIDENCE[horizonKey] ?? Math.round(data.confidence * 100)) : 0
+  const conf = data ? (HORIZON_CONFIDENCE[horizonKey] ?? (data.confidence != null ? Math.round(data.confidence * 100) : 75)) : 0
 
   return (
     <div style={{
@@ -197,9 +196,8 @@ function IndCard({ label, value, sub, barName, barRaw }) {
 }
 
 function SentimentMeter({ value, label }) {
-  const color = value >= 75 ? G.green : value >= 55 ? '#84cc16' : value >= 45 ? G.gold : value >= 25 ? '#f97316' : G.red
-  // Gradient border: map value 0→100 to red→gold→green
-  const gradAngle = value != null ? Math.round((value / 100) * 360) : 0
+  const color = value == null ? G.text : value >= 75 ? G.green : value >= 55 ? '#84cc16' : value >= 45 ? G.gold : value >= 25 ? '#f97316' : G.red
+  const gradAngle = value != null ? Math.round((value / 100) * 360) : 180
   const ticks = Array.from({ length: 10 }, (_, i) => i * 36)
 
   return (
@@ -432,7 +430,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
           )}
 <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 26, ...goldText, letterSpacing: 1 }}>
+            <div className="header-price" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 26, ...goldText, letterSpacing: 1 }}>
               {loading ? '———' : fmtPrice(price?.price)}
             </div>
             {!loading && change != null && (
@@ -492,7 +490,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 2 — AI predictions */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>AI Price Predictions</div>
-          <div className="grid-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16 }}>
+          <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16 }}>
             <PredCard key="4h"     horizonKey="4h"     horizon={<>4H<Tooltip text="AI prediction 4 hours ahead using SMA7 vs SMA14 momentum"/></>}     data={preds['4h']}     loading={loading} />
             <PredCard key="8h"     horizonKey="8h"     horizon={<>8H<Tooltip text="AI prediction 8 hours ahead based on short-term trend"/></>}          data={preds['8h']}     loading={loading} />
             <PredCard key="12h"    horizonKey="12h"    horizon={<>12H<Tooltip text="AI prediction 12 hours using moving average divergence"/></>}         data={preds['12h']}    loading={loading} />
@@ -575,7 +573,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 5 — futures market */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Futures Market</div>
-          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             <IndCard
               label="Funding Rate"
               value={fundingRate != null ? (fundingRate.rate.toFixed(4) + '%') : '—'}
@@ -697,7 +695,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 8 — mempool */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Mempool</div>
-          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             <IndCard
               label="Pending Txns"
               value={mempool?.count != null ? mempool.count.toLocaleString() : '—'}
@@ -743,12 +741,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                       flexShrink: 0,
                       fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.15em',
                       padding: '3px 8px', borderRadius: 4,
-                      background: n.sentiment === 'bullish' ? `${G.green}22` : `${G.red}22`,
-                      color: n.sentiment === 'bullish' ? G.green : G.red,
-                      border: `1px solid ${n.sentiment === 'bullish' ? G.green : G.red}44`,
+                      background: n.sentiment === 'bullish' ? `${G.green}22` : n.sentiment === 'bearish' ? `${G.red}22` : `${G.gold}22`,
+                      color: n.sentiment === 'bullish' ? G.green : n.sentiment === 'bearish' ? G.red : G.gold,
+                      border: `1px solid ${n.sentiment === 'bullish' ? G.green : n.sentiment === 'bearish' ? G.red : G.gold}44`,
                       textTransform: 'uppercase',
                     }}>
-                      {n.sentiment === 'bullish' ? '▲ Bullish' : '▼ Bearish'}
+                      {n.sentiment === 'bullish' ? '▲ Bullish' : n.sentiment === 'bearish' ? '▼ Bearish' : '● Neutral'}
                     </div>
                   </div>
                 </a>
@@ -883,21 +881,31 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes scanLine    { 0%{left:-100%} 100%{left:200%} }
         @keyframes fillBar     { from{width:0} to{width:var(--w)} }
         @media (max-width: 768px) {
-          .grid-4       { grid-template-columns: 1fr 1fr !important; }
+          .grid-3       { grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
+          .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
           .grid-5       { grid-template-columns: 1fr 1fr !important; }
-          .grid-2col      { grid-template-columns: 1fr !important; }
+          .grid-2col    { grid-template-columns: 1fr !important; }
           .sentiment-card { width: 100% !important; min-width: 0 !important; }
-          .grid-6       { grid-template-columns: 1fr 1fr !important; }
-          .ind-card     { min-height: 90px !important; }
+          .grid-6       { grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
+          .ind-card     { min-height: 90px !important; padding: 10px 12px !important; }
           .main-pad     { padding: 16px !important; }
           .header-inner { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 10px 12px !important; flex-wrap: nowrap !important; }
-          .header-right { position: static !important; gap: 10px !important; }
+          .header-right { position: static !important; gap: 8px !important; }
+          .header-price { font-size: 20px !important; }
           .hide-mobile  { display: none !important; }
           .navbar-logo  { height: 45px !important; }
           .navbar-brand { font-size: 13px !important; }
           .ai-title     { font-size: 13px !important; }
           .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
           .ai-sub       { font-size: 7px !important; }
+        }
+        @media (max-width: 420px) {
+          .grid-3       { grid-template-columns: 1fr !important; }
+          .grid-6       { grid-template-columns: 1fr 1fr !important; }
+          .header-price { font-size: 18px !important; }
+          .navbar-logo  { height: 38px !important; }
+          .navbar-brand { font-size: 11px !important; letter-spacing: 0.1em !important; }
+          .main-pad     { padding: 12px !important; }
         }
         .navbar-logo  { height: 55px; margin-right: 6px; }
         .navbar-brand { font-size: 16px; }
