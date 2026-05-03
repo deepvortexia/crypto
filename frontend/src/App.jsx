@@ -324,7 +324,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     try { setWhales(await fetchWhales()) } catch {}
     try { setMempool(await fetchMempool()) } catch {}
     try { setOrderBook(await fetchOrderBook()) } catch {}
-    try { if (price?.price) setKeyLevels(await fetchKeyLevels(price.price)) } catch {}
+    const currentPrice = p.status === 'fulfilled' ? p.value?.price : null
+    try { if (currentPrice) setKeyLevels(await fetchKeyLevels(currentPrice)) } catch {}
     try { setLiquidations(await fetchLiquidations()) } catch {}
 
     setLoading(false)
