@@ -114,7 +114,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
         ? `0 0 12px ${up ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}, 0 4px 32px rgba(0,0,0,0.6)`
         : cardStyle.boxShadow,
     }}>
-      <div style={labelStyle}>{horizon}</div>
+      <div className="pred-horizon" style={labelStyle}>{horizon}</div>
 
       {loading && <div style={{ color: G.text, fontSize: 13, opacity: 0.5 }}>Loading…</div>}
 
@@ -125,10 +125,10 @@ function PredCard({ horizon, horizonKey, data, loading }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{ fontSize: 18, color: dirColor, lineHeight: 1 }}>{up ? '▲' : '▼'}</span>
-            <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 12, color: dirColor, letterSpacing: '0.1em' }}>
+            <span className="pred-direction" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 12, color: dirColor, letterSpacing: '0.1em' }}>
               {data.direction?.toUpperCase()}
             </span>
-            <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 11, color: G.text }}>
+            <span className="pred-pct" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 11, color: G.text }}>
               {fmtPct(data.change_pct)}
             </span>
           </div>
@@ -142,7 +142,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
               transition: 'width 0.8s ease',
             }} />
           </div>
-          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.text, letterSpacing: '0.2em' }}>
+          <div className="pred-conf" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.text, letterSpacing: '0.2em' }}>
             CONFIDENCE {conf}%
           </div>
         </>
@@ -868,6 +868,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
           .ai-sub       { font-size: 7px !important; }
           .deep-btn     { font-size: 13px !important; padding: 12px 24px !important; max-width: 280px !important; }
+          .pred-horizon { font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0.1em !important; }
+          .pred-direction { font-size: 11px !important; }
+          .pred-pct     { font-size: 12px !important; }
+          .pred-conf    { font-size: 11px !important; }
         }
         @media (max-width: 420px) {
           .grid-3       { grid-template-columns: 1fr !important; }
@@ -876,6 +880,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .navbar-logo  { height: 50px !important; }
           .navbar-brand { font-size: 14px !important; letter-spacing: 0.1em !important; }
           .main-pad     { padding: 12px !important; }
+          .pred-horizon { font-size: 12px !important; }
         }
         .navbar-logo  { height: 80px; margin-right: 10px; }
         .navbar-brand { font-size: 22px; }
