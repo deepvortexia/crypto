@@ -652,7 +652,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
               {/* Pivot */}
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.2em', color: G.text, textTransform: 'uppercase' }}>Pivot</span>
+                <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.2em', color: G.text, textTransform: 'uppercase' }}>Pivot<Tooltip text="Central price level — above is bullish below is bearish"/></span>
                 <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 22, ...goldText, marginTop: 4 }}>{fmtPrice(keyLevels.pivot)}</div>
               </div>
 
@@ -660,6 +660,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
                 {/* Support */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.green, letterSpacing: '0.15em', marginBottom: 4 }}>SUPPORT<Tooltip text="Support levels — price may bounce up here"/></div>
                   {[['S1', keyLevels.s1], ['S2', keyLevels.s2], ['S3', keyLevels.s3]].map(([lbl, val]) => (
                     <div key={lbl} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: `${G.green}11`, borderRadius: 6, padding: '8px 12px', border: `1px solid ${G.green}33` }}>
                       <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.15em', color: G.green }}>{lbl}</span>
@@ -669,6 +670,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 </div>
                 {/* Resistance */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.red, letterSpacing: '0.15em', marginBottom: 4 }}>RESISTANCE<Tooltip text="Resistance levels — price may reverse down here"/></div>
                   {[['R1', keyLevels.r1], ['R2', keyLevels.r2], ['R3', keyLevels.r3]].map(([lbl, val]) => (
                     <div key={lbl} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: `${G.red}11`, borderRadius: 6, padding: '8px 12px', border: `1px solid ${G.red}33` }}>
                       <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.15em', color: G.red }}>{lbl}</span>
@@ -680,7 +682,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
               {/* Fibonacci badges */}
               <div style={{ borderTop: `1px solid ${G.border}`, paddingTop: 14 }}>
-                <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.2em', color: G.text, textTransform: 'uppercase', marginBottom: 10 }}>Fibonacci Retracements</div>
+                <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.2em', color: G.text, textTransform: 'uppercase', marginBottom: 10 }}>Fibonacci Retracements<Tooltip text="Golden ratio levels where price often reverses — 61.8% is strongest"/></div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {keyLevels.fib.map(f => (
                     <div key={f.level} style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, padding: '5px 10px', borderRadius: 5, background: G.goldDim, border: `1px solid ${G.gold}44`, color: G.gold, letterSpacing: '0.1em' }}>
@@ -690,7 +692,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 </div>
                 {keyLevels.nearLevel && (
                   <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 11, ...goldText, marginTop: 12, letterSpacing: '0.15em' }}>
-                    ⚠️ Near Fibonacci level {(keyLevels.nearLevel.level * 100).toFixed(1)}% · {fmtPrice(keyLevels.nearLevel.price)}
+                    ⚠️ Near Fibonacci level {(keyLevels.nearLevel.level * 100).toFixed(1)}% · {fmtPrice(keyLevels.nearLevel.price)}<Tooltip text="Price is dangerously close to a key reversal level"/>
                   </div>
                 )}
               </div>
@@ -704,17 +706,17 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <div style={sectionLabel}>Mempool</div>
           <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             <IndCard
-              label="Pending Txns"
+              label={<>Pending Txns<Tooltip text="Number of unconfirmed transactions waiting — high means network congested"/></>}
               value={mempool?.count != null ? mempool.count.toLocaleString() : '—'}
               sub={mempool?.signal}
             />
             <IndCard
-              label="Fast Fee"
+              label={<>Fast Fee<Tooltip text="Minimum fee to get confirmed in next block"/></>}
               value={mempool?.fastestFee != null ? (mempool.fastestFee + ' sat/vB') : '—'}
               sub="Next block"
             />
             <IndCard
-              label="Hour Fee"
+              label={<>Hour Fee<Tooltip text="Minimum fee to get confirmed within 1 hour"/></>}
               value={mempool?.hourFee != null ? (mempool.hourFee + ' sat/vB') : '—'}
               sub="Within 1 hour"
             />
