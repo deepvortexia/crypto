@@ -30,7 +30,7 @@ const mono = '"Share Tech Mono", monospace'
 const orb  = '"Orbitron", sans-serif'
 
 const LogoIcon = () => (
-  <img src="/logoegypt.jpg" style={{ width: '36px', height: '36px', objectFit: 'contain', opacity: 0.8 }} alt="" />
+  <img src="/logoreal.png" style={{ width: '36px', height: '36px', objectFit: 'contain', opacity: 0.8 }} alt="" />
 )
 
 const sectionDivider = {
@@ -101,7 +101,7 @@ export default function About() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logoegypt.jpg" alt="PREDICT ALPHA" style={{ height: 46, width: 'auto', objectFit: 'contain' }} />
+          <img src="/logoreal.png" alt="PREDICT ALPHA" style={{ height: 46, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: orb, fontSize: 18, letterSpacing: '0.15em', color: G.gold, opacity: 0.9 }}>PREDICT ALPHA</span>
         </Link>
         <nav style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
@@ -126,7 +126,7 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ textAlign: 'center', marginBottom: 80, paddingTop: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
-            <img src="/logoegypt.jpg" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} alt="PREDICT ALPHA" />
+            <img src="/logoreal.png" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} alt="PREDICT ALPHA" />
           </div>
           <h2 className="about-hero-title" style={{ fontFamily: orb, fontSize: 'clamp(20px,5vw,42px)', letterSpacing: '0.18em', ...goldText, marginBottom: 18, lineHeight: 1.2 }}>
             AI-POWERED MARKET INTELLIGENCE
@@ -433,7 +433,7 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section cta-section" style={{ textAlign: 'center', padding: '48px 24px', background: G.goldDim, border: `1px solid ${G.gold}33`, borderRadius: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-            <img src="/logoegypt.jpg" style={{ width: 48, height: 48, objectFit: 'contain', filter: `drop-shadow(0 0 12px ${G.goldGlow})` }} alt="" />
+            <img src="/logoreal.png" style={{ width: 48, height: 48, objectFit: 'contain', filter: `drop-shadow(0 0 12px ${G.goldGlow})` }} alt="" />
           </div>
           <h2 style={{ fontFamily: orb, fontSize: 'clamp(16px,3vw,26px)', letterSpacing: '0.2em', ...goldText, marginBottom: 14 }}>
             READY TO SEE THE SIGNAL?
