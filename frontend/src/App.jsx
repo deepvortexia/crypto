@@ -570,8 +570,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <div style={sectionLabel}>On-Chain Data</div>
             <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
-              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Total computing power mining Bitcoin. Higher=more secure"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" barName="hashRate" />}
-              {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Avg minutes between blocks. Target 10 min"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" barName="blockTime" barRaw={onchain.minutes_between_blocks} />}
+              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Higher = more miners = stronger network security"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" barName="hashRate" />}
+              {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Normal ~10 min — higher means network congestion"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" barName="blockTime" barRaw={onchain.minutes_between_blocks} />}
               {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" barName="fees" />}
             </div>
           </div>
@@ -582,31 +582,31 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <div style={sectionLabel}>Futures Market</div>
           <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
             <IndCard
-              label="Funding Rate"
+              label={<>Funding Rate<Tooltip text="Positive = longs pay shorts bullish market"/></>}
               value={fundingRate != null ? (fundingRate.rate.toFixed(4) + '%') : '—'}
               sub={fundingRate?.signal}
               barName="fundingRate"
               barRaw={fundingRate?.rate}
             />
             <IndCard
-              label="Long/Short Ratio"
+              label={<>Long/Short Ratio<Tooltip text="Above 1 more longs than shorts"/></>}
               value={longShort != null ? longShort.ratio.toFixed(2) : '—'}
               sub={longShort?.signal}
               barName="longShort"
               barRaw={longShort?.ratio}
             />
             <IndCard
-              label="Open Interest"
+              label={<>Open Interest<Tooltip text="Rising OI = strong trend confirmation"/></>}
               value={openInterest?.value && price?.price ? fmtLarge(openInterest.value * price.price) : '—'}
               sub="BTC futures open"
             />
             <IndCard
-              label="Whale Activity"
+              label={<>Whale Activity<Tooltip text="Large wallet moves — whales buying is bullish signal"/></>}
               value={whales != null ? (whales.largeCount + ' trades') : '—'}
               sub={whales?.signal}
             />
             <IndCard
-              label="Open Int. Change"
+              label={<>Open Int. Change<Tooltip text="Rising OI with price up = strong bullish confirmation"/></>}
               value={liquidations?.change != null ? (liquidations.change + '%') : '—'}
               sub={liquidations?.signal}
               barName="oiChange"
