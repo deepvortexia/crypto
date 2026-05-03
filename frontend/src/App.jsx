@@ -440,12 +440,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         </div>
       </header>
 
-      <div style={{padding:'10px 16px',borderBottom:'1px solid #1a1a1a',textAlign:'center',background:'#0a0a0a'}}>
-        <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
-        <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
-      </div>
-      <div style={{textAlign:'center',padding:'16px 0'}}>
-        <button className="deep-btn" onClick={() => { setDeepOpen(true) }}
+      {/* HERO SECTION */}
+      <section className="hero-section" style={{display:'block',width:'100%'}}>
+        <div style={{padding:'10px 16px',borderBottom:'1px solid #1a1a1a',textAlign:'center',background:'#0a0a0a'}}>
+          <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
+          <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
+        </div>
+        <div style={{textAlign:'center',padding:'16px 0'}}>
+          <button className="deep-btn" onClick={() => { setDeepOpen(true) }}
           style={{
             fontFamily:'"Orbitron",sans-serif',
             fontSize:14,
@@ -468,13 +470,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           onMouseEnter={e => { e.target.style.boxShadow='0 0 50px #f59e0b99, 0 0 100px #f59e0b55'; e.target.style.transform='scale(1.05)'; e.target.style.borderColor='#fbbf24' }}
           onMouseLeave={e => { e.target.style.boxShadow='0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)'; e.target.style.transform='scale(1)'; e.target.style.borderColor='rgba(251,191,36,0.6)' }}
         >
-          DEEP ANALYSIS
-        </button>
-      </div>
+            DEEP ANALYSIS
+          </button>
+        </div>
 
-      <div style={{textAlign:'center',padding:'12px 0',borderBottom:'1px solid #1a1a1a'}}>
-        <span style={{fontFamily:'"Orbitron",sans-serif',fontSize:22,letterSpacing:'0.2em',color:'#f59e0b',fontWeight:'bold'}}>₿ BITCOIN</span>
-      </div>
+        <div style={{textAlign:'center',padding:'12px 0',borderBottom:'1px solid #1a1a1a'}}>
+          <span style={{fontFamily:'"Orbitron",sans-serif',fontSize:22,letterSpacing:'0.2em',color:'#f59e0b',fontWeight:'bold'}}>₿ BITCOIN</span>
+        </div>
+      </section>
 
       {/* ── BODY ── */}
       <main className="main-pad" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
@@ -863,6 +866,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .ai-title     { font-size: 13px !important; }
           .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
           .ai-sub       { font-size: 7px !important; }
+          .deep-btn     { font-size: 13px !important; padding: 12px 24px !important; max-width: 280px !important; }
         }
         @media (max-width: 420px) {
           .grid-3       { grid-template-columns: 1fr !important; }
