@@ -43,8 +43,9 @@ async def retrain_all():
 
         loop = asyncio.get_event_loop()
 
-        logger.info("Training XGBoost and Prophet in parallel…")
+        logger.info("Training LSTM, XGBoost, and Prophet in parallel…")
         await asyncio.gather(
+            loop.run_in_executor(None, _ensemble.lstm.train, hourly_df),
             loop.run_in_executor(None, _ensemble.xgb.train, hourly_df),
             loop.run_in_executor(None, _ensemble.prophet.train, hourly_df, daily_df),
         )
