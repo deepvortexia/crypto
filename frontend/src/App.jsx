@@ -413,8 +413,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       }}>
         {/* logo */}
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <img src="/logoreal.png" alt="PredictAlpha" style={{height:'45px',width:'auto',marginRight:'10px',objectFit:'contain',verticalAlign:'middle'}} />
-          <span style={{fontFamily:'"Orbitron",sans-serif',fontSize:12,letterSpacing:'0.15em',color:'#f59e0b',opacity:0.9}}>PREDICT ALPHA</span>
+          <img src="/logoreal.png" alt="PredictAlpha" className="navbar-logo" style={{width:'auto',objectFit:'contain',verticalAlign:'middle'}} />
+          <div style={{display:'flex',flexDirection:'column',gap:3}}>
+            <span className="navbar-brand" style={{fontFamily:'"Orbitron",sans-serif',letterSpacing:'0.15em',color:'#f59e0b',opacity:0.9}}>PREDICT ALPHA</span>
+            <div style={{display:'flex',alignItems:'center',gap:5}}>
+              <span style={{display:'inline-block',width:6,height:6,borderRadius:'50%',background:G.green,boxShadow:`0 0 8px ${G.green}`,animation:'blink 0.5s ease-in-out infinite'}} />
+              <span style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.3em',color:G.green}}>LIVE</span>
+            </div>
+          </div>
         </div>
 
         {/* live ticker */}
@@ -425,15 +431,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               <div style={{ opacity: 0.5 }}>{lastAt.toLocaleTimeString()}</div>
             </div>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{
-              display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
-              background: G.green, boxShadow: `0 0 8px ${G.green}`,
-              animation: 'blink 0.5s ease-in-out infinite',
-            }} />
-            <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.3em', color: G.green }}>LIVE</span>
-          </div>
-          <div style={{ textAlign: 'right' }}>
+<div style={{ textAlign: 'right' }}>
             <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 26, ...goldText, letterSpacing: 1 }}>
               {loading ? '———' : fmtPrice(price?.price)}
             </div>
@@ -893,12 +891,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .ind-card     { min-height: 90px !important; }
           .main-pad     { padding: 16px !important; }
           .header-inner { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 10px 12px !important; flex-wrap: nowrap !important; }
-          .header-right { position: static !important; }
+          .header-right { position: static !important; gap: 10px !important; }
           .hide-mobile  { display: none !important; }
+          .navbar-logo  { height: 45px !important; }
+          .navbar-brand { font-size: 13px !important; }
           .ai-title     { font-size: 13px !important; }
           .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
           .ai-sub       { font-size: 7px !important; }
         }
+        .navbar-logo  { height: 55px; margin-right: 6px; }
+        .navbar-brand { font-size: 16px; }
         @keyframes introScan  { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
         @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
       `}</style>
