@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
+import { supabase } from './lib/supabase'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -302,6 +303,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepHorizon,   setDeepHorizon]   = useState(null)
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [loading,     setLoading]     = useState(true)
+  const [unlockOpen,  setUnlockOpen]  = useState(false)
+  const [unlockEmail, setUnlockEmail] = useState('')
+  const [unlockBusy,  setUnlockBusy]  = useState(false)
+  const [unlockError, setUnlockError] = useState('')
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
 
@@ -389,6 +394,36 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     const s=Math.round([indics?.rsi<50,indics?.macd?.histogram>0,sentiment?.value<40,indics?.ema50>indics?.ema200,longShort?.ratio<1,orderBook?.ratio>1].filter(Boolean).length/6*100)
     setDeepResult({score:s,direction:s>50?'BULLISH':'BEARISH',recommendation:s>65?'Strong Buy':s>50?'Weak Buy':s>35?'Hold':'Sell'})
     setDeepRunning(false)
+  }
+
+  const isUnlocked = () => {
+    try {
+      const until = localStorage.getItem('unlocked_until')
+      return until && Date.now() < Number(until)
+    } catch { return false }
+  }
+
+  const handleDeepClick = () => {
+    if (isUnlocked()) { setDeepOpen(true) } else { setUnlockOpen(true) }
+  }
+
+  const handleUnlockSubmit = async (e) => {
+    e.preventDefault()
+    if (!unlockEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      setUnlockError('Please enter a valid email address.')
+      return
+    }
+    setUnlockBusy(true)
+    setUnlockError('')
+    const unlockedUntil = Date.now() + 24 * 60 * 60 * 1000
+    try {
+      await supabase.from('lead').insert({ email: unlockEmail, source: 'deep_analysis', unlocked_until: new Date(unlockedUntil).toISOString() })
+    } catch (_) {}
+    localStorage.setItem('unlocked_until', String(unlockedUntil))
+    setUnlockBusy(false)
+    setUnlockOpen(false)
+    setUnlockEmail('')
+    setDeepOpen(true)
   }
 
   const change  = price?.change_24h_pct ?? null
@@ -489,7 +524,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
         </div>
         <div style={{textAlign:'center',padding:'16px 0'}}>
-          <button className="deep-btn" onClick={() => { setDeepOpen(true) }}
+          <button className="deep-btn" onClick={handleDeepClick}
           style={{
             fontFamily:'"Orbitron",sans-serif',
             fontSize:14,
@@ -778,6 +813,62 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       </main>
 
       {/* ── deep analysis modal ── */}
+      {/* ── unlock modal ── */}
+      {unlockOpen && (
+        <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.92)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}>
+          <div style={{ background:G.card, border:`1px solid ${G.gold}55`, borderRadius:14, boxShadow:`0 0 60px ${G.goldGlow}`, width:'95%', maxWidth:440, padding:'36px 32px' }}>
+            {/* header */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24 }}>
+              <span style={{ fontFamily:'"Orbitron",sans-serif', fontSize:13, letterSpacing:'0.25em', color:G.gold, textShadow:`0 0 8px ${G.goldGlow}` }}>
+                UNLOCK FREE ANALYSIS
+              </span>
+              <button onClick={() => { setUnlockOpen(false); setUnlockError('') }} style={{ background:'none', border:'none', color:G.text, cursor:'pointer', fontSize:18, lineHeight:1 }}>✕</button>
+            </div>
+            {/* description */}
+            <p style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.text, lineHeight:1.9, marginBottom:24, letterSpacing:'0.03em' }}>
+              Enter your email to unlock <span style={{ color:G.gold }}>Deep Analysis</span> for 24 hours. We'll send you AI insights and market updates — no spam, unsubscribe anytime.
+            </p>
+            {/* form */}
+            <form onSubmit={handleUnlockSubmit}>
+              <input
+                type="email"
+                placeholder="your@email.com"
+                value={unlockEmail}
+                onChange={e => { setUnlockEmail(e.target.value); setUnlockError('') }}
+                style={{
+                  width:'100%', boxSizing:'border-box',
+                  fontFamily:'"Share Tech Mono",monospace', fontSize:13,
+                  background:'#0a0a0a', border:`1px solid ${unlockError ? G.red : G.border}`,
+                  borderRadius:8, color:G.bright, padding:'12px 16px',
+                  outline:'none', marginBottom: unlockError ? 6 : 16,
+                  letterSpacing:'0.05em',
+                }}
+              />
+              {unlockError && (
+                <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.red, marginBottom:12, letterSpacing:'0.05em' }}>{unlockError}</div>
+              )}
+              <button
+                type="submit"
+                disabled={unlockBusy}
+                style={{
+                  width:'100%', fontFamily:'"Orbitron",sans-serif', fontSize:12, letterSpacing:'0.25em',
+                  padding:'14px', borderRadius:8, cursor: unlockBusy ? 'not-allowed' : 'pointer',
+                  background: unlockBusy ? G.border : `linear-gradient(135deg,${G.gold},#d97706)`,
+                  border:'none', color:'#000', fontWeight:700,
+                  boxShadow: unlockBusy ? 'none' : `0 0 24px ${G.goldGlow}`,
+                  transition:'all 0.2s',
+                }}
+              >
+                {unlockBusy ? 'UNLOCKING…' : 'UNLOCK DEEP ANALYSIS'}
+              </button>
+            </form>
+            <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:9, color:'#4b5563', letterSpacing:'0.15em', textAlign:'center', marginTop:16 }}>
+              FREE · NO CREDIT CARD · 24-HOUR ACCESS
+            </div>
+          </div>
+        </div>
+      )}
+
       {deepOpen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 200,
