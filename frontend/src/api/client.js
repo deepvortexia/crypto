@@ -255,18 +255,41 @@ export async function fetchNews() {
 }
 
 export async function fetchKeyLevels(currentPrice) {
-  const data = await get('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=30')
-  const highs = data.map(k=>parseFloat(k[2]))
-  const lows = data.map(k=>parseFloat(k[3]))
-  const closes = data.map(k=>parseFloat(k[4]))
-  const H = Math.max(...highs), L = Math.min(...lows)
-  const P = (H + L + closes[closes.length-1]) / 3
-  const fib = [0.236,0.382,0.5,0.618,0.786].map(f=>({level:f,price:parseFloat((H-(H-L)*f).toFixed(0))}))
+  // Use 7-day data for more dynamic Fibonacci levels
+  const data = await get('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=42')
+  const highs = data.map(k => parseFloat(k[2]))
+  const lows = data.map(k => parseFloat(k[3]))
+  const closes = data.map(k => parseFloat(k[4]))
+
+  // 7-day high/low for Fibonacci
+  const H = Math.max(...highs)
+  const L = Math.min(...lows)
+  const lastClose = closes[closes.length - 1]
+
+  // Classic pivot point
+  const P = (H + L + lastClose) / 3
+
+  // Fibonacci retracements from swing high to swing low
+  const range = H - L
+  const fib = [0.236, 0.382, 0.5, 0.618, 0.786].map(f => ({
+    level: f,
+    price: Math.round(H - range * f)
+  }))
+
+  // Find if current price is near any Fibonacci level (within 0.8%)
+  const nearLevel = fib.find(f => Math.abs(f.price - currentPrice) / currentPrice < 0.008)
+
   return {
-    pivot:parseFloat(P.toFixed(0)),
-    r1:parseFloat((2*P-L).toFixed(0)), r2:parseFloat((P+(H-L)).toFixed(0)), r3:parseFloat((H+2*(P-L)).toFixed(0)),
-    s1:parseFloat((2*P-H).toFixed(0)), s2:parseFloat((P-(H-L)).toFixed(0)), s3:parseFloat((L-2*(H-P)).toFixed(0)),
-    fib, nearLevel:fib.find(f=>Math.abs(f.price-currentPrice)/currentPrice<0.005)
+    pivot: Math.round(P),
+    r1: Math.round(2 * P - L),
+    r2: Math.round(P + range),
+    r3: Math.round(H + 2 * (P - L)),
+    s1: Math.round(2 * P - H),
+    s2: Math.round(P - range),
+    s3: Math.round(L - 2 * (H - P)),
+    fib,
+    nearLevel,
+    range: { high: Math.round(H), low: Math.round(L) }
   }
 }
 
