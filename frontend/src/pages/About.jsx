@@ -30,7 +30,7 @@ const mono = '"Share Tech Mono", monospace'
 const orb  = '"Orbitron", sans-serif'
 
 const LogoIcon = () => (
-  <img src="/logoreal.png" style={{ width: '28px', height: '28px', objectFit: 'contain', opacity: 0.8 }} alt="" />
+  <img src="/logoreal.png" style={{ width: '48px', height: '48px', objectFit: 'contain', opacity: 0.8 }} alt="" />
 )
 
 const sectionDivider = {
