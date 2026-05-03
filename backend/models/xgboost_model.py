@@ -33,6 +33,32 @@ def _build_features(df: pd.DataFrame) -> pd.DataFrame:
     feat["price_above_ema50"] = (df["close"] > feat["ema50"]).astype(int)
     feat["price_above_ema200"] = (df["close"] > feat["ema200"]).astype(int)
 
+    # Volume momentum (rate of change of volume)
+    feat["volume_momentum_4"] = df["volume"].pct_change(4)
+    feat["volume_momentum_12"] = df["volume"].pct_change(12)
+    feat["volume_momentum_24"] = df["volume"].pct_change(24)
+    feat["volume_ratio"] = df["volume"] / df["volume"].rolling(24).mean()
+
+    # Price velocity (rate of change / momentum)
+    feat["price_velocity_2"] = df["close"].pct_change(2)
+    feat["price_velocity_6"] = df["close"].pct_change(6)
+    feat["price_velocity_12"] = df["close"].pct_change(12)
+    feat["price_acceleration"] = feat["close_ret_1"] - feat["close_ret_1"].shift(1)
+
+    # Volatility (ATR-based and rolling std)
+    feat["volatility_6"] = df["close"].pct_change().rolling(6).std()
+    feat["volatility_12"] = df["close"].pct_change().rolling(12).std()
+    feat["volatility_24"] = df["close"].pct_change().rolling(24).std()
+    feat["atr_ratio"] = df["atr"] / df["close"]
+
+    # Rolling sentiment proxy (derived from price action and momentum)
+    feat["sentiment_rsi"] = (df["rsi"] - 50) / 50  # normalized RSI as sentiment
+    feat["sentiment_macd"] = np.sign(df["macd_hist"])  # MACD histogram direction
+    feat["sentiment_trend"] = ((df["close"] > feat["ema50"]).astype(int) +
+                               (df["close"] > feat["ema200"]).astype(int)) / 2
+    feat["sentiment_composite"] = (feat["sentiment_rsi"] + feat["sentiment_macd"] +
+                                   feat["sentiment_trend"]) / 3
+
     return feat.dropna()
 
 
