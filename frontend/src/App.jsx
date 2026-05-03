@@ -248,7 +248,6 @@ function SentimentMeter({ value, label }) {
         {/* label + bar */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 15, color, marginBottom: 6 }}>{label ?? '—'}</div>
-          <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: G.text, letterSpacing: '0.2em', marginBottom: 8 }}>ALTERNATIVE.ME</div>
           {value != null && (
             <div style={{ background: '#1a1a1a', borderRadius: 3, height: 4, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${value}%`, background: `linear-gradient(90deg, ${G.red}, ${G.gold}, ${G.green})`, borderRadius: 3, transition: 'width 0.8s ease' }} />
