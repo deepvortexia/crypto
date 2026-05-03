@@ -5,7 +5,6 @@ import {
   fetchPrediction,
   fetchIndicators,
   fetchOnchain,
-  fetchNews,
   fetchFundingRate,
   fetchLongShortRatio,
   fetchOpenInterest,
@@ -280,7 +279,6 @@ export default function App() {
   const [preds,       setPreds]       = useState({})
   const [indics,      setIndics]      = useState(null)
   const [onchain,     setOnchain]     = useState(null)
-  const [news,        setNews]        = useState([])
   const [fundingRate, setFundingRate] = useState(null)
   const [longShort,   setLongShort]   = useState(null)
   const [openInterest,setOpenInterest]= useState(null)
@@ -318,7 +316,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
     // onchain (may fail — proxied)
     try { setOnchain(await fetchOnchain()) } catch {}
-    try { setNews(await fetchNews()) } catch {}
     try { setFundingRate(await fetchFundingRate()) } catch {}
     try { setLongShort(await fetchLongShortRatio()) } catch {}
     try { setOpenInterest(await fetchOpenInterest()) } catch {}
@@ -445,24 +442,29 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
         <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
       </div>
-      <div style={{textAlign:'center',padding:'12px 0'}}>
-        <button onClick={() => { setDeepOpen(true) }}
+      <div style={{textAlign:'center',padding:'16px 0'}}>
+        <button className="deep-btn" onClick={() => { setDeepOpen(true) }}
           style={{
             fontFamily:'"Orbitron",sans-serif',
-            fontSize:13,
-            letterSpacing:'0.3em',
-            padding:'12px 32px',
-            background:'linear-gradient(135deg, #f59e0b, #d97706)',
-            border:'none',
-            borderRadius:12,
+            fontSize:14,
+            letterSpacing:'0.35em',
+            padding:'16px 40px',
+            background:'linear-gradient(135deg, #f59e0b 0%, #fbbf24 25%, #d97706 50%, #f59e0b 75%, #fbbf24 100%)',
+            backgroundSize:'200% 200%',
+            animation:'gradientShift 3s ease infinite, buttonGlow 2s ease-in-out infinite',
+            border:'2px solid rgba(251,191,36,0.6)',
+            borderRadius:14,
             color:'#000',
             cursor:'pointer',
-            boxShadow:'0 0 20px #f59e0b44',
-            transition:'all 0.2s ease',
-            fontWeight:700
+            boxShadow:'0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)',
+            transition:'all 0.3s ease',
+            fontWeight:800,
+            textShadow:'0 1px 0 rgba(255,255,255,0.3)',
+            position:'relative',
+            overflow:'hidden'
           }}
-          onMouseEnter={e => { e.target.style.boxShadow='0 0 40px #f59e0b88'; e.target.style.transform='scale(1.03)' }}
-          onMouseLeave={e => { e.target.style.boxShadow='0 0 20px #f59e0b44'; e.target.style.transform='scale(1)' }}
+          onMouseEnter={e => { e.target.style.boxShadow='0 0 50px #f59e0b99, 0 0 100px #f59e0b55'; e.target.style.transform='scale(1.05)'; e.target.style.borderColor='#fbbf24' }}
+          onMouseLeave={e => { e.target.style.boxShadow='0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)'; e.target.style.transform='scale(1)'; e.target.style.borderColor='rgba(251,191,36,0.6)' }}
         >
           DEEP ANALYSIS
         </button>
@@ -713,47 +715,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
         </div>
 
-        {/* row 8 — news */}
-        {news.length > 0 && (
-          <div style={{ marginBottom: 40 }}>
-            <div style={sectionLabel}>Latest BTC News</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {news.map((n, i) => (
-                <a key={i} href={n.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    ...cardStyle, padding: '12px 16px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-                    cursor: 'pointer', transition: 'border-color 0.2s',
-                  }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = G.gold}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = G.border}
-                  >
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 12, color: '#e5e7eb', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {n.title.length > 60 ? n.title.slice(0, 60) + '…' : n.title}
-                      </div>
-                      <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: G.text, letterSpacing: '0.1em' }}>
-                        {n.source} · {n.time}
-                      </div>
-                    </div>
-                    <div style={{
-                      flexShrink: 0,
-                      fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.15em',
-                      padding: '3px 8px', borderRadius: 4,
-                      background: n.sentiment === 'bullish' ? `${G.green}22` : n.sentiment === 'bearish' ? `${G.red}22` : `${G.gold}22`,
-                      color: n.sentiment === 'bullish' ? G.green : n.sentiment === 'bearish' ? G.red : G.gold,
-                      border: `1px solid ${n.sentiment === 'bullish' ? G.green : n.sentiment === 'bearish' ? G.red : G.gold}44`,
-                      textTransform: 'uppercase',
-                    }}>
-                      {n.sentiment === 'bullish' ? '▲ Bullish' : n.sentiment === 'bearish' ? '▼ Bearish' : '● Neutral'}
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* footer */}
         <div style={{borderTop:`1px solid ${G.border}`,paddingTop:24,marginTop:8,
           display:'flex',flexWrap:'wrap',justifyContent:'center',
@@ -879,6 +840,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes fadeUp      { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         @keyframes scanLine    { 0%{left:-100%} 100%{left:200%} }
         @keyframes fillBar     { from{width:0} to{width:var(--w)} }
+        @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        @keyframes buttonGlow  { 0%,100%{box-shadow:0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)} 50%{box-shadow:0 0 45px #f59e0b88, 0 0 90px #f59e0b44, inset 0 1px 0 rgba(255,255,255,0.4)} }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
         @media (max-width: 768px) {
           .grid-3       { grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
           .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
