@@ -417,7 +417,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{display:'flex',alignItems:'center',gap:10}}>
           <img src="/logoreal.png" alt="PredictAlpha" className="navbar-logo" style={{width:'auto',objectFit:'contain',verticalAlign:'middle'}} />
           <div style={{display:'flex',flexDirection:'column',gap:3}}>
-            <span className="navbar-brand" style={{fontFamily:'"Orbitron",sans-serif',letterSpacing:'0.15em',color:'#f59e0b',opacity:0.9}}>PREDICT ALPHA</span>
+            <span className="navbar-brand" style={{fontFamily:'"Orbitron",sans-serif',letterSpacing:'0.15em',opacity:0.9}}>
+              <span style={{color:'#f59e0b',fontWeight:400}}>PREDICT </span><span style={{color:'#f59e0b',fontWeight:700,textShadow:'0 0 8px rgba(245,158,11,0.4)'}}>ALPHA</span>
+            </span>
             <div style={{display:'flex',alignItems:'center',gap:5}}>
               <span style={{display:'inline-block',width:6,height:6,borderRadius:'50%',background:G.green,boxShadow:`0 0 8px ${G.green}`,animation:'blink 0.5s ease-in-out infinite'}} />
               <span style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.3em',color:G.green}}>LIVE</span>
