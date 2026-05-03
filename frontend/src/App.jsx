@@ -861,8 +861,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .header-right { position: static !important; gap: 8px !important; }
           .header-price { font-size: 20px !important; }
           .hide-mobile  { display: none !important; }
-          .navbar-logo  { height: 45px !important; }
-          .navbar-brand { font-size: 13px !important; }
+          .navbar-logo  { height: 52px !important; }
+          .navbar-brand { font-size: 15px !important; }
           .ai-title     { font-size: 13px !important; }
           .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
           .ai-sub       { font-size: 7px !important; }
@@ -872,12 +872,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .grid-3       { grid-template-columns: 1fr !important; }
           .grid-6       { grid-template-columns: 1fr 1fr !important; }
           .header-price { font-size: 18px !important; }
-          .navbar-logo  { height: 38px !important; }
-          .navbar-brand { font-size: 11px !important; letter-spacing: 0.1em !important; }
+          .navbar-logo  { height: 44px !important; }
+          .navbar-brand { font-size: 12px !important; letter-spacing: 0.1em !important; }
           .main-pad     { padding: 12px !important; }
         }
-        .navbar-logo  { height: 55px; margin-right: 6px; }
-        .navbar-brand { font-size: 16px; }
+        .navbar-logo  { height: 65px; margin-right: 8px; }
+        .navbar-brand { font-size: 18px; }
         @keyframes introScan  { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
         @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
       `}</style>
