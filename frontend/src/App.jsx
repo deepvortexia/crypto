@@ -296,6 +296,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
 
+  useEffect(() => { window.scrollTo(0, 0) }, [])
+
   const loadAll = useCallback(async () => {
     const [p, s, ind] = await Promise.allSettled([
       fetchLivePrice(),
