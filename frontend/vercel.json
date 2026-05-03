@@ -2,8 +2,9 @@
   "rewrites": [
     { "source": "/alternativeme/(.*)", "destination": "https://api.alternative.me/$1" },
     { "source": "/blockchain/(.*)",    "destination": "https://api.blockchain.info/$1" },
-    { "source": "/coingecko/(.*)",      "destination": "https://api.coingecko.com/$1" },
+    { "source": "/coingecko/(.*)",     "destination": "https://api.coingecko.com/$1" },
     { "source": "/cryptocompare/(.*)", "destination": "https://min-api.cryptocompare.com/$1" },
-    { "source": "/coinstats/(.*)", "destination": "https://openapiv1.coinstats.app/$1" }
+    { "source": "/coinstats/(.*)",     "destination": "https://openapiv1.coinstats.app/$1" },
+    { "source": "/(.*)",               "destination": "/index.html" }
   ]
 }

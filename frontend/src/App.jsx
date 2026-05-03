@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Routes, Route, Link } from 'react-router-dom'
+import About from './pages/About'
 import {
   fetchLivePrice,
   fetchSentiment,
@@ -393,6 +395,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const curPrice = indics?.price ?? price?.price
 
   return (
+    <Routes>
+      <Route path="/about" element={<About />} />
+      <Route path="/" element={
     <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
 
       <div style={{position:'fixed',top:0,left:'-2px',width:'2px',height:'100vh',zIndex:999,pointerEvents:'none',background:`linear-gradient(180deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScan 1.2s linear 1 forwards'}} />
@@ -419,6 +424,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
           </div>
         </div>
+
+        {/* learn link */}
+        <Link to="/about" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
 
         {/* live ticker */}
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
@@ -890,5 +898,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
       `}</style>
     </div>
+      } />
+    </Routes>
   )
 }
