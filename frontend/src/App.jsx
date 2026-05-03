@@ -201,7 +201,7 @@ function SentimentMeter({ value, label }) {
 
   return (
     <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
-      <div style={labelStyle}>Fear & Greed<Tooltip text="0-25=Extreme Fear best buy zone. 75-100=Extreme Greed consider selling"/></div>
+      <div style={labelStyle}>Fear & Greed<Tooltip text="0-25 Extreme Fear — 26-45 Fear — 46-55 Neutral — 56-75 Greed — 76-100 Extreme Greed"/></div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
 
         {/* ── futuristic circle ── */}
@@ -514,43 +514,43 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <SentimentMeter value={sentiment?.value} label={sentiment?.classification} />
             <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14 }}>
               <IndCard
-                label={<>RSI (14)<Tooltip text="Above 70=overbought likely drop. Below 30=oversold likely rise. 30-70=neutral"/></>}
+                label={<>RSI (14)<Tooltip text="Below 30 oversold buy signal — above 70 overbought sell signal"/></>}
                 value={rsi != null ? fmtNum(rsi, 1) : '—'}
                 sub={rsi == null ? '' : rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral'}
                 barName="rsi" barRaw={rsi}
               />
               <IndCard
-                label={<>MACD<Tooltip text="Positive histogram=bullish momentum. Negative=bearish pressure"/></>}
+                label={<>MACD<Tooltip text="MACD above signal line = bullish momentum"/></>}
                 value={macd ? fmtNum(macd.macd, 1) : '—'}
                 sub={macd ? (macd.macd > 0 ? 'Bullish' : 'Bearish') : ''}
                 barName="macd" barRaw={macd?.macd}
               />
               <IndCard
-                label={<>MACD Signal<Tooltip text="Signal line crossover. MACD above signal=bullish, below=bearish"/></>}
+                label={<>MACD Signal<Tooltip text="MACD above signal line = bullish momentum"/></>}
                 value={macd ? fmtNum(macd.signal, 1) : '—'}
                 sub={macd ? `Hist: ${fmtNum(macd.histogram, 1)}` : ''}
                 barName="macdSig" barRaw={macd?.histogram}
               />
               <IndCard
-                label={<>BB Upper<Tooltip text="Upper Bollinger Band. Price touching upper=overbought sell signal"/></>}
+                label={<>BB Upper<Tooltip text="Price near upper band = overbought potential reversal"/></>}
                 value={bb ? fmtPrice(bb.upper) : '—'}
                 sub="Bollinger Band"
                 barName="bbUpper"
               />
               <IndCard
-                label={<>BB Lower<Tooltip text="Lower Bollinger Band. Price touching lower=oversold buy signal"/></>}
+                label={<>BB Lower<Tooltip text="Price near lower band = oversold potential reversal"/></>}
                 value={bb ? fmtPrice(bb.lower) : '—'}
                 sub="Bollinger Band"
                 barName="bbLower"
               />
               <IndCard
-                label={<>EMA 50<Tooltip text="50-day exponential moving average. Short-term trend"/></>}
+                label={<>EMA 50<Tooltip text="Price above = bullish trend"/></>}
                 value={ema50 ? fmtPrice(ema50) : '—'}
                 sub={ema50 && curPrice ? (curPrice > ema50 ? 'Price above' : 'Price below') : ''}
                 barName="macd" barRaw={ema50 && curPrice ? curPrice - ema50 : null}
               />
               <IndCard
-                label={<>EMA 200<Tooltip text="200-day exponential moving average. Long-term trend"/></>}
+                label={<>EMA 200<Tooltip text="Price below = long-term bearish"/></>}
                 value={ema200 ? fmtPrice(ema200) : '—'}
                 sub={ema200 && curPrice ? (curPrice > ema200 ? 'Price above' : 'Price below') : ''}
                 barName="macd" barRaw={ema200 && curPrice ? curPrice - ema200 : null}
