@@ -74,7 +74,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How do Fibonacci retracement levels work?',
-    a: 'Fibonacci retracements mark key price zones derived from the golden ratio (0.618, 0.382, 0.236, 0.786). These are drawn from the most recent significant swing high to swing low. Price tends to pause or reverse at these levels because institutional traders and automated systems place orders there. The 61.8% level ("golden ratio") is the most respected and watched by professional traders worldwide.',
+    a: 'Fibonacci retracements mark key price zones derived from the golden ratio (0.618, 0.382, 0.236, 0.786). These are drawn from the most recent significant swing high to swing low. Price tends to pause or reverse at these levels because algorithmic trading systems and high-volume participants place orders there. The 61.8% level ("golden ratio") is the most respected and watched by professional traders worldwide.',
   },
   {
     q: 'What is the funding rate and why does it matter?',
@@ -129,10 +129,10 @@ export default function About() {
             <img src="/logoreal.png" style={{ width: 72, height: 72, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} alt="PredictAlpha" />
           </div>
           <h2 style={{ fontFamily: orb, fontSize: 'clamp(24px,5vw,42px)', letterSpacing: '0.18em', ...goldText, marginBottom: 18, lineHeight: 1.2 }}>
-            INSTITUTIONAL-GRADE BITCOIN INTELLIGENCE
+            AI-POWERED MARKET INTELLIGENCE
           </h2>
           <p style={{ fontFamily: mono, fontSize: 14, color: G.text, maxWidth: 660, margin: '0 auto 28px', lineHeight: 1.9, letterSpacing: '0.05em' }}>
-            PredictAlpha combines machine-learning ensemble models, live on-chain analytics, and real-time derivatives data to deliver the clearest possible picture of where Bitcoin is heading — across six prediction horizons from 4 hours to 1 month.
+            PredictAlpha runs a stacked ensemble of neural networks and gradient-boosted models against a continuous stream of real-time market data — processing thousands of data points per minute across price action, on-chain flows, and derivatives markets to generate calibrated directional forecasts across six time horizons.
           </p>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
             {['AI Predictions', 'On-Chain', 'Futures Data', 'Key Levels', 'Live Feeds'].map(tag => (
@@ -345,7 +345,7 @@ export default function About() {
               },
               {
                 name: 'Whale Activity',
-                body: 'Large on-chain transactions (typically above 100 BTC) are tracked as a proxy for institutional and high-net-worth activity. When whales are accumulating — moving Bitcoin off exchanges to cold storage — it is a long-term bullish signal. When whales deposit large amounts to exchanges, it often precedes selling pressure. PredictAlpha surfaces whale trade count and directional signal.',
+                body: 'Large on-chain transactions (typically above 100 BTC) are tracked as a proxy for high-volume participant activity. When whales are accumulating — moving Bitcoin off exchanges to cold storage — it is a long-term bullish signal. When whales deposit large amounts to exchanges, it often precedes selling pressure. PredictAlpha surfaces whale trade count and directional signal.',
               },
             ].map(({ name, body }) => (
               <div key={name} style={{ ...cardStyle }}>
