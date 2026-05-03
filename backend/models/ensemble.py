@@ -79,13 +79,11 @@ class BTCEnsemble:
                     weight_total += w[i]
             ensemble_price = weighted_sum / weight_total if weight_total > 0 else current_price
             weights_used = {name: w[i] for i, name in enumerate(model_order)}
-        else:
-            weights_used = {"lstm": 0, "xgboost": 0, "prophet": 0}
 
-        # Set actual weights used based on blend type
+        # Set actual weights used for primary blend
         if "xgboost" in valid and "lstm" in valid:
             if "prophet" in valid:
-                weights_used = {"lstm": 0.32, "xgboost": 0.48, "prophet": 0.20}  # 40%*0.8, 60%*0.8, 20%
+                weights_used = {"lstm": 0.32, "xgboost": 0.48, "prophet": 0.20}
             else:
                 weights_used = {"lstm": 0.40, "xgboost": 0.60, "prophet": 0}
 
