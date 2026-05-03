@@ -321,7 +321,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
     // onchain (may fail — proxied)
     try { setOnchain(await fetchOnchain()) } catch {}
-    try { const n = await fetchNews(); console.log('NEWS:', n); setNews(n) } catch(e) { console.error('NEWS ERROR:', e) }
+    try { setNews(await fetchNews()) } catch {}
     try { setFundingRate(await fetchFundingRate()) } catch {}
     try { setLongShort(await fetchLongShortRatio()) } catch {}
     try { setOpenInterest(await fetchOpenInterest()) } catch {}

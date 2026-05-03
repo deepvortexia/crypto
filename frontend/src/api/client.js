@@ -243,7 +243,7 @@ export async function fetchMempool() {
 }
 
 export async function fetchNews() {
-  const data = await get('/coinstats/news?limit=5')
+  const data = await get('https://api.coinstats.app/public/v1/news?limit=5')
   const articles = data.news || data || []
   return articles.slice(0, 5).map(n => ({
     title: n.title || n.feedTitle || '',
