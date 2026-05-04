@@ -268,7 +268,7 @@ function SentimentMeter({ value, label }) {
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────
-const PRED_HORIZONS = ['4h', '8h', '12h', '24h', '1week', '1month']
+const PRED_HORIZONS = ['1h', '4h', '8h', '12h', '24h', '1week', '1month']
 const REFRESH_MS    = 60_000
 
 function Tooltip({text}) {
