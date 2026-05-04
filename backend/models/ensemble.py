@@ -111,12 +111,14 @@ class BTCEnsemble:
 
     def _confidence_score(self, values: list[float]) -> float:
         if len(values) < 2:
-            return 0.5
+            return 0.75
         std = float(np.std(values))
         mean = float(np.mean(values))
         cv = std / mean if mean else 1.0
         # Lower CV = higher agreement = higher confidence
-        confidence = max(0.0, min(1.0, 1.0 - cv * 5))
+        # Map to 50-99% range
+        raw_confidence = 1.0 - cv * 5
+        confidence = min(0.99, max(0.50, raw_confidence))
         return round(confidence, 3)
 
     def _store_prediction(self, pred: dict):

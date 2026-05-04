@@ -153,6 +153,16 @@ class BTCXGBoostModel:
             scaler = self.scalers[horizon_key]
             X_scaled = scaler.transform(X)
             pred = self.models[horizon_key].predict(X_scaled)[0]
+
+            # For 1H predictions, apply momentum boost to make prediction more directional
+            if horizon_key == "1h" and len(df) >= 3:
+                current_price = df["close"].iloc[-1]
+                # Calculate recent momentum (last 2 hours)
+                momentum_2h = (df["close"].iloc[-1] - df["close"].iloc[-3]) / df["close"].iloc[-3]
+                # Apply 40% of 2H momentum to the 1H prediction
+                momentum_adjustment = current_price * momentum_2h * 0.20
+                pred = pred + momentum_adjustment
+
             return float(pred)
         except Exception as exc:
             logger.error(f"XGBoost predict error ({horizon_key}): {exc}")
