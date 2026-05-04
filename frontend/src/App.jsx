@@ -309,6 +309,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [authPass,    setAuthPass]    = useState('')
   const [authBusy,    setAuthBusy]    = useState(false)
   const [authError,   setAuthError]   = useState('')
+  const [authSuccess, setAuthSuccess] = useState(false)
   const [user,        setUser]        = useState(null)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
@@ -432,13 +433,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       if (authTab === 'signup') {
         const { error } = await supabase.auth.signUp({ email: authEmail, password: authPass })
         if (error) throw error
+        setAuthSuccess(true)
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPass })
         if (error) throw error
+        setAuthOpen(false)
+        setAuthEmail('')
+        setAuthPass('')
       }
-      setAuthOpen(false)
-      setAuthEmail('')
-      setAuthPass('')
     } catch (err) {
       setAuthError(err.message || 'Authentication failed.')
     }
@@ -881,73 +883,103 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       {/* ── auth modal ── */}
       {authOpen && (
         <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.92)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}>
-          <div style={{ background:G.card, border:`1px solid ${G.gold}55`, borderRadius:14, boxShadow:`0 0 60px ${G.goldGlow}`, width:'95%', maxWidth:400, padding:'32px 28px' }}>
-            {/* close */}
-            <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:16 }}>
-              <button onClick={() => { setAuthOpen(false); setAuthError('') }} style={{ background:'none', border:'none', color:G.text, cursor:'pointer', fontSize:18, lineHeight:1 }}>✕</button>
-            </div>
-            {/* tabs */}
-            <div style={{ display:'flex', gap:0, marginBottom:24, borderBottom:`1px solid ${G.border}` }}>
-              {['signup', 'login'].map(tab => (
-                <button key={tab} onClick={() => { setAuthTab(tab); setAuthError('') }} style={{
-                  flex:1, fontFamily:'"Orbitron",sans-serif', fontSize:11, letterSpacing:'0.2em', textTransform:'uppercase',
-                  padding:'12px 0', background:'none', border:'none', cursor:'pointer',
-                  color: authTab === tab ? G.gold : G.text,
-                  borderBottom: authTab === tab ? `2px solid ${G.gold}` : '2px solid transparent',
-                  marginBottom: -1,
-                }}>{tab === 'signup' ? 'SIGN UP' : 'LOGIN'}</button>
-              ))}
-            </div>
-            {/* form */}
-            <form onSubmit={handleAuthSubmit}>
-              <input
-                type="email"
-                placeholder="Email"
-                value={authEmail}
-                onChange={e => { setAuthEmail(e.target.value); setAuthError('') }}
-                style={{
-                  width:'100%', boxSizing:'border-box',
-                  fontFamily:'"Share Tech Mono",monospace', fontSize:13,
-                  background:'#0a0a0a', border:`1px solid ${authError ? G.red : G.border}`,
-                  borderRadius:8, color:G.bright, padding:'12px 16px',
-                  outline:'none', marginBottom:12, letterSpacing:'0.05em',
-                }}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={authPass}
-                onChange={e => { setAuthPass(e.target.value); setAuthError('') }}
-                style={{
-                  width:'100%', boxSizing:'border-box',
-                  fontFamily:'"Share Tech Mono",monospace', fontSize:13,
-                  background:'#0a0a0a', border:`1px solid ${authError ? G.red : G.border}`,
-                  borderRadius:8, color:G.bright, padding:'12px 16px',
-                  outline:'none', marginBottom: authError ? 8 : 20, letterSpacing:'0.05em',
-                }}
-              />
-              {authError && (
-                <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.red, marginBottom:12, letterSpacing:'0.05em' }}>{authError}</div>
-              )}
+          {authSuccess ? (
+            /* success screen */
+            <div style={{
+              background:G.card, borderRadius:14, width:'95%', maxWidth:400, padding:'48px 32px', textAlign:'center',
+              border:`2px solid ${G.gold}`,
+              boxShadow:`0 0 60px ${G.goldGlow}`,
+              animation:'authSuccessPulse 2s ease-in-out infinite',
+            }}>
+              <img src="/logoegyptfinal.webp" alt="" style={{ width:80, height:80, objectFit:'contain', marginBottom:24 }} />
+              <h2 style={{ fontFamily:'"Orbitron",sans-serif', fontSize:18, letterSpacing:'0.2em', color:G.gold, textShadow:`0 0 12px ${G.goldGlow}`, marginBottom:16 }}>
+                CHECK YOUR EMAIL
+              </h2>
+              <p style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.text, lineHeight:1.9, letterSpacing:'0.03em', marginBottom:28 }}>
+                We sent a confirmation link to your email address. Click it to unlock all predictions.
+              </p>
               <button
-                type="submit"
-                disabled={authBusy}
+                onClick={() => { setAuthOpen(false); setAuthSuccess(false); setAuthEmail(''); setAuthPass('') }}
                 style={{
-                  width:'100%', fontFamily:'"Orbitron",sans-serif', fontSize:12, letterSpacing:'0.25em',
-                  padding:'14px', borderRadius:8, cursor: authBusy ? 'not-allowed' : 'pointer',
-                  background: authBusy ? G.border : `linear-gradient(135deg,${G.gold},#d97706)`,
-                  border:'none', color:'#000', fontWeight:700,
-                  boxShadow: authBusy ? 'none' : `0 0 24px ${G.goldGlow}`,
-                  transition:'all 0.2s',
+                  fontFamily:'"Share Tech Mono",monospace', fontSize:11, letterSpacing:'0.2em',
+                  padding:'12px 28px', borderRadius:8, cursor:'pointer',
+                  background:'none', border:`1px solid ${G.gold}55`, color:G.gold,
+                  textTransform:'uppercase',
                 }}
               >
-                {authBusy ? 'PLEASE WAIT…' : (authTab === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN')}
+                GOT IT
               </button>
-            </form>
-            <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:9, color:'#4b5563', letterSpacing:'0.15em', textAlign:'center', marginTop:16 }}>
-              {authTab === 'signup' ? 'FREE · UNLOCK ALL PREDICTIONS' : 'WELCOME BACK'}
             </div>
-          </div>
+          ) : (
+            /* form */
+            <div style={{ background:G.card, border:`1px solid ${G.gold}55`, borderRadius:14, boxShadow:`0 0 60px ${G.goldGlow}`, width:'95%', maxWidth:400, padding:'32px 28px' }}>
+              {/* close */}
+              <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:16 }}>
+                <button onClick={() => { setAuthOpen(false); setAuthError('') }} style={{ background:'none', border:'none', color:G.text, cursor:'pointer', fontSize:18, lineHeight:1 }}>✕</button>
+              </div>
+              {/* tabs */}
+              <div style={{ display:'flex', gap:0, marginBottom:24, borderBottom:`1px solid ${G.border}` }}>
+                {['signup', 'login'].map(tab => (
+                  <button key={tab} onClick={() => { setAuthTab(tab); setAuthError('') }} style={{
+                    flex:1, fontFamily:'"Orbitron",sans-serif', fontSize:11, letterSpacing:'0.2em', textTransform:'uppercase',
+                    padding:'12px 0', background:'none', border:'none', cursor:'pointer',
+                    color: authTab === tab ? G.gold : G.text,
+                    borderBottom: authTab === tab ? `2px solid ${G.gold}` : '2px solid transparent',
+                    marginBottom: -1,
+                  }}>{tab === 'signup' ? 'SIGN UP' : 'LOGIN'}</button>
+                ))}
+              </div>
+              {/* form inputs */}
+              <form onSubmit={handleAuthSubmit}>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={authEmail}
+                  onChange={e => { setAuthEmail(e.target.value); setAuthError('') }}
+                  style={{
+                    width:'100%', boxSizing:'border-box',
+                    fontFamily:'"Share Tech Mono",monospace', fontSize:13,
+                    background:'#0a0a0a', border:`1px solid ${authError ? G.red : G.border}`,
+                    borderRadius:8, color:G.bright, padding:'12px 16px',
+                    outline:'none', marginBottom:12, letterSpacing:'0.05em',
+                  }}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={authPass}
+                  onChange={e => { setAuthPass(e.target.value); setAuthError('') }}
+                  style={{
+                    width:'100%', boxSizing:'border-box',
+                    fontFamily:'"Share Tech Mono",monospace', fontSize:13,
+                    background:'#0a0a0a', border:`1px solid ${authError ? G.red : G.border}`,
+                    borderRadius:8, color:G.bright, padding:'12px 16px',
+                    outline:'none', marginBottom: authError ? 8 : 20, letterSpacing:'0.05em',
+                  }}
+                />
+                {authError && (
+                  <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.red, marginBottom:12, letterSpacing:'0.05em' }}>{authError}</div>
+                )}
+                <button
+                  type="submit"
+                  disabled={authBusy}
+                  style={{
+                    width:'100%', fontFamily:'"Orbitron",sans-serif', fontSize:12, letterSpacing:'0.25em',
+                    padding:'14px', borderRadius:8, cursor: authBusy ? 'not-allowed' : 'pointer',
+                    background: authBusy ? G.border : `linear-gradient(135deg,${G.gold},#d97706)`,
+                    border:'none', color:'#000', fontWeight:700,
+                    boxShadow: authBusy ? 'none' : `0 0 24px ${G.goldGlow}`,
+                    transition:'all 0.2s',
+                  }}
+                >
+                  {authBusy ? 'PLEASE WAIT…' : (authTab === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN')}
+                </button>
+              </form>
+              <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:9, color:'#4b5563', letterSpacing:'0.15em', textAlign:'center', marginTop:16 }}>
+                {authTab === 'signup' ? 'FREE · UNLOCK ALL PREDICTIONS' : 'WELCOME BACK'}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1065,6 +1097,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
         @keyframes buttonGlow  { 0%,100%{box-shadow:0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)} 50%{box-shadow:0 0 45px #f59e0b88, 0 0 90px #f59e0b44, inset 0 1px 0 rgba(255,255,255,0.4)} }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @keyframes authSuccessPulse { 0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.4)} 50%{box-shadow:0 0 40px rgba(245,158,11,0.7)} }
         @media (max-width: 768px) {
           .grid-3       { grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
           .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
