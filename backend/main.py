@@ -56,14 +56,15 @@ async def _get_dataframes():
 
 
 # ── App lifespan ─────────────────────────────────────────────────────────────
-ensemble = BTCEnsemble(data_dir="data")
+ensemble = BTCEnsemble(data_dir="models")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     retrainer.inject_ensemble(ensemble)
 
-    # Try to load pre-trained models
+    # Try to load pre-trained models from persistent volume
+    logger.info("Checking for existing models in /app/models...")
     loop = asyncio.get_event_loop()
     loaded = await loop.run_in_executor(None, ensemble.load_models)
 
@@ -71,7 +72,7 @@ async def lifespan(app: FastAPI):
         logger.info("No saved models found — triggering initial training in background")
         asyncio.create_task(retrainer.retrain_all())
     else:
-        logger.info("Loaded existing models successfully")
+        logger.info("✓ Loaded existing models successfully — skipping retraining")
 
     retrainer.start_scheduler(retrain_interval_hours=RETRAIN_INTERVAL_HOURS)
 

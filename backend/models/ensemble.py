@@ -23,13 +23,14 @@ DEFAULT_WEIGHTS = {"1h": [0.50, 0.45, 0.05], "4h": [0.45, 0.40, 0.15],
 
 
 class BTCEnsemble:
-    def __init__(self, data_dir: str = "data"):
+    def __init__(self, data_dir: str = "models"):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.predictions_path = self.data_dir / "predictions.json"
         self.weights_path = self.data_dir / "weights.json"
 
-        models_dir = str(self.data_dir / "models")
+        # Models saved directly in data_dir (no subdirectory)
+        models_dir = str(self.data_dir)
         self.lstm = BTCLSTMModel(data_dir=models_dir)
         self.xgb = BTCXGBoostModel(data_dir=models_dir)
         self.prophet = BTCProphetModel(data_dir=models_dir)
