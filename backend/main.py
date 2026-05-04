@@ -28,7 +28,7 @@ CORS_ORIGINS = os.getenv(
 
 RETRAIN_INTERVAL_HOURS = int(os.getenv("MODEL_RETRAIN_INTERVAL_HOURS", "24"))
 
-HorizonKey = Literal["4h", "8h", "12h", "24h", "1month"]
+HorizonKey = Literal["1h", "4h", "8h", "12h", "24h", "1month"]
 
 # ── In-memory TTL caches ─────────────────────────────────────────────────────
 _price_cache: TTLCache = TTLCache(maxsize=1, ttl=60)           # 1 min
@@ -140,7 +140,7 @@ async def get_indicators():
 # ── Predictions ───────────────────────────────────────────────────────────────
 @app.get("/api/predict/{horizon}")
 async def get_prediction(
-    horizon: HorizonKey = Path(..., description="Prediction horizon: 4h, 8h, 12h, 24h, 1month"),
+    horizon: HorizonKey = Path(..., description="Prediction horizon: 1h, 4h, 8h, 12h, 24h, 1month"),
 ):
     """
     Ensemble prediction (LSTM + XGBoost + Prophet) for the requested horizon.

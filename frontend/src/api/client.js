@@ -137,7 +137,7 @@ export async function fetchOnchain() {
   return get('/blockchain/stats')
 }
 
-const HORIZON_DAYS = { '4h': 4 / 24, '8h': 8 / 24, '12h': 12 / 24, '24h': 1, '1week': 7, '1month': 30 }
+const HORIZON_DAYS = { '1h': 1 / 24, '4h': 4 / 24, '8h': 8 / 24, '12h': 12 / 24, '24h': 1, '1week': 7, '1month': 30 }
 
 export async function fetchPrediction(horizon) {
   if (!(horizon in HORIZON_DAYS)) {
