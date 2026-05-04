@@ -115,7 +115,7 @@ async def fetch_daily_ohlcv(days: int = 365) -> pd.DataFrame:
     vols["timestamp"] = pd.to_datetime(vols["timestamp"], unit="ms", utc=True)
     vols = vols.set_index("timestamp").sort_index()
 
-    df = ohlc_df.join(vols, how="left").fillna(method="ffill")
+    df = ohlc_df.join(vols, how="left").ffill()
     return df
 
 
