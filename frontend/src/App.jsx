@@ -573,13 +573,45 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 2 — AI predictions */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>AI Price Predictions</div>
-          <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 16 }}>
-            <PredCard key="4h"     horizonKey="4h"     horizon={<>4H<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}     data={preds['4h']}     loading={loading} />
-            <PredCard key="8h"     horizonKey="8h"     horizon={<>8H<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}          data={preds['8h']}     loading={loading} />
-            <PredCard key="12h"    horizonKey="12h"    horizon={<>12H<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}         data={preds['12h']}    loading={loading} />
-            <PredCard key="24h"    horizonKey="24h"    horizon={<>24H<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}           data={preds['24h']}    loading={loading} />
-            <PredCard key="1week"  horizonKey="1week"  horizon={<>1WEEK<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}      data={preds['1week']}  loading={loading} />
-            <PredCard key="1month" horizonKey="1month" horizon={<>1MONTH<Tooltip text="AI ensemble XGBoost+LSTM trained on 2168 hourly candles — confidence decreases with horizon"/></>}       data={preds['1month']} loading={loading} />
+          <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 16 }}>
+
+            {/* 1H — always free */}
+            <div style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, background: '#10b981', color: '#000', fontFamily: '"Share Tech Mono",monospace', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', padding: '2px 7px', borderRadius: 4 }}>FREE</div>
+              <PredCard key="1h" horizonKey="1h" horizon={<>1H<Tooltip text="Shortest horizon — highest confidence intraday signal"/></>} data={preds['1h']} loading={loading} />
+            </div>
+
+            {/* 4H–1MONTH — locked unless unlocked_until valid */}
+            {[
+              { k: '4h',     label: '4H',     tip: '4-hour AI ensemble prediction' },
+              { k: '8h',     label: '8H',     tip: '8-hour AI ensemble prediction' },
+              { k: '12h',    label: '12H',    tip: '12-hour AI ensemble prediction' },
+              { k: '24h',    label: '24H',    tip: '24-hour AI ensemble prediction' },
+              { k: '1week',  label: '1WEEK',  tip: 'Weekly AI ensemble prediction' },
+              { k: '1month', label: '1MONTH', tip: 'Monthly AI ensemble prediction' },
+            ].map(({ k, label, tip }) => (
+              <div key={k} style={{ position: 'relative' }}>
+                {/* blurred card underneath */}
+                <div style={{ filter: isUnlocked() ? 'none' : 'blur(5px)', pointerEvents: isUnlocked() ? 'auto' : 'none', userSelect: 'none' }}>
+                  <PredCard horizonKey={k} horizon={<>{label}<Tooltip text={tip}/></>} data={preds[k]} loading={loading} />
+                </div>
+                {/* lock overlay */}
+                {!isUnlocked() && (
+                  <div onClick={handleDeepClick} style={{
+                    position: 'absolute', inset: 0, zIndex: 3,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: 10, cursor: 'pointer',
+                    background: 'rgba(10,10,10,0.55)',
+                    backdropFilter: 'blur(1px)',
+                    border: `1px solid ${G.gold}33`,
+                    gap: 6,
+                  }}>
+                    <span style={{ fontSize: 20 }}>🔒</span>
+                    <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.5 }}>UNLOCK WITH<br/>EMAIL</span>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
