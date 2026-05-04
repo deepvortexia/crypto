@@ -113,7 +113,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
   const gold = G.gold
   const up = data?.direction === 'up'
   const dirColor = up ? G.green : G.red
-  const conf = data ? (HORIZON_CONFIDENCE[horizonKey] ?? (data.confidence != null ? Math.round(data.confidence * 100) : 75)) : 0
+  const conf = data ? (HORIZON_CONFIDENCE[horizonKey] ?? (data.confidence != null ? Math.round(data.confidence > 1 ? data.confidence : data.confidence * 100) : 75)) : 0
 
   return (
     <div style={{
