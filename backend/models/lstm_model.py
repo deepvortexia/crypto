@@ -12,7 +12,7 @@ from services.indicators import compute_indicators
 logger = logging.getLogger(__name__)
 
 FEATURE_COLS = ["close", "volume", "rsi", "macd", "macd_signal", "bb_pct", "ema50", "ema200", "atr", "obv_ema"]
-HORIZON_HOURS = {"4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
+HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
 SEQUENCE_LEN = 12  # 12 hours of hourly data
 
 

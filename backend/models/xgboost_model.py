@@ -12,7 +12,7 @@ from services.indicators import compute_indicators
 
 logger = logging.getLogger(__name__)
 
-HORIZON_HOURS = {"4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
+HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
 LAG_STEPS = [1, 2, 3, 5, 10, 24, 48]
 
 
