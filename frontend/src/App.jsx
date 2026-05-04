@@ -303,14 +303,28 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepHorizon,   setDeepHorizon]   = useState(null)
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [loading,     setLoading]     = useState(true)
-  const [unlockOpen,  setUnlockOpen]  = useState(false)
-  const [unlockEmail, setUnlockEmail] = useState('')
-  const [unlockBusy,  setUnlockBusy]  = useState(false)
-  const [unlockError, setUnlockError] = useState('')
+  const [authOpen,    setAuthOpen]    = useState(false)
+  const [authTab,     setAuthTab]     = useState('signup') // 'signup' | 'login'
+  const [authEmail,   setAuthEmail]   = useState('')
+  const [authPass,    setAuthPass]    = useState('')
+  const [authBusy,    setAuthBusy]    = useState(false)
+  const [authError,   setAuthError]   = useState('')
+  const [user,        setUser]        = useState(null)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
+
+  // Supabase auth session
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   const loadAll = useCallback(async () => {
     const [p, s, ind] = await Promise.allSettled([
@@ -396,34 +410,44 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setDeepRunning(false)
   }
 
-  const isUnlocked = () => {
-    try {
-      const until = localStorage.getItem('unlocked_until')
-      return until && Date.now() < Number(until)
-    } catch { return false }
-  }
+  const isUnlocked = () => !!user
 
   const handleDeepClick = () => {
-    if (isUnlocked()) { setDeepOpen(true) } else { setUnlockOpen(true) }
+    if (isUnlocked()) { setDeepOpen(true) } else { setAuthOpen(true) }
   }
 
-  const handleUnlockSubmit = async (e) => {
+  const handleAuthSubmit = async (e) => {
     e.preventDefault()
-    if (!unlockEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      setUnlockError('Please enter a valid email address.')
+    if (!authEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      setAuthError('Please enter a valid email address.')
       return
     }
-    setUnlockBusy(true)
-    setUnlockError('')
-    const unlockedUntil = Date.now() + 24 * 60 * 60 * 1000
+    if (authPass.length < 6) {
+      setAuthError('Password must be at least 6 characters.')
+      return
+    }
+    setAuthBusy(true)
+    setAuthError('')
     try {
-      await supabase.from('lead').insert({ email: unlockEmail, source: 'deep_analysis', unlocked_until: new Date(unlockedUntil).toISOString() })
-    } catch (_) {}
-    localStorage.setItem('unlocked_until', String(unlockedUntil))
-    setUnlockBusy(false)
-    setUnlockOpen(false)
-    setUnlockEmail('')
-    setDeepOpen(true)
+      if (authTab === 'signup') {
+        const { error } = await supabase.auth.signUp({ email: authEmail, password: authPass })
+        if (error) throw error
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPass })
+        if (error) throw error
+      }
+      setAuthOpen(false)
+      setAuthEmail('')
+      setAuthPass('')
+    } catch (err) {
+      setAuthError(err.message || 'Authentication failed.')
+    }
+    setAuthBusy(false)
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
   }
 
   const change  = price?.change_24h_pct ?? null
@@ -473,6 +497,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* learn link — desktop only */}
         <Link to="/about" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
+
+        {/* auth — desktop only */}
+        {user ? (
+          <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.1em', color: G.text, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</span>
+            <button onClick={handleLogout} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, background: 'none', border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '4px 10px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGOUT</button>
+          </div>
+        ) : (
+          <button className="hide-mobile" onClick={() => setAuthOpen(true)} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGIN</button>
+        )}
 
         {/* hamburger — mobile only */}
         <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:32,lineHeight:1,padding:'8px',display:'none'}}>☰</button>
@@ -844,58 +878,74 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         </div>
       </main>
 
-      {/* ── deep analysis modal ── */}
-      {/* ── unlock modal ── */}
-      {unlockOpen && (
+      {/* ── auth modal ── */}
+      {authOpen && (
         <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.92)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}>
-          <div style={{ background:G.card, border:`1px solid ${G.gold}55`, borderRadius:14, boxShadow:`0 0 60px ${G.goldGlow}`, width:'95%', maxWidth:440, padding:'36px 32px' }}>
-            {/* header */}
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:24 }}>
-              <span style={{ fontFamily:'"Orbitron",sans-serif', fontSize:13, letterSpacing:'0.25em', color:G.gold, textShadow:`0 0 8px ${G.goldGlow}` }}>
-                UNLOCK FREE ANALYSIS
-              </span>
-              <button onClick={() => { setUnlockOpen(false); setUnlockError('') }} style={{ background:'none', border:'none', color:G.text, cursor:'pointer', fontSize:18, lineHeight:1 }}>✕</button>
+          <div style={{ background:G.card, border:`1px solid ${G.gold}55`, borderRadius:14, boxShadow:`0 0 60px ${G.goldGlow}`, width:'95%', maxWidth:400, padding:'32px 28px' }}>
+            {/* close */}
+            <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:16 }}>
+              <button onClick={() => { setAuthOpen(false); setAuthError('') }} style={{ background:'none', border:'none', color:G.text, cursor:'pointer', fontSize:18, lineHeight:1 }}>✕</button>
             </div>
-            {/* description */}
-            <p style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.text, lineHeight:1.9, marginBottom:24, letterSpacing:'0.03em' }}>
-              Enter your email to unlock <span style={{ color:G.gold }}>Deep Analysis</span> for 24 hours. We'll send you AI insights and market updates — no spam, unsubscribe anytime.
-            </p>
+            {/* tabs */}
+            <div style={{ display:'flex', gap:0, marginBottom:24, borderBottom:`1px solid ${G.border}` }}>
+              {['signup', 'login'].map(tab => (
+                <button key={tab} onClick={() => { setAuthTab(tab); setAuthError('') }} style={{
+                  flex:1, fontFamily:'"Orbitron",sans-serif', fontSize:11, letterSpacing:'0.2em', textTransform:'uppercase',
+                  padding:'12px 0', background:'none', border:'none', cursor:'pointer',
+                  color: authTab === tab ? G.gold : G.text,
+                  borderBottom: authTab === tab ? `2px solid ${G.gold}` : '2px solid transparent',
+                  marginBottom: -1,
+                }}>{tab === 'signup' ? 'SIGN UP' : 'LOGIN'}</button>
+              ))}
+            </div>
             {/* form */}
-            <form onSubmit={handleUnlockSubmit}>
+            <form onSubmit={handleAuthSubmit}>
               <input
                 type="email"
-                placeholder="your@email.com"
-                value={unlockEmail}
-                onChange={e => { setUnlockEmail(e.target.value); setUnlockError('') }}
+                placeholder="Email"
+                value={authEmail}
+                onChange={e => { setAuthEmail(e.target.value); setAuthError('') }}
                 style={{
                   width:'100%', boxSizing:'border-box',
                   fontFamily:'"Share Tech Mono",monospace', fontSize:13,
-                  background:'#0a0a0a', border:`1px solid ${unlockError ? G.red : G.border}`,
+                  background:'#0a0a0a', border:`1px solid ${authError ? G.red : G.border}`,
                   borderRadius:8, color:G.bright, padding:'12px 16px',
-                  outline:'none', marginBottom: unlockError ? 6 : 16,
-                  letterSpacing:'0.05em',
+                  outline:'none', marginBottom:12, letterSpacing:'0.05em',
                 }}
               />
-              {unlockError && (
-                <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.red, marginBottom:12, letterSpacing:'0.05em' }}>{unlockError}</div>
+              <input
+                type="password"
+                placeholder="Password"
+                value={authPass}
+                onChange={e => { setAuthPass(e.target.value); setAuthError('') }}
+                style={{
+                  width:'100%', boxSizing:'border-box',
+                  fontFamily:'"Share Tech Mono",monospace', fontSize:13,
+                  background:'#0a0a0a', border:`1px solid ${authError ? G.red : G.border}`,
+                  borderRadius:8, color:G.bright, padding:'12px 16px',
+                  outline:'none', marginBottom: authError ? 8 : 20, letterSpacing:'0.05em',
+                }}
+              />
+              {authError && (
+                <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.red, marginBottom:12, letterSpacing:'0.05em' }}>{authError}</div>
               )}
               <button
                 type="submit"
-                disabled={unlockBusy}
+                disabled={authBusy}
                 style={{
                   width:'100%', fontFamily:'"Orbitron",sans-serif', fontSize:12, letterSpacing:'0.25em',
-                  padding:'14px', borderRadius:8, cursor: unlockBusy ? 'not-allowed' : 'pointer',
-                  background: unlockBusy ? G.border : `linear-gradient(135deg,${G.gold},#d97706)`,
+                  padding:'14px', borderRadius:8, cursor: authBusy ? 'not-allowed' : 'pointer',
+                  background: authBusy ? G.border : `linear-gradient(135deg,${G.gold},#d97706)`,
                   border:'none', color:'#000', fontWeight:700,
-                  boxShadow: unlockBusy ? 'none' : `0 0 24px ${G.goldGlow}`,
+                  boxShadow: authBusy ? 'none' : `0 0 24px ${G.goldGlow}`,
                   transition:'all 0.2s',
                 }}
               >
-                {unlockBusy ? 'UNLOCKING…' : 'UNLOCK DEEP ANALYSIS'}
+                {authBusy ? 'PLEASE WAIT…' : (authTab === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN')}
               </button>
             </form>
             <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:9, color:'#4b5563', letterSpacing:'0.15em', textAlign:'center', marginTop:16 }}>
-              FREE · NO CREDIT CARD · 24-HOUR ACCESS
+              {authTab === 'signup' ? 'FREE · UNLOCK ALL PREDICTIONS' : 'WELCOME BACK'}
             </div>
           </div>
         </div>
