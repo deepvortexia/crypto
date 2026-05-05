@@ -203,10 +203,19 @@ function IndCard({ label, value, sub, barName, barRaw }) {
   )
 }
 
-function SentimentMeter({ value, label }) {
+function SentimentMeter({ value, label, history }) {
   const color = value == null ? G.text : value >= 75 ? G.green : value >= 55 ? '#84cc16' : value >= 45 ? G.gold : value >= 25 ? '#f97316' : G.red
   const gradAngle = value != null ? Math.round((value / 100) * 360) : 180
   const ticks = Array.from({ length: 10 }, (_, i) => i * 36)
+
+  const getHistoryColor = (val) => {
+    if (val == null) return G.text
+    if (val >= 56) return '#22c55e' // green for Greed
+    if (val >= 46) return '#f59e0b' // yellow for Neutral
+    return '#ef4444' // red for Fear
+  }
+
+  const dayLabels = ['TODAY', '-1D', '-2D', '-3D', '-4D', '-5D', '-6D']
 
   return (
     <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
@@ -263,6 +272,70 @@ function SentimentMeter({ value, label }) {
           )}
         </div>
       </div>
+
+      {/* ── 7-day history ── */}
+      {history && history.length > 0 && (
+        <>
+          {/* separator line */}
+          <div style={{ height: 1, background: G.border, marginTop: 20, marginBottom: 16 }} />
+
+          {/* 7-day cards */}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            {history.slice(0, 7).map((item, i) => {
+              const dayValue = parseInt(item.value, 10)
+              const dayColor = getHistoryColor(dayValue)
+              const isToday = i === 0
+
+              return (
+                <div key={i} style={{
+                  flex: 1,
+                  minWidth: 60,
+                  padding: isToday ? '10px 8px' : '8px 6px',
+                  background: isToday ? `${G.goldDim}` : '#0a0a0a',
+                  border: isToday ? `2px solid ${G.gold}` : `1px solid ${G.border}`,
+                  borderRadius: 6,
+                  textAlign: 'center',
+                  transition: 'all 0.2s',
+                  boxShadow: isToday ? `0 0 8px ${G.goldGlow}` : 'none',
+                }}>
+                  {/* day label */}
+                  <div style={{
+                    fontFamily: '"Share Tech Mono", monospace',
+                    fontSize: 8,
+                    letterSpacing: '0.15em',
+                    color: isToday ? G.gold : G.text,
+                    marginBottom: 4,
+                    fontWeight: isToday ? 'bold' : 'normal',
+                  }}>
+                    {dayLabels[i] || `-${i}D`}
+                  </div>
+
+                  {/* value */}
+                  <div style={{
+                    fontFamily: '"Share Tech Mono", monospace',
+                    fontSize: isToday ? 18 : 16,
+                    color: dayColor,
+                    fontWeight: 'bold',
+                    marginBottom: 4,
+                  }}>
+                    {dayValue}
+                  </div>
+
+                  {/* color dot */}
+                  <div style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    background: dayColor,
+                    margin: '0 auto',
+                    boxShadow: `0 0 6px ${dayColor}`,
+                  }} />
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -794,7 +867,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Technical Indicators</div>
           <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '2fr 5fr', gap: 16, alignItems: 'start' }}>
-            <SentimentMeter value={sentiment?.value} label={sentiment?.classification} />
+            <SentimentMeter value={sentiment?.value} label={sentiment?.classification} history={sentiment?.history} />
             <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14 }}>
               <IndCard
                 label={<>RSI (14)<Tooltip text="Below 30 oversold buy signal — above 70 overbought sell signal"/></>}
