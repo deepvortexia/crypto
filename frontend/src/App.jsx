@@ -217,7 +217,7 @@ function SentimentMeter({ value, label, history }) {
     return '#ef4444'
   }
 
-  const dayLabels = ['TODAY', '-1D', '-2D', '-3D', '-4D', '-5D', '-6D']
+  const dayLabels = ['TODAY', 'YDAY', '2D', '3D', '4D', '5D', '6D']
 
   return (
     <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
@@ -311,10 +311,21 @@ function SentimentMeter({ value, label, history }) {
                     fontSize: isToday ? 17 : 15,
                     color: dayColor,
                     fontWeight: 'bold',
-                    marginBottom: 3,
+                    marginBottom: 2,
                     lineHeight: 1,
                   }}>
                     {dayValue}
+                  </div>
+                  <div style={{
+                    fontFamily: '"Share Tech Mono", monospace',
+                    fontSize: 6,
+                    color: dayColor,
+                    opacity: 0.85,
+                    letterSpacing: '0.05em',
+                    marginBottom: 4,
+                    lineHeight: 1,
+                  }}>
+                    {(item.classification || '').toUpperCase().replace('EXTREME ', 'EXT ')}
                   </div>
                   <div style={{
                     width: 5, height: 5,
