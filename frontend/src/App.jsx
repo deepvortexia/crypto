@@ -375,13 +375,84 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   }, [])
 
   useEffect(() => {
-    const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker')
-    ws.onmessage = (e) => {
-      const d = JSON.parse(e.data)
-      setPrice(prev => ({ ...prev, price: parseFloat(d.c), change_24h_pct: parseFloat(d.P), volume_24h: parseFloat(d.q) }))
+    let ws = null
+    let reconnectAttempts = 0
+    let reconnectTimeout = null
+    let restFallbackInterval = null
+    const MAX_RECONNECT_ATTEMPTS = 5
+
+    function connectWebSocket() {
+      try {
+        ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker')
+
+        ws.onopen = () => {
+          console.log('[WebSocket] Connected to Binance price stream')
+          reconnectAttempts = 0
+          // Clear REST fallback if WebSocket connects
+          if (restFallbackInterval) {
+            clearInterval(restFallbackInterval)
+            restFallbackInterval = null
+          }
+        }
+
+        ws.onmessage = (e) => {
+          const d = JSON.parse(e.data)
+          setPrice(prev => ({
+            ...prev,
+            price: parseFloat(d.c),
+            change_24h_pct: parseFloat(d.P),
+            volume_24h: parseFloat(d.q)
+          }))
+        }
+
+        ws.onerror = (err) => {
+          console.warn('[WebSocket] Error:', err)
+        }
+
+        ws.onclose = () => {
+          console.warn('[WebSocket] Disconnected')
+
+          // Try to reconnect with exponential backoff
+          if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000)
+            console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${reconnectAttempts + 1}/${MAX_RECONNECT_ATTEMPTS})`)
+            reconnectTimeout = setTimeout(() => {
+              reconnectAttempts++
+              connectWebSocket()
+            }, delay)
+          } else {
+            // Fall back to REST API polling if WebSocket fails
+            console.warn('[WebSocket] Max reconnect attempts reached, falling back to REST API polling')
+            if (!restFallbackInterval) {
+              restFallbackInterval = setInterval(async () => {
+                try {
+                  const ticker = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
+                    .then(r => r.json())
+                  setPrice(prev => ({
+                    ...prev,
+                    price: parseFloat(ticker.lastPrice),
+                    change_24h_pct: parseFloat(ticker.priceChangePercent),
+                    volume_24h: parseFloat(ticker.quoteVolume)
+                  }))
+                } catch (err) {
+                  console.error('[REST Fallback] Failed to fetch price:', err)
+                }
+              }, 5000) // Poll every 5 seconds
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[WebSocket] Failed to create connection:', err)
+      }
     }
-    ws.onerror = () => ws.close()
-    return () => ws.close()
+
+    connectWebSocket()
+
+    return () => {
+      if (ws) ws.close()
+      if (reconnectTimeout) clearTimeout(reconnectTimeout)
+      if (restFallbackInterval) clearInterval(restFallbackInterval)
+    }
   }, [])
 
   async function runDeepAnalysis(horizon) {

@@ -120,52 +120,86 @@ async def fetch_daily_ohlcv(days: int = 365) -> pd.DataFrame:
 
 
 async def fetch_fear_greed() -> dict:
+    """Fetch Fear & Greed Index with retry logic and fallback."""
     async with httpx.AsyncClient() as client:
-        try:
-            resp = await client.get(FEAR_GREED_URL, timeout=_HTTP_TIMEOUT)
-            resp.raise_for_status()
-            data = resp.json()
-        except Exception:
-            return {"value": 50, "classification": "Neutral", "history": []}
+        for attempt in range(3):
+            try:
+                resp = await client.get(FEAR_GREED_URL, timeout=_HTTP_TIMEOUT)
+                resp.raise_for_status()
+                data = resp.json()
 
-    entries = data.get("data", [])
-    latest = entries[0] if entries else {}
-    history = [
-        {
-            "value": int(e["value"]),
-            "classification": e["value_classification"],
-            "timestamp": e["timestamp"],
-        }
-        for e in entries[:7]
-    ]
-    return {
-        "value": int(latest.get("value", 50)),
-        "classification": latest.get("value_classification", "Neutral"),
-        "timestamp": latest.get("timestamp"),
-        "history": history,
-    }
+                entries = data.get("data", [])
+                latest = entries[0] if entries else {}
+                history = [
+                    {
+                        "value": int(e["value"]),
+                        "classification": e["value_classification"],
+                        "timestamp": e["timestamp"],
+                    }
+                    for e in entries[:7]
+                ]
+                return {
+                    "value": int(latest.get("value", 50)),
+                    "classification": latest.get("value_classification", "Neutral"),
+                    "timestamp": latest.get("timestamp"),
+                    "history": history,
+                }
+            except Exception as e:
+                if attempt == 2:  # Last attempt
+                    import logging
+                    logging.warning(f"Fear & Greed API failed after 3 attempts: {e}")
+                    return {"value": 50, "classification": "Neutral", "history": [], "error": "API unavailable"}
+                await asyncio.sleep(2 ** attempt)
+
+    # Fallback if all retries fail
+    return {"value": 50, "classification": "Neutral", "history": [], "error": "API unavailable"}
 
 
 async def fetch_onchain() -> dict:
+    """Fetch on-chain metrics with retry logic and safe fallbacks."""
+    import logging
+    logger = logging.getLogger(__name__)
+
     async with httpx.AsyncClient() as client:
+        # Fetch blockchain.info stats with fallback
         try:
             stats = await _get(client, BLOCKCHAIN_STATS_URL)
-        except Exception:
-            return {"error": "Blockchain.com API unavailable"}
+        except Exception as e:
+            logger.warning(f"Blockchain.com API failed: {e}")
+            # Return safe default values instead of error object
+            stats = {
+                "hash_rate": 0,
+                "difficulty": 0,
+                "n_blocks_mined": 0,
+                "n_btc_mined": 0,
+                "n_tx": 0,
+                "minutes_between_blocks": 10,
+                "market_price_usd": 0,
+                "trade_volume_usd": 0,
+                "total_btc_sent": 0,
+            }
 
-        # Fetch total fees from mempool.space (last 144 blocks ~24h)
+        # Fetch total fees from mempool.space with retry (last 144 blocks ~24h)
         total_fees_btc = None
-        try:
-            fees_data = await client.get("https://mempool.space/api/v1/mining/reward-stats/144", timeout=_HTTP_TIMEOUT)
-            fees_data.raise_for_status()
-            fees_json = fees_data.json()
-            total_fee_sat = fees_json.get("totalFee", 0)
-            total_fees_btc = round(total_fee_sat / 100000000, 6) if total_fee_sat else None
-        except Exception:
-            pass
+        for attempt in range(3):
+            try:
+                fees_data = await client.get(
+                    "https://mempool.space/api/v1/mining/reward-stats/144",
+                    timeout=_HTTP_TIMEOUT
+                )
+                fees_data.raise_for_status()
+                fees_json = fees_data.json()
+                total_fee_sat = fees_json.get("totalFee", 0)
+                total_fees_btc = round(total_fee_sat / 100000000, 6) if total_fee_sat else None
+                break
+            except Exception as e:
+                if attempt == 2:
+                    logger.warning(f"mempool.space fees API failed after 3 attempts: {e}")
+                else:
+                    await asyncio.sleep(2 ** attempt)
 
     return {
-        "hash_rate": round(stats.get("hash_rate", 0) / 1e18, 2),
+        "hash_rate": round(stats.get("hash_rate", 0) / 1e18, 2) if stats.get("hash_rate") else None,
         "difficulty": stats.get("difficulty", 0),
         "blocks_mined_today": stats.get("n_blocks_mined", 0),
         "btc_mined_today": round(stats.get("n_btc_mined", 0) / 1e8, 4),
