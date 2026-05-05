@@ -1,4 +1,5 @@
 const BINANCE = 'https://api.binance.com/api/v3'
+const BACKEND_URL = 'https://crypto-production-f7c5.up.railway.app'
 
 class ApiError extends Error {
   constructor(status, message) {
@@ -197,14 +198,14 @@ export async function fetchPriceHistory() {
 
 export async function fetchSentiment() {
   try {
-    const data = await get('/api/sentiment', {
+    const data = await get(`${BACKEND_URL}/api/sentiment`, {
       timeout: 10000,
       retries: 2
     })
 
     // DEBUG: Print raw backend response
     console.log('='.repeat(80))
-    console.log('DEBUG [fetchSentiment] RAW response from /api/sentiment:')
+    console.log('DEBUG [fetchSentiment] RAW response from Railway backend:')
     console.log(data)
     console.log('='.repeat(80))
 
@@ -222,14 +223,14 @@ export async function fetchSentiment() {
 
 export async function fetchOnchain() {
   try {
-    const data = await get('/api/onchain', {
+    const data = await get(`${BACKEND_URL}/api/onchain`, {
       timeout: 10000,
       retries: 2
     })
 
     // DEBUG: Print raw backend response
     console.log('='.repeat(80))
-    console.log('DEBUG [fetchOnchain] RAW response from /api/onchain:')
+    console.log('DEBUG [fetchOnchain] RAW response from Railway backend:')
     console.log(data)
     console.log('='.repeat(80))
 
