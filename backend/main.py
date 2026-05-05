@@ -216,7 +216,13 @@ async def get_sentiment():
 async def get_onchain():
     """On-chain metrics from Blockchain.com: hash rate, difficulty, mempool, fees."""
     if "onchain" in _onchain_cache:
-        return _onchain_cache["onchain"]
+        cached = _onchain_cache["onchain"]
+        # Clear cache if hash_rate is 0 or null (invalid data)
+        if not cached.get("hash_rate") or cached.get("hash_rate") == 0:
+            logger.warning("Cached onchain data has invalid hash_rate, forcing refresh")
+            del _onchain_cache["onchain"]  # force refresh
+        else:
+            return cached
 
     try:
         data = await fetch_onchain()
