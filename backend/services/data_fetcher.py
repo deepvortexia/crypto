@@ -209,7 +209,8 @@ async def fetch_onchain() -> dict:
                 print(fees_json)
                 print("=" * 80)
 
-                total_fee_sat = fees_json.get("totalFee", 0)
+                # totalFee is returned as string, need to convert to int
+                total_fee_sat = int(fees_json.get("totalFee", 0))
                 total_fees_btc = round(total_fee_sat / 100000000, 6) if total_fee_sat else None
                 break
             except Exception as e:
@@ -219,7 +220,7 @@ async def fetch_onchain() -> dict:
                     await asyncio.sleep(2 ** attempt)
 
     return {
-        "hash_rate": round(stats.get("hash_rate", 0) / 1e18, 2) if stats.get("hash_rate") else None,
+        "hash_rate": round(stats.get("hash_rate", 0) / 1e9, 2) if stats.get("hash_rate") else None,
         "difficulty": stats.get("difficulty", 0),
         "blocks_mined_today": stats.get("n_blocks_mined", 0),
         "btc_mined_today": round(stats.get("n_btc_mined", 0) / 1e8, 4),
