@@ -279,59 +279,71 @@ function SentimentMeter({ value, label, history }) {
       {Array.isArray(history) && history.length > 0 && (
         <>
           <div style={{ height: 1, background: G.border, marginTop: 20, marginBottom: 14 }} />
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {history.slice(0, 7).map((item, i) => {
               const dayValue = parseInt(item.value, 10)
               const dayColor = getHistoryColor(dayValue)
               const isToday = i === 0
+              const classText = (item.classification || '').toUpperCase().replace('EXTREME ', 'EXT ')
 
               return (
                 <div key={i} className={i >= 4 ? 'hide-mobile' : ''} style={{
-                  flex: '1 1 auto',
-                  minWidth: isToday ? 52 : 40,
-                  padding: isToday ? '10px 6px' : '7px 4px',
-                  background: isToday ? G.goldDim : '#0a0a0a',
+                  ...cardStyle,
+                  flex: '1 1 0',
+                  minWidth: 52,
+                  minHeight: 70,
+                  padding: '10px 6px',
+                  background: isToday ? G.goldDim : G.card,
                   border: isToday ? `2px solid ${G.gold}` : `1px solid ${G.border}`,
                   borderRadius: 6,
                   textAlign: 'center',
-                  boxShadow: isToday ? `0 0 8px ${G.goldGlow}` : 'none',
+                  boxShadow: isToday ? `0 0 10px ${G.goldGlow}` : cardStyle.boxShadow,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 4,
                 }}>
+                  {/* horizon-style label */}
                   <div style={{
                     fontFamily: '"Share Tech Mono", monospace',
-                    fontSize: 7,
+                    fontSize: 11,
                     letterSpacing: '0.1em',
-                    color: isToday ? G.gold : G.text,
-                    marginBottom: 3,
+                    color: isToday ? G.gold : '#9ca3af',
                     fontWeight: isToday ? 'bold' : 'normal',
+                    textTransform: 'uppercase',
                   }}>
                     {dayLabels[i]}
                   </div>
+
+                  {/* value */}
                   <div style={{
                     fontFamily: '"Share Tech Mono", monospace',
-                    fontSize: isToday ? 17 : 15,
+                    fontSize: 20,
                     color: dayColor,
                     fontWeight: 'bold',
-                    marginBottom: 2,
                     lineHeight: 1,
                   }}>
                     {dayValue}
                   </div>
+
+                  {/* classification */}
                   <div style={{
                     fontFamily: '"Share Tech Mono", monospace',
-                    fontSize: 6,
+                    fontSize: 8,
                     color: dayColor,
-                    opacity: 0.85,
-                    letterSpacing: '0.05em',
-                    marginBottom: 4,
+                    opacity: 0.8,
+                    letterSpacing: '0.08em',
                     lineHeight: 1,
                   }}>
-                    {(item.classification || '').toUpperCase().replace('EXTREME ', 'EXT ')}
+                    {classText}
                   </div>
+
+                  {/* color dot */}
                   <div style={{
                     width: 5, height: 5,
                     borderRadius: '50%',
                     background: dayColor,
-                    margin: '0 auto',
                     boxShadow: `0 0 5px ${dayColor}`,
                   }} />
                 </div>
