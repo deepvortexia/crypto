@@ -23,7 +23,7 @@ from services import retrainer
 
 CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS",
-    "https://deepvortexai.com,https://www.deepvortexai.com,http://localhost:3000,http://localhost:5173",
+    "https://predictalpha.app,https://www.predictalpha.app,https://deepvortexai.com,https://www.deepvortexai.com,http://localhost:3000,http://localhost:5173",
 ).split(",")
 
 RETRAIN_INTERVAL_HOURS = int(os.getenv("MODEL_RETRAIN_INTERVAL_HOURS", "24"))
