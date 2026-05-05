@@ -111,7 +111,8 @@ const HORIZON_CONFIDENCE = { '4h': 92, '8h': 88, '12h': 84, '24h': 78, '1week': 
 
 function PredCard({ horizon, horizonKey, data, loading }) {
   const gold = G.gold
-  const up = data?.direction === 'up'
+  // Derive direction from change_pct (single source of truth — never trust the string field alone)
+  const up = data != null ? (data.change_pct ?? 0) >= 0 : false
   const dirColor = up ? G.green : G.red
   const conf = data ? (HORIZON_CONFIDENCE[horizonKey] ?? (data.confidence != null ? Math.round(data.confidence > 1 ? data.confidence : data.confidence * 100) : 75)) : 0
 
@@ -137,7 +138,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
             <span className="pred-direction" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 12, color: dirColor, letterSpacing: '0.1em' }}>
               {data.direction?.toUpperCase()}
             </span>
-            <span className="pred-pct" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 11, color: G.text }}>
+            <span className="pred-pct" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 11, color: dirColor }}>
               {fmtPct(data.change_pct)}
             </span>
           </div>

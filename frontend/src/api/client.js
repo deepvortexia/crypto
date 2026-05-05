@@ -294,10 +294,12 @@ export async function fetchPrediction(horizon) {
     confidence = parseFloat((50 + Math.min(Math.abs(dailyTrend) * 100, 1) * 45).toFixed(1))
   }
 
+  const predicted_price = parseFloat(predictedPrice.toFixed(2))
+  const change_pct = parseFloat(changePct.toFixed(2))
   return {
-    predicted_price: parseFloat(predictedPrice.toFixed(2)),
-    change_pct: parseFloat(changePct.toFixed(2)),
-    direction: changePct >= 0 ? 'up' : 'down',
+    predicted_price,
+    change_pct,
+    direction: predicted_price >= currentPrice ? 'up' : 'down',
     confidence,
   }
 }
