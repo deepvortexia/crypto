@@ -201,6 +201,13 @@ export async function fetchSentiment() {
       timeout: 10000,
       retries: 2
     })
+
+    // DEBUG: Print raw alternative.me response
+    console.log('='.repeat(80))
+    console.log('DEBUG [fetchSentiment] RAW response from /alternativeme:')
+    console.log(data)
+    console.log('='.repeat(80))
+
     const entry = data.data[0]
     return {
       value: parseInt(entry.value, 10),
@@ -215,10 +222,18 @@ export async function fetchSentiment() {
 
 export async function fetchOnchain() {
   try {
-    return await get('/blockchain/stats', {
+    const data = await get('/blockchain/stats', {
       timeout: 10000,
       retries: 2
     })
+
+    // DEBUG: Print raw blockchain.info response
+    console.log('='.repeat(80))
+    console.log('DEBUG [fetchOnchain] RAW response from /blockchain:')
+    console.log(data)
+    console.log('='.repeat(80))
+
+    return data
   } catch (err) {
     console.error('[fetchOnchain] Failed:', err.message)
     return null
@@ -398,6 +413,15 @@ export async function fetchMempool() {
       get('https://mempool.space/api/mempool', { timeout: 10000, retries: 2 }),
       get('https://mempool.space/api/v1/fees/recommended', { timeout: 10000, retries: 2 })
     ])
+
+    // DEBUG: Print raw mempool.space responses
+    console.log('='.repeat(80))
+    console.log('DEBUG [fetchMempool] RAW stats response:')
+    console.log(stats)
+    console.log('DEBUG [fetchMempool] RAW fees response:')
+    console.log(fees)
+    console.log('='.repeat(80))
+
     return {
       count: stats.count,
       vsize: stats.vsize,
