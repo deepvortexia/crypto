@@ -56,7 +56,6 @@ class BTCProphetModel:
             daily_seasonality=True,
             weekly_seasonality=True,
             yearly_seasonality=False,
-            suppress_stdout_stderror=True,
         )
         model.add_seasonality(name="monthly", period=30.5, fourier_order=5)
         logger.info("Prophet fitting hourly model…")
@@ -73,7 +72,6 @@ class BTCProphetModel:
             daily_seasonality=False,
             weekly_seasonality=True,
             yearly_seasonality=True,
-            suppress_stdout_stderror=True,
         )
         model.add_seasonality(name="monthly", period=30.5, fourier_order=5)
         logger.info("Prophet fitting daily model…")
