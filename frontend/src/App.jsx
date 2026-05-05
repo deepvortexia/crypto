@@ -863,12 +863,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
         </div>
 
-        {/* row 3 — indicators + sentiment */}
+        {/* row 3 — sentiment (full-width) + indicators */}
         <div style={{ marginBottom: 40 }}>
-          <div style={sectionLabel}>Technical Indicators</div>
-          <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '2fr 5fr', gap: 16, alignItems: 'start' }}>
-            <SentimentMeter value={sentiment?.value} label={sentiment?.classification} history={sentiment?.history} />
-            <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14 }}>
+          <div style={sectionLabel}>Market Sentiment & Technical Indicators</div>
+          <SentimentMeter value={sentiment?.value} label={sentiment?.classification} history={sentiment?.history} />
+          <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14, marginTop: 16 }}>
               <IndCard
                 label={<>RSI (14)<Tooltip text="Below 30 oversold buy signal — above 70 overbought sell signal"/></>}
                 value={rsi != null ? fmtNum(rsi, 1) : '—'}
@@ -912,12 +911,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 barName="macd" barRaw={ema200 && curPrice ? curPrice - ema200 : null}
               />
             </div>
-            {ema50 != null && ema200 != null && (
-              <div style={{ marginTop: 12, fontFamily: '"Share Tech Mono", monospace', fontSize: 12, letterSpacing: '0.15em', color: ema50 > ema200 ? G.green : G.red }}>
-                {ema50 > ema200 ? '🟢 GOLDEN CROSS — Bullish' : '🔴 DEATH CROSS — Bearish'}
-              </div>
-            )}
-          </div>
+          {ema50 != null && ema200 != null && (
+            <div style={{ marginTop: 12, fontFamily: '"Share Tech Mono", monospace', fontSize: 12, letterSpacing: '0.15em', color: ema50 > ema200 ? G.green : G.red }}>
+              {ema50 > ema200 ? '🟢 GOLDEN CROSS — Bullish' : '🔴 DEATH CROSS — Bearish'}
+            </div>
+          )}
         </div>
 
         {/* row 4 — onchain (optional) */}
