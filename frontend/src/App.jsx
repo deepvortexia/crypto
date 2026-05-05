@@ -927,9 +927,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 barName="macd" barRaw={ema200 && curPrice ? curPrice - ema200 : null}
               />
             </div>
-          {ema50 != null && ema200 != null && (
-            <div style={{ marginTop: 12, fontFamily: '"Share Tech Mono", monospace', fontSize: 12, letterSpacing: '0.15em', color: ema50 > ema200 ? G.green : G.red }}>
-              {ema50 > ema200 ? '🟢 GOLDEN CROSS — Bullish' : '🔴 DEATH CROSS — Bearish'}
+          {ema50 != null && ema200 != null && ema50 > ema200 && (
+            <div style={{ marginTop: 12, fontFamily: '"Share Tech Mono", monospace', fontSize: 12, letterSpacing: '0.15em', color: G.green }}>
+              🟢 GOLDEN CROSS — Bullish
             </div>
           )}
         </div>
