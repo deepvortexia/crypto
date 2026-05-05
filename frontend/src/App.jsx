@@ -491,7 +491,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             ...prev,
             price: parseFloat(d.c),
             change_24h_pct: parseFloat(d.P),
-            volume_24h: parseFloat(d.q)
+            // volume_24h and market_cap intentionally omitted — kept from CoinGecko
           }))
         }
 
@@ -522,7 +522,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     ...prev,
                     price: parseFloat(ticker.lastPrice),
                     change_24h_pct: parseFloat(ticker.priceChangePercent),
-                    volume_24h: parseFloat(ticker.quoteVolume)
+                    // volume_24h and market_cap intentionally omitted — kept from CoinGecko
                   }))
                 } catch (err) {
                   console.error('[REST Fallback] Failed to fetch price:', err)
