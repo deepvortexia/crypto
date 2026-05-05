@@ -906,13 +906,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               <IndCard
                 label={<>BB Upper<Tooltip text="Price near upper band = overbought potential reversal"/></>}
                 value={bb ? fmtPrice(bb.upper) : '—'}
-                sub="Bollinger Band"
+                sub={bb && curPrice ? (curPrice > bb.upper ? 'Overbought ⚠️' : 'Bollinger Band') : 'Bollinger Band'}
                 barName="bbUpper"
               />
               <IndCard
                 label={<>BB Lower<Tooltip text="Price near lower band = oversold potential reversal"/></>}
                 value={bb ? fmtPrice(bb.lower) : '—'}
-                sub="Bollinger Band"
+                sub={bb && curPrice ? (curPrice < bb.lower ? 'Oversold ⚠️' : 'Bollinger Band') : 'Bollinger Band'}
                 barName="bbLower"
               />
               <IndCard
