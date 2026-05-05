@@ -71,7 +71,9 @@ async function getOhlc() {
   }
 
   try {
-    const data = await get(`${BINANCE}/klines?symbol=BTCUSDT&interval=1d&limit=200`, {
+    // Fetch 400 daily candles for accurate EMA 200 calculation
+    // EMA needs more data than the period for proper convergence
+    const data = await get(`${BINANCE}/klines?symbol=BTCUSDT&interval=1d&limit=400`, {
       timeout: 10000,
       retries: 2
     })
