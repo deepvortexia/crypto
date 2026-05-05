@@ -208,11 +208,13 @@ function SentimentMeter({ value, label, history }) {
   const gradAngle = value != null ? Math.round((value / 100) * 360) : 180
   const ticks = Array.from({ length: 10 }, (_, i) => i * 36)
 
+  console.log('history:', history)
+
   const getHistoryColor = (val) => {
     if (val == null) return G.text
-    if (val >= 56) return '#22c55e' // green for Greed
-    if (val >= 46) return '#f59e0b' // yellow for Neutral
-    return '#ef4444' // red for Fear
+    if (val >= 56) return '#22c55e'
+    if (val >= 46) return '#f59e0b'
+    return '#ef4444'
   }
 
   const dayLabels = ['TODAY', '-1D', '-2D', '-3D', '-4D', '-5D', '-6D']
@@ -274,61 +276,52 @@ function SentimentMeter({ value, label, history }) {
       </div>
 
       {/* ── 7-day history ── */}
-      {history && history.length > 0 && (
+      {Array.isArray(history) && history.length > 0 && (
         <>
-          {/* separator line */}
-          <div style={{ height: 1, background: G.border, marginTop: 20, marginBottom: 16 }} />
-
-          {/* 7-day cards */}
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          <div style={{ height: 1, background: G.border, marginTop: 20, marginBottom: 14 }} />
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {history.slice(0, 7).map((item, i) => {
               const dayValue = parseInt(item.value, 10)
               const dayColor = getHistoryColor(dayValue)
               const isToday = i === 0
 
               return (
-                <div key={i} style={{
-                  flex: 1,
-                  minWidth: 60,
-                  padding: isToday ? '10px 8px' : '8px 6px',
-                  background: isToday ? `${G.goldDim}` : '#0a0a0a',
+                <div key={i} className={i >= 4 ? 'hide-mobile' : ''} style={{
+                  flex: '1 1 auto',
+                  minWidth: isToday ? 52 : 40,
+                  padding: isToday ? '10px 6px' : '7px 4px',
+                  background: isToday ? G.goldDim : '#0a0a0a',
                   border: isToday ? `2px solid ${G.gold}` : `1px solid ${G.border}`,
                   borderRadius: 6,
                   textAlign: 'center',
-                  transition: 'all 0.2s',
                   boxShadow: isToday ? `0 0 8px ${G.goldGlow}` : 'none',
                 }}>
-                  {/* day label */}
                   <div style={{
                     fontFamily: '"Share Tech Mono", monospace',
-                    fontSize: 8,
-                    letterSpacing: '0.15em',
+                    fontSize: 7,
+                    letterSpacing: '0.1em',
                     color: isToday ? G.gold : G.text,
-                    marginBottom: 4,
+                    marginBottom: 3,
                     fontWeight: isToday ? 'bold' : 'normal',
                   }}>
-                    {dayLabels[i] || `-${i}D`}
+                    {dayLabels[i]}
                   </div>
-
-                  {/* value */}
                   <div style={{
                     fontFamily: '"Share Tech Mono", monospace',
-                    fontSize: isToday ? 18 : 16,
+                    fontSize: isToday ? 17 : 15,
                     color: dayColor,
                     fontWeight: 'bold',
-                    marginBottom: 4,
+                    marginBottom: 3,
+                    lineHeight: 1,
                   }}>
                     {dayValue}
                   </div>
-
-                  {/* color dot */}
                   <div style={{
-                    width: 6,
-                    height: 6,
+                    width: 5, height: 5,
                     borderRadius: '50%',
                     background: dayColor,
                     margin: '0 auto',
-                    boxShadow: `0 0 6px ${dayColor}`,
+                    boxShadow: `0 0 5px ${dayColor}`,
                   }} />
                 </div>
               )

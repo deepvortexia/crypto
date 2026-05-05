@@ -211,15 +211,16 @@ export async function fetchSentiment() {
     console.log(data)
     console.log('='.repeat(80))
 
-    // Backend returns flat object, not {data: [{...}]}
+    // Backend returns flat object with history array
     return {
       value: parseInt(data.value, 10),
       classification: data.classification,
       timestamp: data.timestamp,
+      history: Array.isArray(data.history) ? data.history : [],
     }
   } catch (err) {
     console.error('[fetchSentiment] Failed:', err.message)
-    return { value: 50, classification: 'Neutral', timestamp: null }
+    return { value: 50, classification: 'Neutral', timestamp: null, history: [] }
   }
 }
 
