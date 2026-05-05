@@ -843,7 +843,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             />
             <IndCard
               label="Bid/Ask Ratio"
-              value={orderBook?.ratio != null ? Math.min(orderBook.ratio, 9.99).toFixed(2) : '—'}
+              value={orderBook?.ratio != null ? orderBook.ratio.toFixed(2) : '—'}
               sub={orderBook?.signal}
               barName="longShort"
               barRaw={orderBook?.ratio}

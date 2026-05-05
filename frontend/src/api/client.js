@@ -156,7 +156,36 @@ export async function fetchPrediction(horizon) {
   const predictedPrice = currentPrice * (1 + projectedChange)
   const changePct = projectedChange * 100
 
-  const confidence = parseFloat((50 + Math.min(Math.abs(dailyTrend) * 100, 1) * 45).toFixed(1))
+  // Dynamic confidence for 1H: simulate LSTM+XGB agreement + volatility analysis
+  let confidence
+  if (horizon === '1h') {
+    // Calculate recent volatility (last 7 days)
+    const recentPrices = closes.slice(-7)
+    const volatility = _stddev(recentPrices) / currentPrice
+
+    // Calculate trend strength (how aligned are short-term indicators)
+    const ema3 = _ema(closes, 3)
+    const ema7 = _ema(closes, 7)
+    const lastEma3 = ema3[ema3.length - 1]
+    const lastEma7 = ema7[ema7.length - 1]
+    const trendAlignment = Math.abs((lastEma3 - lastEma7) / lastEma7)
+
+    // Model agreement score (simulated): higher when trend is clear and volatility is moderate
+    const modelAgreement = Math.min(trendAlignment * 200, 1.0) // 0 to 1
+    const volatilityScore = Math.max(0, 1 - volatility * 50) // lower volatility = higher confidence
+
+    // Confidence range: 55-88%
+    const baseConfidence = 55
+    const maxBonus = 33 // 88 - 55
+    const agreementBonus = modelAgreement * maxBonus * 0.6
+    const stabilityBonus = volatilityScore * maxBonus * 0.4
+
+    confidence = parseFloat((baseConfidence + agreementBonus + stabilityBonus).toFixed(1))
+    confidence = Math.max(55, Math.min(88, confidence)) // clamp to 55-88%
+  } else {
+    // Other horizons: keep existing logic
+    confidence = parseFloat((50 + Math.min(Math.abs(dailyTrend) * 100, 1) * 45).toFixed(1))
+  }
 
   return {
     predicted_price: parseFloat(predictedPrice.toFixed(2)),
@@ -223,7 +252,7 @@ export async function fetchOrderBook() {
   const bestAsk = parseFloat(data.asks[0][0])  // lowest sell price
   const bidVol = data.bids.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
   const askVol = data.asks.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
-  const ratio = Math.min(Math.max(bidVol/askVol, 0.1), 10.0)
+  const ratio = parseFloat((bidVol/askVol).toFixed(2))
   return { topBid: bestBid, topAsk: bestAsk, ratio, signal:ratio>1.3?'Strong buy wall':ratio<0.7?'Strong sell wall':'Balanced' }
 }
 
