@@ -136,7 +136,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             <span style={{ fontSize: 18, color: dirColor, lineHeight: 1 }}>{up ? '▲' : '▼'}</span>
             <span className="pred-direction" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 12, color: dirColor, letterSpacing: '0.1em' }}>
-              {data.direction?.toUpperCase()}
+              {up ? 'UP' : 'DOWN'}
             </span>
             <span className="pred-pct" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 11, color: dirColor }}>
               {fmtPct(data.change_pct)}
