@@ -33,6 +33,12 @@ class BTCProphetModel:
             logger.warning("Skipping Prophet training — library not installed")
             return
 
+        import cmdstanpy
+        try:
+            cmdstanpy.install_cmdstan(progress=False, overwrite=False)
+        except Exception:
+            pass
+
         logger.info("Training Prophet models…")
         try:
             self._train_hourly(hourly_df)
