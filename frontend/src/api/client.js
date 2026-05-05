@@ -165,6 +165,8 @@ function _calcBollinger(closes, period = 20) {
 
 // --- Public API ---
 
+const COINGECKO = 'https://api.coingecko.com/api/v3'
+
 export async function fetchLivePrice() {
   try {
     const ticker = await get(`${BINANCE}/ticker/24hr?symbol=BTCUSDT`, {
@@ -172,11 +174,25 @@ export async function fetchLivePrice() {
       retries: 2
     })
     const price = parseFloat(ticker.lastPrice)
+    // Fetch total market volume + real market cap from CoinGecko in parallel
+    let volume_24h = parseFloat(ticker.quoteVolume)
+    let market_cap = price * 19700000
+    try {
+      const cg = await get(`${COINGECKO}/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false`, {
+        timeout: 10000,
+        retries: 1,
+      })
+      volume_24h = cg.market_data?.total_volume?.usd ?? volume_24h
+      market_cap = cg.market_data?.market_cap?.usd ?? market_cap
+    } catch (cgErr) {
+      console.warn('[fetchLivePrice] CoinGecko fallback to Binance volume:', cgErr.message)
+    }
+
     return {
       price,
       change_24h_pct: parseFloat(ticker.priceChangePercent),
-      volume_24h: parseFloat(ticker.quoteVolume),
-      market_cap: price * 19700000,
+      volume_24h,
+      market_cap,
       last_updated: new Date().toISOString(),
     }
   } catch (err) {
