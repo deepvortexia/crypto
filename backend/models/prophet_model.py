@@ -1,9 +1,12 @@
 import logging
+import os
 import pickle
 from pathlib import Path
 from typing import Optional
 
 import pandas as pd
+
+os.environ["CMDSTAN"] = "/root/.cmdstan/cmdstan-2.38.0"
 
 logger = logging.getLogger(__name__)
 
