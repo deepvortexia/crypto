@@ -452,6 +452,23 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setUser(null)
   }
 
+  const handleGoogleLogin = async () => {
+    setAuthBusy(true)
+    setAuthError('')
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://predictalpha.app'
+        }
+      })
+      if (error) throw error
+    } catch (err) {
+      setAuthError(err.message || 'Google login failed.')
+      setAuthBusy(false)
+    }
+  }
+
   const change  = price?.change_24h_pct ?? null
   const isUp    = change != null && change >= 0
   const chgColor = change == null ? G.gold : isUp ? G.green : G.red
@@ -503,6 +520,37 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* auth — desktop only */}
         {user ? (
           <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {user.user_metadata?.avatar_url ? (
+              <img
+                src={user.user_metadata.avatar_url}
+                alt="User avatar"
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  border: `2px solid ${G.gold}`,
+                  boxShadow: `0 0 8px ${G.goldGlow}`
+                }}
+              />
+            ) : (
+              <div style={{
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                background: G.goldDim,
+                border: `2px solid ${G.gold}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: '"Share Tech Mono",monospace',
+                fontSize: 12,
+                fontWeight: 'bold',
+                color: G.gold,
+                boxShadow: `0 0 8px ${G.goldGlow}`
+              }}>
+                {user.email?.[0]?.toUpperCase() || 'U'}
+              </div>
+            )}
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.1em', color: G.text, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</span>
             <button onClick={handleLogout} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, background: 'none', border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '4px 10px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGOUT</button>
           </div>
@@ -516,6 +564,26 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* mobile dropdown */}
         {menuOpen && (
           <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:200,padding:'12px 0'}}>
+            {/* User section for mobile */}
+            {user ? (
+              <div style={{padding:'12px 24px',borderBottom:`1px solid #2a1f00`,marginBottom:8,display:'flex',alignItems:'center',gap:12}}>
+                {user.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} alt="User avatar" style={{width:28,height:28,borderRadius:'50%',border:`2px solid ${G.gold}`}} />
+                ) : (
+                  <div style={{width:28,height:28,borderRadius:'50%',background:G.goldDim,border:`2px solid ${G.gold}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'"Share Tech Mono",monospace',fontSize:11,fontWeight:'bold',color:G.gold}}>
+                    {user.email?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                )}
+                <div style={{flex:1,overflow:'hidden'}}>
+                  <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:G.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user.email}</div>
+                  <button onClick={() => { handleLogout(); setMenuOpen(false) }} style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.1em',color:G.gold,background:'none',border:'none',cursor:'pointer',padding:0,marginTop:4,textTransform:'uppercase'}}>LOGOUT</button>
+                </div>
+              </div>
+            ) : (
+              <div style={{padding:'12px 24px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
+                <button onClick={() => { setAuthOpen(true); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:10,letterSpacing:'0.15em',color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}44`,borderRadius:4,padding:'8px 12px',cursor:'pointer',textTransform:'uppercase'}}>LOGIN</button>
+              </div>
+            )}
             {[
               { label: 'Dashboard', to: '/', dim: false },
               { label: 'Learn',     to: '/about', dim: false },
@@ -929,6 +997,37 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   }}>{tab === 'signup' ? 'SIGN UP' : 'LOGIN'}</button>
                 ))}
               </div>
+              {/* Google Sign In Button */}
+              <button
+                onClick={handleGoogleLogin}
+                disabled={authBusy}
+                type="button"
+                style={{
+                  width:'100%', fontFamily:'"Share Tech Mono",monospace', fontSize:12, letterSpacing:'0.15em',
+                  padding:'14px', borderRadius:8, cursor: authBusy ? 'not-allowed' : 'pointer',
+                  background: '#fff', border:`2px solid ${G.gold}44`, color:'#000', fontWeight:600,
+                  boxShadow: `0 0 12px ${G.goldGlow}`, transition:'all 0.2s', marginBottom:20,
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:10,
+                }}
+                onMouseEnter={e => !authBusy && (e.target.style.boxShadow = `0 0 20px ${G.goldGlow}`)}
+                onMouseLeave={e => !authBusy && (e.target.style.boxShadow = `0 0 12px ${G.goldGlow}`)}
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                  <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.184l-2.909-2.258c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/>
+                  <path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                  <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
+                </svg>
+                SIGN IN WITH GOOGLE
+              </button>
+
+              {/* Divider */}
+              <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:20 }}>
+                <div style={{ flex:1, height:1, background:G.border }} />
+                <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:9, color:G.text, letterSpacing:'0.15em' }}>OR</span>
+                <div style={{ flex:1, height:1, background:G.border }} />
+              </div>
+
               {/* form inputs */}
               <form onSubmit={handleAuthSubmit}>
                 <input
