@@ -853,9 +853,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <div style={sectionLabel}>On-Chain Data</div>
             <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
-              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Higher = more miners = stronger network security"/></>}       value={`${(onchain.hash_rate / 1e9).toFixed(2)} EH/s`} sub="Network difficulty" barName="hashRate" />}
+              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Higher = more miners = stronger network security"/></>}       value={`${Number(onchain.hash_rate).toFixed(2)} EH/s`} sub="Network difficulty" barName="hashRate" />}
               {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Normal ~10 min — higher means network congestion"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" barName="blockTime" barRaw={onchain.minutes_between_blocks} />}
-              {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${(Math.abs(Number(onchain.total_fees_btc)) / 100000000).toFixed(4)} BTC`} sub="Last 24h" barName="fees" />}
+              {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${Number(onchain.total_fees_btc).toFixed(4)} BTC`} sub="Last 24h" barName="fees" />}
             </div>
           </div>
         )}
