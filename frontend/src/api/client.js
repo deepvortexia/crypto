@@ -197,22 +197,22 @@ export async function fetchPriceHistory() {
 
 export async function fetchSentiment() {
   try {
-    const data = await get('/alternativeme/fng/?limit=1', {
+    const data = await get('/api/sentiment', {
       timeout: 10000,
       retries: 2
     })
 
-    // DEBUG: Print raw alternative.me response
+    // DEBUG: Print raw backend response
     console.log('='.repeat(80))
-    console.log('DEBUG [fetchSentiment] RAW response from /alternativeme:')
+    console.log('DEBUG [fetchSentiment] RAW response from /api/sentiment:')
     console.log(data)
     console.log('='.repeat(80))
 
-    const entry = data.data[0]
+    // Backend returns flat object, not {data: [{...}]}
     return {
-      value: parseInt(entry.value, 10),
-      classification: entry.value_classification,
-      timestamp: entry.timestamp,
+      value: parseInt(data.value, 10),
+      classification: data.classification,
+      timestamp: data.timestamp,
     }
   } catch (err) {
     console.error('[fetchSentiment] Failed:', err.message)
@@ -222,14 +222,14 @@ export async function fetchSentiment() {
 
 export async function fetchOnchain() {
   try {
-    const data = await get('/blockchain/stats', {
+    const data = await get('/api/onchain', {
       timeout: 10000,
       retries: 2
     })
 
-    // DEBUG: Print raw blockchain.info response
+    // DEBUG: Print raw backend response
     console.log('='.repeat(80))
-    console.log('DEBUG [fetchOnchain] RAW response from /blockchain:')
+    console.log('DEBUG [fetchOnchain] RAW response from /api/onchain:')
     console.log(data)
     console.log('='.repeat(80))
 
