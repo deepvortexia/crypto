@@ -960,9 +960,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               barRaw={fundingRate?.rate}
             />
             <IndCard
-              label={<>Long/Short Ratio<Tooltip text="Above 1 more longs than shorts"/></>}
+              label={<>Long/Short Ratio<Tooltip text="Ratio below 1.0 means more shorts than longs. Combined with whale buying, this could trigger a short squeeze — forcing shorts to buy back, causing a rapid price spike."/></>}
               value={longShort != null ? longShort.ratio.toFixed(2) : '—'}
-              sub={longShort?.signal}
+              sub={longShort != null ? (longShort.ratio < 0.7 ? 'Short squeeze risk 🔥' : longShort.ratio > 1.3 ? 'Long squeeze risk' : 'Balanced') : ''}
               barName="longShort"
               barRaw={longShort?.ratio}
             />
