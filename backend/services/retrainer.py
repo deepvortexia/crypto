@@ -67,7 +67,7 @@ def get_status() -> dict:
     }
 
 
-def start_scheduler(retrain_interval_hours: int = 24):
+def start_scheduler(retrain_interval_hours: int = 48):
     global _scheduler
     _scheduler = AsyncIOScheduler(timezone="UTC")
     _scheduler.add_job(
