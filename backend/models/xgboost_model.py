@@ -169,6 +169,7 @@ class BTCXGBoostModel:
             return None
 
     def save(self):
+        self.data_dir.mkdir(parents=True, exist_ok=True)
         for key, model in self.models.items():
             model.save_model(str(self.data_dir / f"xgb_{key}.ubj"))
             with open(self.data_dir / f"xgb_{key}_scaler.pkl", "wb") as f:
