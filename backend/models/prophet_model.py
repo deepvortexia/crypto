@@ -11,10 +11,11 @@ HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
 
 try:
     from prophet import Prophet
+    import cmdstanpy as _cmdstanpy  # noqa: F401 — confirms backend is importable
     PROPHET_AVAILABLE = True
-except ImportError:
+except (ImportError, Exception) as _e:
     PROPHET_AVAILABLE = False
-    logger.warning("Prophet not available — prophet model will be skipped")
+    logger.warning(f"Prophet not available — skipping: {_e}")
 
 
 class BTCProphetModel:
@@ -55,11 +56,14 @@ class BTCProphetModel:
             daily_seasonality=True,
             weekly_seasonality=True,
             yearly_seasonality=False,
+            suppress_stdout_stderror=True,
         )
         model.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+        logger.info("Prophet fitting hourly model…")
         model.fit(prophet_df)
         self.model_hourly = model
         self._last_train_df_hourly = prophet_df
+        logger.info("Prophet hourly model trained ✓")
 
     def _train_daily(self, df: pd.DataFrame):
         prophet_df = self._to_prophet_df(df)
@@ -69,11 +73,14 @@ class BTCProphetModel:
             daily_seasonality=False,
             weekly_seasonality=True,
             yearly_seasonality=True,
+            suppress_stdout_stderror=True,
         )
         model.add_seasonality(name="monthly", period=30.5, fourier_order=5)
+        logger.info("Prophet fitting daily model…")
         model.fit(prophet_df)
         self.model_daily = model
         self._last_train_df_daily = prophet_df
+        logger.info("Prophet daily model trained ✓")
 
     def predict(self, horizon_key: str) -> Optional[float]:
         if not self.is_trained or not PROPHET_AVAILABLE:
