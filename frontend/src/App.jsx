@@ -11,6 +11,7 @@ import About from './pages/About'
 import {
   fetchLivePrice,
   fetchSentiment,
+  fetchNewsSentiment,
   fetchPrediction,
   fetchIndicators,
   fetchOnchain,
@@ -204,6 +205,97 @@ function IndCard({ label, value, sub, barName, barRaw }) {
   )
 }
 
+function NewsSentimentWidget({ data }) {
+  if (!data) return (
+    <div style={{ ...cardStyle, width: '100%', marginTop: 16 }}>
+      <div style={labelStyle}>Media Sentiment<Tooltip text="AI-scored crypto headlines from CoinTelegraph, CoinDesk, Decrypt — last 24h"/></div>
+      <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text, opacity: 0.5 }}>Loading…</div>
+    </div>
+  )
+
+  const score = data.score ?? 0
+  const label = data.label ?? 'Neutral'
+  const headlines = data.headlines ?? []
+
+  const labelColor = label === 'Bullish' ? G.green : label === 'Bearish' ? G.red : G.gold
+  const scoreColor = score > 0.15 ? G.green : score < -0.15 ? G.red : G.gold
+
+  // Map score -1..+1 to 0..100% for the bar
+  const barPct = Math.round(((score + 1) / 2) * 100)
+  // Bar fill starts from center (50%) and goes left or right
+  const fillLeft  = score < 0 ? `${50 + score * 50}%` : '50%'
+  const fillWidth = `${Math.abs(score) * 50}%`
+
+  const scoreLabel = (s) => {
+    if (s > 0.15) return { color: G.green, symbol: '▲' }
+    if (s < -0.15) return { color: G.red,   symbol: '▼' }
+    return { color: G.gold, symbol: '—' }
+  }
+
+  return (
+    <div style={{ ...cardStyle, width: '100%', marginTop: 16 }}>
+      <div style={labelStyle}>Media Sentiment<Tooltip text="AI-scored crypto headlines from CoinTelegraph, CoinDesk, Decrypt — updated every 30 min"/></div>
+
+      {/* Score bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 14 }}>
+        <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 28, color: scoreColor, fontWeight: 'bold', minWidth: 60 }}>
+          {score >= 0 ? '+' : ''}{score.toFixed(2)}
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 13, color: labelColor, marginBottom: 6, letterSpacing: '0.1em' }}>
+            {label.toUpperCase()}
+          </div>
+          {/* Track */}
+          <div style={{ position: 'relative', height: 6, borderRadius: 3, background: '#1a1a1a', overflow: 'hidden' }}>
+            {/* Center marker */}
+            <div style={{ position: 'absolute', left: '50%', top: 0, width: 1, height: '100%', background: '#444' }} />
+            {/* Fill */}
+            <div style={{
+              position: 'absolute', top: 0, height: '100%',
+              left: fillLeft, width: fillWidth,
+              background: scoreColor,
+              boxShadow: `0 0 6px ${scoreColor}`,
+              borderRadius: 3,
+              transition: 'all 0.8s ease',
+            }} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: '"Share Tech Mono",monospace', fontSize: 8, color: G.text, marginTop: 3 }}>
+            <span style={{ color: G.red }}>BEARISH −1.0</span>
+            <span>NEUTRAL</span>
+            <span style={{ color: G.green }}>BULLISH +1.0</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Separator */}
+      {headlines.length > 0 && <div style={{ height: 1, background: G.border, marginBottom: 12 }} />}
+
+      {/* Headlines */}
+      {headlines.slice(0, 5).map((h, i) => {
+        const { color: hColor, symbol } = scoreLabel(h.score)
+        return (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'flex-start', gap: 10,
+            padding: '7px 0',
+            borderBottom: i < 4 ? `1px solid ${G.border}33` : 'none',
+          }}>
+            <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: hColor, flexShrink: 0, minWidth: 14 }}>{symbol}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: G.bright, lineHeight: 1.5, marginBottom: 2 }}>
+                {h.title}
+              </div>
+              <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 8, color: G.text, letterSpacing: '0.1em' }}>
+                {h.source} &nbsp;·&nbsp;
+                <span style={{ color: hColor }}>{h.score >= 0 ? '+' : ''}{h.score.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function SentimentMeter({ value, label, history }) {
   const color = value == null ? G.text : value >= 75 ? G.green : value >= 55 ? '#84cc16' : value >= 45 ? G.gold : value >= 25 ? '#f97316' : G.red
   const gradAngle = value != null ? Math.round((value / 100) * 360) : 180
@@ -385,6 +477,7 @@ export default function App() {
   const [orderBook,   setOrderBook]   = useState(null)
   const [keyLevels,     setKeyLevels]     = useState(null)
   const [liquidations,  setLiquidations]  = useState(null)
+  const [newsSentiment, setNewsSentiment] = useState(null)
 const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepLogs,      setDeepLogs]      = useState([])
   const [deepResult,    setDeepResult]    = useState(null)
@@ -445,6 +538,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     const currentPrice = p.status === 'fulfilled' ? p.value?.price : null
     try { if (currentPrice) setKeyLevels(await fetchKeyLevels(currentPrice)) } catch {}
     try { setLiquidations(await fetchLiquidations()) } catch {}
+    try { setNewsSentiment(await fetchNewsSentiment()) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -902,6 +996,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Market Sentiment & Technical Indicators</div>
           <SentimentMeter value={sentiment?.value} label={sentiment?.classification} history={sentiment?.history} />
+          <NewsSentimentWidget data={newsSentiment} />
           <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14, marginTop: 16 }}>
               <IndCard
                 label={<>RSI (14)<Tooltip text="Below 30 oversold buy signal — above 70 overbought sell signal"/></>}

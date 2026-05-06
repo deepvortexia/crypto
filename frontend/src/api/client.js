@@ -234,6 +234,15 @@ export async function fetchSentiment() {
   }
 }
 
+export async function fetchNewsSentiment() {
+  try {
+    return await get(`${BACKEND_URL}/api/news-sentiment`, { timeout: 15000, retries: 1 })
+  } catch (err) {
+    console.error('[fetchNewsSentiment] Failed:', err.message)
+    return null
+  }
+}
+
 export async function fetchOnchain() {
   try {
     const data = await get(`${BACKEND_URL}/api/onchain`, {
