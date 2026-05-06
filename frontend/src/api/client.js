@@ -184,8 +184,8 @@ export async function fetchLivePrice() {
       })
       volume_24h = cg.market_data?.total_volume?.usd ?? volume_24h
       market_cap = cg.market_data?.market_cap?.usd ?? market_cap
-    } catch (cgErr) {
-      console.warn('[fetchLivePrice] CoinGecko fallback to Binance volume:', cgErr.message)
+    } catch (_cgErr) {
+      // fallback to Binance volume silently
     }
 
     return {
@@ -221,12 +221,6 @@ export async function fetchSentiment() {
       retries: 2
     })
 
-    // DEBUG: Print raw backend response
-    console.log('='.repeat(80))
-    console.log('DEBUG [fetchSentiment] RAW response from Railway backend:')
-    console.log(data)
-    console.log('='.repeat(80))
-
     // Backend returns flat object with history array
     return {
       value: parseInt(data.value, 10),
@@ -246,12 +240,6 @@ export async function fetchOnchain() {
       timeout: 10000,
       retries: 2
     })
-
-    // DEBUG: Print raw backend response
-    console.log('='.repeat(80))
-    console.log('DEBUG [fetchOnchain] RAW response from Railway backend:')
-    console.log(data)
-    console.log('='.repeat(80))
 
     return data
   } catch (err) {
@@ -437,13 +425,6 @@ export async function fetchMempool() {
     ])
 
     // DEBUG: Print raw mempool.space responses
-    console.log('='.repeat(80))
-    console.log('DEBUG [fetchMempool] RAW stats response:')
-    console.log(stats)
-    console.log('DEBUG [fetchMempool] RAW fees response:')
-    console.log(fees)
-    console.log('='.repeat(80))
-
     return {
       count: stats.count,
       vsize: stats.vsize,

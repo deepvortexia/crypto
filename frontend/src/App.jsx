@@ -209,7 +209,6 @@ function SentimentMeter({ value, label, history }) {
   const gradAngle = value != null ? Math.round((value / 100) * 360) : 180
   const ticks = Array.from({ length: 10 }, (_, i) => i * 36)
 
-  console.log('history:', history)
 
   const getHistoryColor = (val) => {
     if (val == null) return G.text
@@ -476,7 +475,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker')
 
         ws.onopen = () => {
-          console.log('[WebSocket] Connected to Binance price stream')
           reconnectAttempts = 0
           // Clear REST fallback if WebSocket connects
           if (restFallbackInterval) {
@@ -495,24 +493,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           }))
         }
 
-        ws.onerror = (err) => {
-          console.warn('[WebSocket] Error:', err)
-        }
+        ws.onerror = () => {}
 
         ws.onclose = () => {
-          console.warn('[WebSocket] Disconnected')
-
-          // Try to reconnect with exponential backoff
           if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
             const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000)
-            console.log(`[WebSocket] Reconnecting in ${delay}ms (attempt ${reconnectAttempts + 1}/${MAX_RECONNECT_ATTEMPTS})`)
             reconnectTimeout = setTimeout(() => {
               reconnectAttempts++
               connectWebSocket()
             }, delay)
           } else {
-            // Fall back to REST API polling if WebSocket fails
-            console.warn('[WebSocket] Max reconnect attempts reached, falling back to REST API polling')
             if (!restFallbackInterval) {
               restFallbackInterval = setInterval(async () => {
                 try {
