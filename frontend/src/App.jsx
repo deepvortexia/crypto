@@ -594,10 +594,19 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       if (authTab === 'signup') {
         const { error } = await supabase.auth.signUp({ email: authEmail, password: authPass })
         if (error) throw error
-        setAuthSuccess(true)
+        setAuthSuccess(true) // show "Check your email" only for new signups
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPass })
-        if (error) throw error
+        const { data, error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPass })
+        if (error) {
+          const msg = error.message?.toLowerCase() || ''
+          if (msg.includes('invalid login') || msg.includes('invalid credentials') || msg.includes('wrong password') || msg.includes('email not confirmed')) {
+            throw new Error('Invalid credentials. Please check your email and password.')
+          }
+          if (msg.includes('user not found') || msg.includes('no user')) {
+            throw new Error('No account found. Please sign up first.')
+          }
+          throw new Error(error.message)
+        }
         setAuthOpen(false)
         setAuthEmail('')
         setAuthPass('')
@@ -1146,14 +1155,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               </div>
               {/* tabs */}
               <div style={{ display:'flex', gap:0, marginBottom:24, borderBottom:`1px solid ${G.border}` }}>
-                {['signup', 'login'].map(tab => (
+                {['login', 'signup'].map(tab => (
                   <button key={tab} onClick={() => { setAuthTab(tab); setAuthError('') }} style={{
                     flex:1, fontFamily:'"Orbitron",sans-serif', fontSize:11, letterSpacing:'0.2em', textTransform:'uppercase',
                     padding:'12px 0', background:'none', border:'none', cursor:'pointer',
                     color: authTab === tab ? G.gold : G.text,
                     borderBottom: authTab === tab ? `2px solid ${G.gold}` : '2px solid transparent',
                     marginBottom: -1,
-                  }}>{tab === 'signup' ? 'SIGN UP' : 'LOGIN'}</button>
+                  }}>{tab === 'signup' ? 'SIGN UP' : 'SIGN IN'}</button>
                 ))}
               </div>
               {/* Google Sign In Button */}
@@ -1230,11 +1239,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     transition:'all 0.2s',
                   }}
                 >
-                  {authBusy ? 'PLEASE WAIT…' : (authTab === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN')}
+                  {authBusy ? 'PLEASE WAIT…' : (authTab === 'signup' ? 'CREATE ACCOUNT' : 'SIGN IN')}
                 </button>
               </form>
               <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:9, color:'#4b5563', letterSpacing:'0.15em', textAlign:'center', marginTop:16 }}>
-                {authTab === 'signup' ? 'FREE · UNLOCK ALL PREDICTIONS' : 'WELCOME BACK'}
+                {authTab === 'signup'
+                  ? 'FREE · UNLOCK ALL PREDICTIONS · CONFIRMATION EMAIL SENT'
+                  : 'EXISTING USERS · NO EMAIL CONFIRMATION NEEDED'}
               </div>
             </div>
           )}
