@@ -1053,7 +1053,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     border: `1px solid ${G.gold}33`,
                     gap: 6,
                   }}>
-                    <span style={{ fontSize: 20 }}>👑</span>
+                    <img src="/logoegyptfinal.webp" alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} />
                     <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.5 }}>PRO<br/>$12.99/mo</span>
                   </div>
                 )}
@@ -1142,7 +1142,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
             {!isPro && (
               <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-                <span style={{ fontSize: 20 }}>👑</span>
+                <img src="/logoegyptfinal.webp" alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} />
                 <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
               </div>
             )}
@@ -1168,7 +1168,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
             {!isPro && (
               <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-                <span style={{ fontSize: 20 }}>👑</span>
+                <img src="/logoegyptfinal.webp" alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} />
                 <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
               </div>
             )}
@@ -1215,7 +1215,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
           {!isPro && (
             <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-              <span style={{ fontSize: 20 }}>👑</span>
+              <img src="/logoegyptfinal.webp" alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} />
               <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
             </div>
           )}
@@ -1252,7 +1252,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
           {!isPro && (
             <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-              <span style={{ fontSize: 20 }}>👑</span>
+              <img src="/logoegyptfinal.webp" alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} />
               <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
             </div>
           )}
@@ -1316,7 +1316,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
             {!isPro && (
               <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-                <span style={{ fontSize: 20 }}>👑</span>
+                <img src="/logoegyptfinal.webp" alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} />
                 <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
               </div>
             )}
@@ -1347,7 +1347,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
           {!isPro && (
             <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-              <span style={{ fontSize: 20 }}>👑</span>
+              <img src="/logoegyptfinal.webp" alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} />
               <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
             </div>
           )}
