@@ -70,7 +70,7 @@ async def lifespan(app: FastAPI):
 
     if not loaded:
         logger.info("No saved models found — triggering initial training in background")
-        asyncio.create_task(retrainer.retrain_all())
+        asyncio.create_task(retrainer.initial_train())
     else:
         logger.info("✓ Loaded existing models successfully — skipping retraining")
 

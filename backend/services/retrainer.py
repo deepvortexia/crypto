@@ -18,6 +18,13 @@ def inject_ensemble(ensemble):
     _ensemble = ensemble
 
 
+async def initial_train():
+    """Boot-time training with a 30s delay to avoid CoinGecko 429 on rapid redeploys."""
+    logger.info("Initial training scheduled — waiting 30s for CoinGecko rate limit to clear…")
+    await asyncio.sleep(30)
+    await retrain_all()
+
+
 async def retrain_all():
     global _is_training, _last_trained
 
@@ -29,7 +36,7 @@ async def retrain_all():
         return
 
     _is_training = True
-    logger.info("Starting scheduled retraining…")
+    logger.info("Starting retraining…")
 
     try:
         from services.data_fetcher import fetch_hourly_ohlcv, fetch_daily_ohlcv

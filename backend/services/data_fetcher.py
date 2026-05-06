@@ -22,19 +22,22 @@ def _coingecko_headers() -> dict:
     return {}
 
 
+_RETRY_BACKOFF = [5, 15, 30]  # seconds between attempts (handles CoinGecko 429s)
+
+
 async def _get(client: httpx.AsyncClient, url: str, params: dict = None, retries: int = 3) -> dict:
     for attempt in range(retries):
         try:
             resp = await client.get(url, params=params, headers=_coingecko_headers(), timeout=_HTTP_TIMEOUT)
             if resp.status_code == 429:
-                await asyncio.sleep(2 ** attempt)
+                await asyncio.sleep(_RETRY_BACKOFF[min(attempt, len(_RETRY_BACKOFF) - 1)])
                 continue
             resp.raise_for_status()
             return resp.json()
         except httpx.HTTPError as exc:
             if attempt == retries - 1:
                 raise
-            await asyncio.sleep(2 ** attempt)
+            await asyncio.sleep(_RETRY_BACKOFF[min(attempt, len(_RETRY_BACKOFF) - 1)])
     raise RuntimeError(f"Failed to fetch {url} after {retries} attempts")
 
 
