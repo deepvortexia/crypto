@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 from models.ensemble import BTCEnsemble
 from services.data_fetcher import fetch_daily_ohlcv, fetch_fear_greed, fetch_hourly_ohlcv, fetch_live_price, fetch_onchain
 from services.indicators import compute_indicators, get_indicator_snapshot
+from services.news_sentiment import fetch_news_sentiment
 from services import retrainer
 
 CORS_ORIGINS = os.getenv(
@@ -36,6 +37,7 @@ _indicators_cache: TTLCache = TTLCache(maxsize=1, ttl=300)     # 5 min
 _sentiment_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)     # 30 min
 _onchain_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)       # 30 min
 _predict_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)      # 1 h per horizon
+_news_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)          # 30 min
 
 # Shared dataframe cache (refreshed alongside indicators)
 _hourly_df = None
@@ -209,6 +211,21 @@ async def get_sentiment():
     except Exception as exc:
         logger.error(f"Sentiment fetch failed: {exc}")
         raise HTTPException(502, "Failed to fetch sentiment data")
+
+
+# ── News Sentiment ───────────────────────────────────────────────────────────
+@app.get("/api/news-sentiment")
+async def get_news_sentiment():
+    """AI-scored crypto news sentiment from CoinTelegraph, CoinDesk, Decrypt (last 24h)."""
+    if "news" in _news_cache:
+        return _news_cache["news"]
+    try:
+        data = await fetch_news_sentiment()
+        _news_cache["news"] = data
+        return data
+    except Exception as exc:
+        logger.error(f"News sentiment failed: {exc}")
+        raise HTTPException(502, "Failed to fetch news sentiment")
 
 
 # ── On-Chain ──────────────────────────────────────────────────────────────────
