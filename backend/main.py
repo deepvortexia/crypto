@@ -38,12 +38,13 @@ async def get_current_user(authorization: str = Header(...)) -> dict:
         raise HTTPException(401, "Invalid authorization header")
     token = authorization.split(" ")[1]
     try:
-        payload = jwt.decode(token, SUPABASE_JWT_SECRET, algorithms=["HS256"], audience="authenticated")
-        return {"id": payload["sub"], "email": payload.get("email")}
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(401, "Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(401, "Invalid token")
+        response = supabase.auth.get_user(token)
+        user = response.user
+        if not user:
+            raise HTTPException(401, "Invalid token")
+        return {"id": str(user.id), "email": user.email}
+    except Exception as e:
+        raise HTTPException(401, f"Invalid token: {str(e)}")
 
 from models.ensemble import BTCEnsemble
 from services.data_fetcher import fetch_daily_ohlcv, fetch_fear_greed, fetch_hourly_ohlcv, fetch_live_price, fetch_onchain
