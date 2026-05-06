@@ -1,3 +1,5 @@
+import { supabase } from '../lib/supabase'
+
 const BINANCE = 'https://api.binance.com/api/v3'
 const BACKEND_URL = 'https://crypto-production-f7c5.up.railway.app'
 
@@ -530,5 +532,54 @@ export async function fetchOHLCCandles(limit = 100) {
   } catch (err) {
     console.error('[fetchOHLCCandles] Failed:', err.message)
     return []
+  }
+}
+
+// ── Subscription API ────────────────────────────────────────────────────────
+async function getAuthHeaders() {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.access_token) throw new Error('Not authenticated')
+  return { Authorization: `Bearer ${session.access_token}` }
+}
+
+export async function fetchSubscriptionStatus() {
+  try {
+    const headers = await getAuthHeaders()
+    const res = await fetch(`${BACKEND_URL}/api/subscription-status`, { headers })
+    if (!res.ok) throw new Error(res.statusText)
+    return await res.json()
+  } catch (err) {
+    console.error('[fetchSubscriptionStatus] Failed:', err.message)
+    return { status: 'inactive', current_period_end: null }
+  }
+}
+
+export async function createCheckoutSession() {
+  const headers = await getAuthHeaders()
+  const res = await fetch(`${BACKEND_URL}/api/create-checkout-session`, {
+    method: 'POST',
+    headers
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || 'Checkout failed')
+  }
+  return await res.json()
+}
+
+export async function fetchUserCredits() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return { credits_remaining: 0 }
+    const { data, error } = await supabase
+      .from('user_credits')
+      .select('credits_remaining')
+      .eq('user_id', session.user.id)
+      .single()
+    if (error) throw error
+    return data || { credits_remaining: 3 }
+  } catch (err) {
+    console.error('[fetchUserCredits] Failed:', err.message)
+    return { credits_remaining: 0 }
   }
 }

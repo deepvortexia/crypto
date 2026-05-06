@@ -23,6 +23,9 @@ import {
   fetchOrderBook,
   fetchKeyLevels,
   fetchLiquidations,
+  fetchSubscriptionStatus,
+  fetchUserCredits,
+  createCheckoutSession,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -493,6 +496,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [authError,   setAuthError]   = useState('')
   const [authSuccess, setAuthSuccess] = useState(false)
   const [user,        setUser]        = useState(null)
+  const [isPro,       setIsPro]       = useState(false)
+  const [credits,     setCredits]     = useState(0)
+  const [pricingOpen, setPricingOpen] = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
 
@@ -508,6 +514,21 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     })
     return () => subscription.unsubscribe()
   }, [])
+
+  // Fetch subscription status when user changes
+  useEffect(() => {
+    if (user) {
+      fetchSubscriptionStatus().then(sub => {
+        setIsPro(sub.status === 'active')
+      })
+      fetchUserCredits().then(c => {
+        setCredits(c.credits_remaining ?? 0)
+      })
+    } else {
+      setIsPro(false)
+      setCredits(0)
+    }
+  }, [user])
 
   const loadAll = useCallback(async () => {
     const [p, s, ind] = await Promise.allSettled([
@@ -675,10 +696,25 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setDeepRunning(false)
   }
 
-  const isUnlocked = () => !!user
+  const isLoggedIn = () => !!user
+  const canAccessPremium = () => !!user
+  const canDeepAnalysis = () => isPro || credits > 0
 
   const handleDeepClick = () => {
-    if (isUnlocked()) { setDeepOpen(true) } else { setAuthOpen(true) }
+    if (!user) { setAuthOpen(true); return }
+    if (!canDeepAnalysis()) { setPricingOpen(true); return }
+    setDeepOpen(true)
+  }
+
+  const handleUpgrade = async () => {
+    if (!user) { setAuthOpen(true); return }
+    try {
+      const { url } = await createCheckoutSession()
+      window.location.href = url
+    } catch (err) {
+      console.error('Checkout error:', err)
+      alert('Failed to start checkout: ' + err.message)
+    }
   }
 
   const handleAuthSubmit = async (e) => {
@@ -845,6 +881,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               </div>
             )}
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.1em', color: G.text, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</span>
+            {!isPro && (
+              <button onClick={() => setPricingOpen(true)} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.1em', color: '#000', background: `linear-gradient(135deg, ${G.gold}, #d97706)`, border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', textTransform: 'uppercase', fontWeight: 'bold' }}>UPGRADE</button>
+            )}
+            {isPro && (
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.1em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 4, padding: '4px 8px' }}>PRO</span>
+            )}
             <button onClick={handleLogout} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, background: 'none', border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '4px 10px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGOUT</button>
           </div>
         ) : (
@@ -869,7 +911,15 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 )}
                 <div style={{flex:1,overflow:'hidden'}}>
                   <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:G.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user.email}</div>
-                  <button onClick={() => { handleLogout(); setMenuOpen(false) }} style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.1em',color:G.gold,background:'none',border:'none',cursor:'pointer',padding:0,marginTop:4,textTransform:'uppercase'}}>LOGOUT</button>
+                  <div style={{display:'flex',gap:8,marginTop:4}}>
+                    {!isPro && (
+                      <button onClick={() => { setPricingOpen(true); setMenuOpen(false) }} style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.1em',color:'#000',background:`linear-gradient(135deg, ${G.gold}, #d97706)`,border:'none',borderRadius:4,padding:'4px 8px',cursor:'pointer',textTransform:'uppercase',fontWeight:'bold'}}>UPGRADE</button>
+                    )}
+                    {isPro && (
+                      <span style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}`,borderRadius:4,padding:'4px 8px'}}>PRO</span>
+                    )}
+                    <button onClick={() => { handleLogout(); setMenuOpen(false) }} style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.1em',color:G.gold,background:'none',border:'none',cursor:'pointer',padding:0,textTransform:'uppercase'}}>LOGOUT</button>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -978,7 +1028,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               <PredCard key="1h" horizonKey="1h" horizon={<>1H<Tooltip text="Shortest horizon — highest confidence intraday signal"/></>} data={preds['1h']} loading={loading} />
             </div>
 
-            {/* 4H–1MONTH — locked unless unlocked_until valid */}
+            {/* 4H–1MONTH — locked for non-Pro users */}
             {[
               { k: '4h',     label: '4H',     tip: '4-hour AI ensemble prediction' },
               { k: '8h',     label: '8H',     tip: '8-hour AI ensemble prediction' },
@@ -989,12 +1039,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             ].map(({ k, label, tip }) => (
               <div key={k} style={{ position: 'relative' }}>
                 {/* blurred card underneath */}
-                <div style={{ filter: isUnlocked() ? 'none' : 'blur(5px)', pointerEvents: isUnlocked() ? 'auto' : 'none', userSelect: 'none' }}>
+                <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none', userSelect: 'none' }}>
                   <PredCard horizonKey={k} horizon={<>{label}<Tooltip text={tip}/></>} data={preds[k]} loading={loading} />
                 </div>
                 {/* lock overlay */}
-                {!isUnlocked() && (
-                  <div onClick={handleDeepClick} style={{
+                {!isPro && (
+                  <div onClick={() => setPricingOpen(true)} style={{
                     position: 'absolute', inset: 0, zIndex: 3,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     borderRadius: 10, cursor: 'pointer',
@@ -1003,8 +1053,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     border: `1px solid ${G.gold}33`,
                     gap: 6,
                   }}>
-                    <span style={{ fontSize: 20 }}>🔒</span>
-                    <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.5 }}>UNLOCK WITH<br/>EMAIL</span>
+                    <span style={{ fontSize: 20 }}>👑</span>
+                    <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.5 }}>PRO<br/>$12.99/mo</span>
                   </div>
                 )}
               </div>
@@ -1015,52 +1065,75 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 3 — sentiment (full-width) + indicators */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Market Sentiment & Technical Indicators</div>
-          <SentimentMeter value={sentiment?.value} label={sentiment?.classification} history={sentiment?.history} />
-          <NewsSentimentWidget data={newsSentiment} />
-          <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14, marginTop: 16 }}>
-              <IndCard
-                label={<>RSI (14)<Tooltip text="Below 30 oversold buy signal — above 70 overbought sell signal"/></>}
-                value={rsi != null ? fmtNum(rsi, 1) : '—'}
-                sub={rsi == null ? '' : rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral'}
-                barName="rsi" barRaw={rsi}
-              />
-              <IndCard
-                label={<>MACD<Tooltip text="MACD above signal line = bullish momentum"/></>}
-                value={macd ? fmtNum(macd.macd, 1) : '—'}
-                sub={macd ? (macd.macd > 0 ? 'Bullish' : 'Bearish') : ''}
-                barName="macd" barRaw={macd?.macd}
-              />
-              <IndCard
-                label={<>MACD Signal<Tooltip text="MACD above signal line = bullish momentum"/></>}
-                value={macd ? fmtNum(macd.signal, 1) : '—'}
-                sub={macd ? `Hist: ${fmtNum(macd.histogram, 1)}` : ''}
-                barName="macdSig" barRaw={macd?.histogram}
-              />
-              <IndCard
-                label={<>BB Upper<Tooltip text="Price near upper band = overbought potential reversal"/></>}
-                value={bb ? fmtPrice(bb.upper) : '—'}
-                sub={bb && curPrice ? (curPrice > bb.upper ? 'Overbought ⚠️' : 'Bollinger Band') : 'Bollinger Band'}
-                barName="bbUpper"
-              />
-              <IndCard
-                label={<>BB Lower<Tooltip text="Price near lower band = oversold potential reversal"/></>}
-                value={bb ? fmtPrice(bb.lower) : '—'}
-                sub={bb && curPrice ? (curPrice < bb.lower ? 'Oversold ⚠️' : 'Bollinger Band') : 'Bollinger Band'}
-                barName="bbLower"
-              />
-              <IndCard
-                label={<>EMA 50<Tooltip text="Price above = bullish trend"/></>}
-                value={ema50 ? fmtPrice(ema50) : '—'}
-                sub={ema50 && curPrice ? (curPrice > ema50 ? 'Price above' : 'Price below') : ''}
-                barName="macd" barRaw={ema50 && curPrice ? curPrice - ema50 : null}
-              />
-              <IndCard
-                label={<>EMA 200<Tooltip text="Price below = long-term bearish"/></>}
-                value={ema200 ? fmtPrice(ema200) : '—'}
-                sub={ema200 && curPrice ? (curPrice > ema200 ? 'Price above' : 'Price below') : ''}
-                barName="macd" barRaw={ema200 && curPrice ? curPrice - ema200 : null}
-              />
+          {/* Fear & Greed: non-logged-in sees today only, logged-in sees history */}
+          <SentimentMeter value={sentiment?.value} label={sentiment?.classification} history={user ? sentiment?.history : []} />
+          {/* Media Sentiment: locked for non-logged-in */}
+          <div style={{ position: 'relative' }}>
+            <div style={{ filter: user ? 'none' : 'blur(5px)', pointerEvents: user ? 'auto' : 'none' }}>
+              <NewsSentimentWidget data={newsSentiment} />
             </div>
+            {!user && (
+              <div onClick={() => setAuthOpen(true)} style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+                <span style={{ fontSize: 20 }}>🔒</span>
+                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>SIGN UP FREE</span>
+              </div>
+            )}
+          </div>
+          {/* Technical indicators: locked for non-logged-in */}
+          <div style={{ position: 'relative', marginTop: 16 }}>
+            <div style={{ filter: user ? 'none' : 'blur(5px)', pointerEvents: user ? 'auto' : 'none' }}>
+              <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14 }}>
+                <IndCard
+                  label={<>RSI (14)<Tooltip text="Below 30 oversold buy signal — above 70 overbought sell signal"/></>}
+                  value={rsi != null ? fmtNum(rsi, 1) : '—'}
+                  sub={rsi == null ? '' : rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral'}
+                  barName="rsi" barRaw={rsi}
+                />
+                <IndCard
+                  label={<>MACD<Tooltip text="MACD above signal line = bullish momentum"/></>}
+                  value={macd ? fmtNum(macd.macd, 1) : '—'}
+                  sub={macd ? (macd.macd > 0 ? 'Bullish' : 'Bearish') : ''}
+                  barName="macd" barRaw={macd?.macd}
+                />
+                <IndCard
+                  label={<>MACD Signal<Tooltip text="MACD above signal line = bullish momentum"/></>}
+                  value={macd ? fmtNum(macd.signal, 1) : '—'}
+                  sub={macd ? `Hist: ${fmtNum(macd.histogram, 1)}` : ''}
+                  barName="macdSig" barRaw={macd?.histogram}
+                />
+                <IndCard
+                  label={<>BB Upper<Tooltip text="Price near upper band = overbought potential reversal"/></>}
+                  value={bb ? fmtPrice(bb.upper) : '—'}
+                  sub={bb && curPrice ? (curPrice > bb.upper ? 'Overbought ⚠️' : 'Bollinger Band') : 'Bollinger Band'}
+                  barName="bbUpper"
+                />
+                <IndCard
+                  label={<>BB Lower<Tooltip text="Price near lower band = oversold potential reversal"/></>}
+                  value={bb ? fmtPrice(bb.lower) : '—'}
+                  sub={bb && curPrice ? (curPrice < bb.lower ? 'Oversold ⚠️' : 'Bollinger Band') : 'Bollinger Band'}
+                  barName="bbLower"
+                />
+                <IndCard
+                  label={<>EMA 50<Tooltip text="Price above = bullish trend"/></>}
+                  value={ema50 ? fmtPrice(ema50) : '—'}
+                  sub={ema50 && curPrice ? (curPrice > ema50 ? 'Price above' : 'Price below') : ''}
+                  barName="macd" barRaw={ema50 && curPrice ? curPrice - ema50 : null}
+                />
+                <IndCard
+                  label={<>EMA 200<Tooltip text="Price below = long-term bearish"/></>}
+                  value={ema200 ? fmtPrice(ema200) : '—'}
+                  sub={ema200 && curPrice ? (curPrice > ema200 ? 'Price above' : 'Price below') : ''}
+                  barName="macd" barRaw={ema200 && curPrice ? curPrice - ema200 : null}
+                />
+              </div>
+            </div>
+            {!user && (
+              <div onClick={() => setAuthOpen(true)} style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+                <span style={{ fontSize: 20 }}>🔒</span>
+                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>SIGN UP FREE<br/>TO UNLOCK</span>
+              </div>
+            )}
+          </div>
           {ema50 != null && ema200 != null && ema50 > ema200 && (
             <div style={{ marginTop: 12, fontFamily: '"Share Tech Mono", monospace', fontSize: 12, letterSpacing: '0.15em', color: G.green }}>
               🟢 GOLDEN CROSS — Bullish
@@ -1488,6 +1561,94 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 }}>Close</button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Pricing Modal */}
+      {pricingOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 300,
+          background: 'rgba(0,0,0,0.92)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(8px)',
+        }} onClick={() => setPricingOpen(false)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: G.card, borderRadius: 16, maxWidth: 420, width: '90%',
+            border: `2px solid ${G.gold}`, boxShadow: `0 0 60px ${G.goldGlow}`,
+          }}>
+            <div style={{ padding: '24px 28px', borderBottom: `1px solid ${G.border}`, textAlign: 'center' }}>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>👑</div>
+              <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 20, color: G.gold, letterSpacing: '0.15em', marginBottom: 8 }}>
+                PREDICTALPHA PRO
+              </div>
+              <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text }}>
+                Unlock the full power of AI predictions
+              </div>
+            </div>
+
+            <div style={{ padding: '24px 28px' }}>
+              <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 36, color: G.bright, textAlign: 'center', marginBottom: 4 }}>
+                $12.99<span style={{ fontSize: 14, color: G.text }}>/month</span>
+              </div>
+              <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text, textAlign: 'center', marginBottom: 24 }}>
+                Cancel anytime
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+                {[
+                  'All prediction horizons (1H–1M)',
+                  'RSI, MACD, Bollinger Bands, EMA',
+                  'Fear & Greed 7-day history',
+                  'Media Sentiment Analysis',
+                  'Unlimited Deep Analysis',
+                  'Priority support',
+                ].map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ color: G.green, fontSize: 14 }}>✓</span>
+                    <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.bright }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button onClick={handleUpgrade} style={{
+                width: '100%', padding: '14px 20px',
+                fontFamily: '"Orbitron",sans-serif', fontSize: 14, letterSpacing: '0.2em',
+                background: `linear-gradient(135deg, ${G.gold}, #d97706)`,
+                border: 'none', borderRadius: 8, color: '#000', cursor: 'pointer',
+                fontWeight: 'bold', textTransform: 'uppercase',
+                boxShadow: `0 0 30px ${G.goldGlow}`,
+              }}>
+                UPGRADE NOW
+              </button>
+
+              {!user && (
+                <div style={{ marginTop: 16, textAlign: 'center' }}>
+                  <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
+                    Don't have an account?{' '}
+                    <span onClick={() => { setPricingOpen(false); setAuthOpen(true) }} style={{ color: G.gold, cursor: 'pointer', textDecoration: 'underline' }}>
+                      Sign up free
+                    </span>
+                  </span>
+                </div>
+              )}
+
+              {user && !isPro && credits > 0 && (
+                <div style={{ marginTop: 16, textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
+                  You have <span style={{ color: G.gold }}>{credits}</span> free Deep Analysis credits remaining
+                </div>
+              )}
+            </div>
+
+            <div style={{ padding: '12px 28px 20px', textAlign: 'center' }}>
+              <button onClick={() => setPricingOpen(false)} style={{
+                fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.1em',
+                background: 'none', border: `1px solid ${G.border}`, borderRadius: 6,
+                color: G.text, cursor: 'pointer', padding: '8px 20px', textTransform: 'uppercase',
+              }}>
+                Maybe Later
+              </button>
+            </div>
           </div>
         </div>
       )}
