@@ -394,6 +394,17 @@ async def stripe_webhook(request: Request):
     return {"status": "ok"}
 
 
+@app.get("/api/debug-token")
+async def debug_token(authorization: str = Header(None)):
+    secret = os.getenv("SUPABASE_JWT_SECRET", "")
+    return {
+        "secret_len": len(secret),
+        "secret_first10": secret[:10],
+        "secret_last5": secret[-5:],
+        "auth_header": authorization[:50] if authorization else None
+    }
+
+
 @app.get("/api/subscription-status")
 async def get_subscription_status(user: dict = Depends(get_current_user)):
     """Get current user's subscription status."""
