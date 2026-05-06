@@ -1531,7 +1531,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(6px)',
         }}>
-          <div style={{
+          <div className="deep-modal-box" style={{
             background: G.card,
             border: `1px solid ${G.gold}55`,
             borderRadius: 12,
@@ -1560,7 +1560,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             {!deepHorizon && (
               <div style={{textAlign:'center',padding:20}}>
                 <div style={{fontFamily:'"Orbitron",sans-serif',color:'#f59e0b',marginBottom:20}}>SELECT HORIZON</div>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
+                <div className="deep-horizon-grid" style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
                   {['4h','8h','12h','24h','1week','1month'].map(h=>(
                     <button key={h} onClick={()=>{setDeepHorizon(h);runDeepAnalysis(h)}} style={{fontFamily:'"Orbitron",sans-serif',padding:'14px',background:'#1a1a1a',border:'1px solid #f59e0b',borderRadius:8,color:'#f59e0b',cursor:'pointer',fontSize:13,letterSpacing:'0.2em'}}>{h.toUpperCase()}</button>
                   ))}
@@ -1595,7 +1595,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     ${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}
                   </div>
                   <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:20}}>USD PREDICTED PRICE</div>
-                  <div style={{display:'flex',gap:12,justifyContent:'center',marginBottom:12}}>
+                  <div className="deep-result-badges" style={{display:'flex',gap:12,justifyContent:'center',marginBottom:12}}>
                     <div style={{border:`1px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,borderRadius:8,padding:'8px 20px',color:deepResult.score>50?'#10b981':'#ef4444',fontFamily:'"Orbitron",sans-serif',fontSize:12}}>
                       {deepResult.direction?.toUpperCase()}
                     </div>
@@ -1635,8 +1635,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(8px)',
         }} onClick={() => setPricingOpen(false)}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: G.card, borderRadius: 16, maxWidth: 420, width: '90%',
+          <div onClick={e => e.stopPropagation()} className="pricing-modal-box" style={{
+            background: G.card, borderRadius: 16, maxWidth: 420, width: '92%',
             border: `2px solid ${G.gold}`, boxShadow: `0 0 60px ${G.goldGlow}`,
           }}>
             <div style={{ padding: '24px 28px', borderBottom: `1px solid ${G.border}`, textAlign: 'center' }}>
@@ -1732,44 +1732,92 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes buttonGlow  { 0%,100%{box-shadow:0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)} 50%{box-shadow:0 0 45px #f59e0b88, 0 0 90px #f59e0b44, inset 0 1px 0 rgba(255,255,255,0.4)} }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
         @keyframes authSuccessPulse { 0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.4)} 50%{box-shadow:0 0 40px rgba(245,158,11,0.7)} }
+        @keyframes introScan  { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
+        @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
+
+        /* ── Desktop base ── */
+        * { box-sizing: border-box; }
+        body { overflow-x: hidden; }
+        .navbar-logo  { height: 80px; margin-right: 10px; }
+        .navbar-brand { font-size: 22px; }
+
+        /* ── Tablet landscape: 1025px (desktop grid kicks in naturally) ── */
+
+        /* ── Tablet portrait: 769px – 1024px ── */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .main-pad     { padding: 20px !important; }
+          .header-inner { padding: 0 20px !important; }
+          .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
+          .grid-3       { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
+          .grid-6       { grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
+          .navbar-logo  { height: 64px !important; }
+          .navbar-brand { font-size: 18px !important; }
+        }
+
+        /* ── Mobile + large phone: ≤768px ── */
         @media (max-width: 768px) {
-          .grid-3       { grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
-          .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-          .grid-5       { grid-template-columns: 1fr 1fr !important; }
           .grid-2col    { grid-template-columns: 1fr !important; }
+          .grid-3       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+          .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+          .grid-5       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+          .grid-6       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
           .sentiment-card { width: 100% !important; min-width: 0 !important; }
-          .grid-6       { grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
-          .ind-card     { min-height: 90px !important; padding: 10px 12px !important; }
-          .main-pad     { padding: 16px !important; }
-          .header-inner { flex-direction: row !important; justify-content: space-between !important; align-items: center !important; padding: 10px 12px !important; flex-wrap: nowrap !important; }
+          .ind-card     { min-height: 80px !important; padding: 10px 12px !important; }
+          .main-pad     { padding: 14px !important; }
+          .header-inner { flex-direction: row !important; justify-content: space-between !important;
+                          align-items: center !important; padding: 0 12px !important; flex-wrap: nowrap !important; }
           .header-right { position: static !important; gap: 8px !important; }
           .header-price { font-size: 20px !important; }
           .hide-mobile  { display: none !important; }
-          .show-mobile  { display: block !important; }
-          .navbar-logo  { height: 62px !important; }
-          .navbar-brand { font-size: 13px !important; white-space: nowrap !important; }
+          .show-mobile  { display: flex !important; align-items: center !important; }
+          .navbar-logo  { height: 52px !important; }
+          .navbar-brand { font-size: 14px !important; white-space: nowrap !important; }
           .ai-title     { font-size: 13px !important; }
-          .ai-banner    { font-size: 12px !important; letter-spacing: 0.15em !important; }
-          .ai-sub       { font-size: 7px !important; }
-          .deep-btn     { font-size: 13px !important; padding: 12px 24px !important; max-width: 280px !important; }
-          .pred-horizon { font-size: 13px !important; font-weight: 600 !important; letter-spacing: 0.1em !important; }
-          .pred-direction { font-size: 11px !important; }
-          .pred-pct     { font-size: 12px !important; }
-          .pred-conf    { font-size: 11px !important; }
+          .ai-banner    { font-size: 11px !important; letter-spacing: 0.1em !important; }
+          .ai-sub       { font-size: 7px !important; letter-spacing: 0.05em !important; }
+          .deep-btn     { font-size: 13px !important; padding: 14px 28px !important;
+                          min-height: 52px !important; max-width: 300px !important; }
+          .pred-horizon   { font-size: 12px !important; font-weight: 700 !important; letter-spacing: 0.08em !important; }
+          .pred-direction { font-size: 10px !important; }
+          .pred-pct       { font-size: 11px !important; }
+          .pred-conf      { font-size: 10px !important; }
+          /* Deep Analysis modal: full-screen on mobile */
+          .deep-modal-box { width: 100% !important; max-width: 100% !important;
+                            height: 100% !important; max-height: 100% !important;
+                            border-radius: 0 !important; }
+          /* Horizon selector: 2 cols on mobile */
+          .deep-horizon-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          /* Result badges: wrap if needed */
+          .deep-result-badges { flex-wrap: wrap !important; justify-content: center !important; }
+          /* Pricing modal: scrollable, fits screen */
+          .pricing-modal-box { max-height: 90vh !important; overflow-y: auto !important;
+                               width: 95% !important; border-radius: 12px !important; }
+          /* Ensure all buttons are tappable */
+          button { min-height: 44px; }
         }
-        @media (max-width: 420px) {
-          .grid-3       { grid-template-columns: 1fr !important; }
-          .grid-6       { grid-template-columns: 1fr 1fr !important; }
+
+        /* ── Small phones: ≤480px (iPhone SE 375px, Galaxy S series) ── */
+        @media (max-width: 480px) {
+          .grid-3       { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+          .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+          .grid-6       { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+          .main-pad     { padding: 10px !important; }
           .header-price { font-size: 18px !important; }
-          .navbar-logo  { height: 50px !important; }
-          .navbar-brand { font-size: 13px !important; letter-spacing: 0.05em !important; white-space: nowrap !important; }
-          .main-pad     { padding: 12px !important; }
-          .pred-horizon { font-size: 12px !important; }
+          .navbar-logo  { height: 44px !important; }
+          .navbar-brand { font-size: 13px !important; letter-spacing: 0.03em !important; }
+          .pred-horizon { font-size: 11px !important; }
+          .deep-btn     { font-size: 12px !important; padding: 13px 22px !important; }
+          .ind-card     { padding: 8px 10px !important; }
+          .hide-mobile  { display: none !important; }
         }
-        .navbar-logo  { height: 80px; margin-right: 10px; }
-        .navbar-brand { font-size: 22px; }
-        @keyframes introScan  { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
-        @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
+
+        /* ── Very small: ≤360px (older Androids, iPhone SE 1st gen) ── */
+        @media (max-width: 360px) {
+          .grid-4       { grid-template-columns: 1fr !important; gap: 8px !important; }
+          .header-price { font-size: 16px !important; }
+          .navbar-brand { font-size: 11px !important; }
+          .main-pad     { padding: 8px !important; }
+        }
       `}</style>
     </div>
       } />
