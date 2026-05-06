@@ -1631,9 +1631,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             border: `2px solid ${G.gold}`, boxShadow: `0 0 60px ${G.goldGlow}`,
           }}>
             <div style={{ padding: '24px 28px', borderBottom: `1px solid ${G.border}`, textAlign: 'center' }}>
-              <div style={{ fontSize: 28, marginBottom: 8 }}>👑</div>
+              <img src="/logoegyptfinal.webp" alt="PredictAlpha" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 8 }} />
               <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 20, color: G.gold, letterSpacing: '0.15em', marginBottom: 8 }}>
-                PREDICTALPHA PRO
+                PREDICT ALPHA PRO
               </div>
               <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text }}>
                 Unlock the full power of AI predictions
