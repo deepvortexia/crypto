@@ -88,7 +88,7 @@ async def _get_dataframes():
 
 
 # ── App lifespan ─────────────────────────────────────────────────────────────
-ensemble = BTCEnsemble(data_dir="models")
+ensemble = BTCEnsemble(data_dir="/app/saved_models")
 
 
 @asynccontextmanager
