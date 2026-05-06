@@ -2,19 +2,48 @@ import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from functools import wraps
 from time import time
 from typing import Literal
 
+import jwt
+import stripe
 from cachetools import TTLCache
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from supabase import create_client, Client
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+# ── Stripe setup ─────────────────────────────────────────────────────────────
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PRICE_ID = os.getenv("STRIPE_PRICE_ID")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+# ── Supabase setup ───────────────────────────────────────────────────────────
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY) if SUPABASE_URL and SUPABASE_SERVICE_KEY else None
+
+
+async def get_current_user(authorization: str = Header(...)) -> dict:
+    """Verify Supabase JWT and return user data."""
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Invalid authorization header")
+    token = authorization.split(" ")[1]
+    try:
+        payload = jwt.decode(token, SUPABASE_JWT_SECRET, algorithms=["HS256"], audience="authenticated")
+        return {"id": payload["sub"], "email": payload.get("email")}
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, "Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401, "Invalid token")
 
 from models.ensemble import BTCEnsemble
 from services.data_fetcher import fetch_daily_ohlcv, fetch_fear_greed, fetch_hourly_ohlcv, fetch_live_price, fetch_onchain
@@ -94,7 +123,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "OPTIONS"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -277,3 +306,104 @@ async def trigger_retrain(secret: str):
         return {"message": "Training already in progress"}
     asyncio.create_task(retrainer.retrain_all())
     return {"message": "Retraining triggered"}
+
+
+# ── Stripe Checkout ──────────────────────────────────────────────────────────
+@app.post("/api/create-checkout-session")
+async def create_checkout_session(user: dict = Depends(get_current_user)):
+    """Create a Stripe Checkout session for subscription."""
+    if not stripe.api_key or not STRIPE_PRICE_ID:
+        raise HTTPException(500, "Stripe not configured")
+
+    try:
+        # Get or create Stripe customer
+        existing = supabase.table("subscriptions").select("stripe_customer_id").eq("user_id", user["id"]).execute()
+
+        if existing.data and existing.data[0].get("stripe_customer_id"):
+            customer_id = existing.data[0]["stripe_customer_id"]
+        else:
+            customer = stripe.Customer.create(email=user["email"], metadata={"supabase_user_id": user["id"]})
+            customer_id = customer.id
+            supabase.table("subscriptions").upsert({
+                "user_id": user["id"],
+                "stripe_customer_id": customer_id,
+                "status": "inactive"
+            }).execute()
+
+        session = stripe.checkout.Session.create(
+            customer=customer_id,
+            payment_method_types=["card"],
+            line_items=[{"price": STRIPE_PRICE_ID, "quantity": 1}],
+            mode="subscription",
+            success_url=os.getenv("FRONTEND_URL", "https://predictalpha.app") + "/dashboard?success=true",
+            cancel_url=os.getenv("FRONTEND_URL", "https://predictalpha.app") + "/pricing?canceled=true",
+        )
+        return {"url": session.url}
+    except stripe.StripeError as e:
+        logger.error(f"Stripe error: {e}")
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/webhook")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhook events."""
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except ValueError:
+        raise HTTPException(400, "Invalid payload")
+    except stripe.SignatureVerificationError:
+        raise HTTPException(400, "Invalid signature")
+
+    event_type = event["type"]
+    data = event["data"]["object"]
+
+    def unix_to_iso(ts: int) -> str:
+        return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    if event_type == "customer.subscription.created":
+        supabase.table("subscriptions").update({
+            "stripe_subscription_id": data["id"],
+            "status": "active",
+            "current_period_end": unix_to_iso(data["current_period_end"]),
+            "updated_at": now_iso
+        }).eq("stripe_customer_id", data["customer"]).execute()
+        logger.info(f"Subscription created for customer {data['customer']}")
+
+    elif event_type == "customer.subscription.updated":
+        status = "active" if data["status"] == "active" else data["status"]
+        supabase.table("subscriptions").update({
+            "status": status,
+            "current_period_end": unix_to_iso(data["current_period_end"]),
+            "updated_at": now_iso
+        }).eq("stripe_customer_id", data["customer"]).execute()
+        logger.info(f"Subscription updated for customer {data['customer']}: {status}")
+
+    elif event_type == "customer.subscription.deleted":
+        supabase.table("subscriptions").update({
+            "status": "inactive",
+            "current_period_end": None,
+            "updated_at": now_iso
+        }).eq("stripe_customer_id", data["customer"]).execute()
+        logger.info(f"Subscription deleted for customer {data['customer']}")
+
+    return {"status": "ok"}
+
+
+@app.get("/api/subscription-status")
+async def get_subscription_status(user: dict = Depends(get_current_user)):
+    """Get current user's subscription status."""
+    result = supabase.table("subscriptions").select("status, current_period_end").eq("user_id", user["id"]).execute()
+
+    if not result.data:
+        return {"status": "inactive", "current_period_end": None}
+
+    sub = result.data[0]
+    return {
+        "status": sub.get("status", "inactive"),
+        "current_period_end": sub.get("current_period_end")
+    }
