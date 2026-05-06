@@ -12,11 +12,25 @@ logger = logging.getLogger(__name__)
 
 HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
 
-logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
+
+class _IgnoreAll(logging.Filter):
+    def filter(self, record):
+        return False
+
+
+def _silence_cmdstanpy():
+    _log = logging.getLogger("cmdstanpy")
+    _log.setLevel(logging.CRITICAL)
+    if not any(isinstance(f, _IgnoreAll) for f in _log.filters):
+        _log.addFilter(_IgnoreAll())
+
+
+_silence_cmdstanpy()
 
 try:
     from prophet import Prophet
     import cmdstanpy as _cmdstanpy  # noqa: F401 — confirms backend is importable
+    _silence_cmdstanpy()  # re-apply after Prophet may have reset it
     PROPHET_AVAILABLE = True
 except (ImportError, Exception) as _e:
     PROPHET_AVAILABLE = False
@@ -39,11 +53,11 @@ class BTCProphetModel:
             return
 
         import cmdstanpy
-        logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
         try:
             cmdstanpy.install_cmdstan(progress=False, overwrite=False)
         except Exception:
             pass
+        _silence_cmdstanpy()
 
         logger.info("Training Prophet models…")
         try:
