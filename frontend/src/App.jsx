@@ -644,6 +644,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       'Open Interest: '+fmtLarge((openInterest?.value||0)*(price?.price||0)),
       'Long/Short: '+longShort?.ratio?.toFixed(2),
       'Mempool: '+mempool?.signal,
+      'News Sentiment: '+(newsSentiment?.label??'N/A')+' ('+((newsSentiment?.score??0).toFixed(2))+')',
+      'Hash Rate: '+(onchain?.hash_rate??'N/A')+' EH/s',
+      'Fees 24h: '+(onchain?.total_fees_btc??'N/A')+' BTC',
       'Key level: '+(keyLevels?.nearLevel?'Fib '+(keyLevels.nearLevel.level*100).toFixed(1)+'%':'None'),
       'OI Change: '+liquidations?.change+'%',
       'Horizon: '+horizon,
@@ -651,7 +654,23 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       'Running model...','CONSENSUS REACHED',
     ]
     for(const l of L){await new Promise(r=>setTimeout(r,500));setDeepLogs(p=>[...p,l])}
-    const s=Math.round([indics?.rsi<50,indics?.macd?.histogram>0,sentiment?.value<40,indics?.ema50>indics?.ema200,longShort?.ratio<1,orderBook?.ratio>1].filter(Boolean).length/6*100)
+    // Scoring: 9 signals, each grounded in historical analyst thresholds
+    // RSI>50 = bullish momentum | MACD>0 = bullish crossover | Fear&Greed<40 = contrarian buy
+    // Golden Cross | L/S ratio<1 = shorts dominant (squeeze risk, contrarian buy) | OB ratio>1 = bid pressure
+    // News sentiment>=0.15 = net bullish narrative (backend label threshold)
+    // Hash rate>=700 EH/s = robust mining ecosystem (above bear-era 200-300 EH/s floor)
+    // Fees>=15 BTC/24h = meaningful on-chain demand (bear floor ~5-10, bull avg ~84+)
+    const s=Math.round([
+      indics?.rsi>50,
+      indics?.macd?.histogram>0,
+      sentiment?.value<40,
+      indics?.ema50>indics?.ema200,
+      longShort?.ratio<1,
+      orderBook?.ratio>1,
+      (newsSentiment?.score??-1)>=0.15,
+      (onchain?.hash_rate??0)>=700,
+      (onchain?.total_fees_btc??0)>=15,
+    ].filter(Boolean).length/9*100)
     setDeepResult({score:s,direction:s>50?'BULLISH':'BEARISH',recommendation:s>65?'Strong Buy':s>50?'Weak Buy':s>35?'Hold':'Sell'})
     setDeepRunning(false)
   }
