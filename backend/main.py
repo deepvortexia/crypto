@@ -370,7 +370,7 @@ async def stripe_webhook(request: Request):
         supabase.table("subscriptions").update({
             "stripe_subscription_id": data["id"],
             "status": "active",
-            "current_period_end": unix_to_iso(data["current_period_end"]),
+            "current_period_end": unix_to_iso(data.get("current_period_end")) if data.get("current_period_end") else None,
             "updated_at": now_iso
         }).eq("stripe_customer_id", data["customer"]).execute()
         logger.info(f"Subscription created for customer {data['customer']}")
@@ -379,7 +379,7 @@ async def stripe_webhook(request: Request):
         status = "active" if data["status"] == "active" else data["status"]
         supabase.table("subscriptions").update({
             "status": status,
-            "current_period_end": unix_to_iso(data["current_period_end"]),
+            "current_period_end": unix_to_iso(data.get("current_period_end")) if data.get("current_period_end") else None,
             "updated_at": now_iso
         }).eq("stripe_customer_id", data["customer"]).execute()
         logger.info(f"Subscription updated for customer {data['customer']}: {status}")
