@@ -1079,10 +1079,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               </div>
             )}
           </div>
-          {/* Technical indicators: locked for non-logged-in */}
+          {/* RSI & MACD: locked for non-logged-in, visible for free */}
           <div style={{ position: 'relative', marginTop: 16 }}>
             <div style={{ filter: user ? 'none' : 'blur(5px)', pointerEvents: user ? 'auto' : 'none' }}>
-              <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 14 }}>
+              <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
                 <IndCard
                   label={<>RSI (14)<Tooltip text="Below 30 oversold buy signal — above 70 overbought sell signal"/></>}
                   value={rsi != null ? fmtNum(rsi, 1) : '—'}
@@ -1101,6 +1101,19 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   sub={macd ? `Hist: ${fmtNum(macd.histogram, 1)}` : ''}
                   barName="macdSig" barRaw={macd?.histogram}
                 />
+              </div>
+            </div>
+            {!user && (
+              <div onClick={() => setAuthOpen(true)} style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+                <span style={{ fontSize: 20 }}>🔒</span>
+                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>SIGN UP FREE</span>
+              </div>
+            )}
+          </div>
+          {/* BB & EMA: Pro only */}
+          <div style={{ position: 'relative', marginTop: 14 }}>
+            <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
+              <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
                 <IndCard
                   label={<>BB Upper<Tooltip text="Price near upper band = overbought potential reversal"/></>}
                   value={bb ? fmtPrice(bb.upper) : '—'}
@@ -1127,104 +1140,129 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 />
               </div>
             </div>
-            {!user && (
-              <div onClick={() => setAuthOpen(true)} style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-                <span style={{ fontSize: 20 }}>🔒</span>
-                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>SIGN UP FREE<br/>TO UNLOCK</span>
+            {!isPro && (
+              <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+                <span style={{ fontSize: 20 }}>👑</span>
+                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
               </div>
             )}
           </div>
-          {ema50 != null && ema200 != null && ema50 > ema200 && (
+          {isPro && ema50 != null && ema200 != null && ema50 > ema200 && (
             <div style={{ marginTop: 12, fontFamily: '"Share Tech Mono", monospace', fontSize: 12, letterSpacing: '0.15em', color: G.green }}>
               🟢 GOLDEN CROSS — Bullish
             </div>
           )}
         </div>
 
-        {/* row 4 — onchain (optional) */}
+        {/* row 4 — onchain (Pro only) */}
         {onchain && (
-          <div style={{ marginBottom: 40 }}>
-            <div style={sectionLabel}>On-Chain Data</div>
-            <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-              {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
-              {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Higher = more miners = stronger network security"/></>}       value={`${Number(onchain.hash_rate).toFixed(2)} EH/s`} sub="Network difficulty" barName="hashRate" />}
-              {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Normal ~10 min — higher means network congestion"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" barName="blockTime" barRaw={onchain.minutes_between_blocks} />}
-              {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${Number(onchain.total_fees_btc).toFixed(4)} BTC`} sub="Last 24h" barName="fees" />}
+          <div style={{ marginBottom: 40, position: 'relative' }}>
+            <div style={sectionLabel}>On-Chain Data {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+            <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
+              <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
+                {onchain.hash_rate  != null && <IndCard label={<>Hash Rate<Tooltip text="Higher = more miners = stronger network security"/></>}       value={`${Number(onchain.hash_rate).toFixed(2)} EH/s`} sub="Network difficulty" barName="hashRate" />}
+                {onchain.minutes_between_blocks != null && <IndCard label={<>Block Time<Tooltip text="Normal ~10 min — higher means network congestion"/></>} value={`${Number(onchain.minutes_between_blocks).toFixed(1)} min`} sub="Avg block interval" barName="blockTime" barRaw={onchain.minutes_between_blocks} />}
+                {onchain.total_fees_btc != null && <IndCard label={<>Total Fees<Tooltip text="Total BTC paid as fees to miners last 24h"/></>}  value={`${Number(onchain.total_fees_btc).toFixed(4)} BTC`} sub="Last 24h" barName="fees" />}
+              </div>
             </div>
+            {!isPro && (
+              <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+                <span style={{ fontSize: 20 }}>👑</span>
+                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
+              </div>
+            )}
           </div>
         )}
 
-        {/* row 5 — futures market */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={sectionLabel}>Futures Market</div>
-          <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-            <IndCard
-              label={<>Funding Rate<Tooltip text="Positive = longs pay shorts bullish market"/></>}
-              value={fundingRate != null ? (fundingRate.rate.toFixed(4) + '%') : '—'}
-              sub={fundingRate?.signal}
-              barName="fundingRate"
-              barRaw={fundingRate?.rate}
-            />
-            <IndCard
-              label={<>Long/Short Ratio<Tooltip text="Ratio below 1.0 means more shorts than longs. Combined with whale buying, this could trigger a short squeeze — forcing shorts to buy back, causing a rapid price spike."/></>}
-              value={longShort != null ? longShort.ratio.toFixed(2) : '—'}
-              sub={longShort != null ? (longShort.ratio < 0.7 ? 'Short squeeze risk 🔥' : longShort.ratio > 1.3 ? 'Long squeeze risk' : 'Balanced') : ''}
-              barName="longShort"
-              barRaw={longShort?.ratio}
-            />
-            <IndCard
-              label={<>Open Interest<Tooltip text="Rising OI = strong trend confirmation"/></>}
-              value={openInterest?.value && price?.price ? fmtLarge(openInterest.value * price.price) : '—'}
-              sub="BTC futures open"
-            />
-            <IndCard
-              label={<>Whale Activity<Tooltip text="Large wallet moves — whales buying is bullish signal"/></>}
-              value={whales != null ? (whales.largeCount + ' trades') : '—'}
-              sub={whales?.signal}
-            />
-            <IndCard
-              label={<>Open Int. Change<Tooltip text="Rising OI with price up = strong bullish confirmation"/></>}
-              value={liquidations?.change != null ? (liquidations.change + '%') : '—'}
-              sub={liquidations?.signal}
-              barName="oiChange"
-              barRaw={liquidations?.change}
-            />
+        {/* row 5 — futures market (Pro only) */}
+        <div style={{ marginBottom: 40, position: 'relative' }}>
+          <div style={sectionLabel}>Futures Market {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+          <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
+            <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+              <IndCard
+                label={<>Funding Rate<Tooltip text="Positive = longs pay shorts bullish market"/></>}
+                value={fundingRate != null ? (fundingRate.rate.toFixed(4) + '%') : '—'}
+                sub={fundingRate?.signal}
+                barName="fundingRate"
+                barRaw={fundingRate?.rate}
+              />
+              <IndCard
+                label={<>Long/Short Ratio<Tooltip text="Ratio below 1.0 means more shorts than longs. Combined with whale buying, this could trigger a short squeeze — forcing shorts to buy back, causing a rapid price spike."/></>}
+                value={longShort != null ? longShort.ratio.toFixed(2) : '—'}
+                sub={longShort != null ? (longShort.ratio < 0.7 ? 'Short squeeze risk 🔥' : longShort.ratio > 1.3 ? 'Long squeeze risk' : 'Balanced') : ''}
+                barName="longShort"
+                barRaw={longShort?.ratio}
+              />
+              <IndCard
+                label={<>Open Interest<Tooltip text="Rising OI = strong trend confirmation"/></>}
+                value={openInterest?.value && price?.price ? fmtLarge(openInterest.value * price.price) : '—'}
+                sub="BTC futures open"
+              />
+              <IndCard
+                label={<>Whale Activity<Tooltip text="Large wallet moves — whales buying is bullish signal"/></>}
+                value={whales != null ? (whales.largeCount + ' trades') : '—'}
+                sub={whales?.signal}
+              />
+              <IndCard
+                label={<>Open Int. Change<Tooltip text="Rising OI with price up = strong bullish confirmation"/></>}
+                value={liquidations?.change != null ? (liquidations.change + '%') : '—'}
+                sub={liquidations?.signal}
+                barName="oiChange"
+                barRaw={liquidations?.change}
+              />
+            </div>
           </div>
+          {!isPro && (
+            <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+              <span style={{ fontSize: 20 }}>👑</span>
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
+            </div>
+          )}
         </div>
 
-        {/* row 6 — order book */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={sectionLabel}>Order Book</div>
-          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-            <IndCard
-              label="Best Bid"
-              value={orderBook?.topBid != null ? `$${orderBook.topBid.toFixed(2)}` : '—'}
-              sub="Highest buy order"
-            />
-            <IndCard
-              label="Best Ask"
-              value={orderBook?.topAsk != null ? `$${orderBook.topAsk.toFixed(2)}` : '—'}
-              sub="Lowest sell order"
-            />
-            <IndCard
-              label="Bid/Ask Ratio"
-              value={orderBook?.ratio != null ? orderBook.ratio.toFixed(2) : '—'}
-              sub={orderBook?.signal}
-              barName="longShort"
-              barRaw={orderBook?.ratio}
-            />
-            <IndCard
-              label="SPREAD"
-              value={orderBook?.topBid != null && orderBook?.topAsk != null ? `$${(orderBook.topAsk - orderBook.topBid).toFixed(2)}` : '—'}
-              sub="Bid/Ask gap"
-            />
+        {/* row 6 — order book (Pro only) */}
+        <div style={{ marginBottom: 40, position: 'relative' }}>
+          <div style={sectionLabel}>Order Book {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+          <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
+            <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+              <IndCard
+                label="Best Bid"
+                value={orderBook?.topBid != null ? `$${orderBook.topBid.toFixed(2)}` : '—'}
+                sub="Highest buy order"
+              />
+              <IndCard
+                label="Best Ask"
+                value={orderBook?.topAsk != null ? `$${orderBook.topAsk.toFixed(2)}` : '—'}
+                sub="Lowest sell order"
+              />
+              <IndCard
+                label="Bid/Ask Ratio"
+                value={orderBook?.ratio != null ? orderBook.ratio.toFixed(2) : '—'}
+                sub={orderBook?.signal}
+                barName="longShort"
+                barRaw={orderBook?.ratio}
+              />
+              <IndCard
+                label="SPREAD"
+                value={orderBook?.topBid != null && orderBook?.topAsk != null ? `$${(orderBook.topAsk - orderBook.topBid).toFixed(2)}` : '—'}
+                sub="Bid/Ask gap"
+              />
+            </div>
           </div>
+          {!isPro && (
+            <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+              <span style={{ fontSize: 20 }}>👑</span>
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
+            </div>
+          )}
         </div>
 
-        {/* row 7 — key levels */}
+        {/* row 7 — key levels (Pro only) */}
         {keyLevels && (
-          <div style={{ marginBottom: 40 }}>
-            <div style={sectionLabel}>Key Levels</div>
+          <div style={{ marginBottom: 40, position: 'relative' }}>
+            <div style={sectionLabel}>Key Levels {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+            <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
             <div style={{ ...cardStyle, padding: '20px 24px' }}>
 
               {/* Pivot */}
@@ -1275,29 +1313,44 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               </div>
 
             </div>
+            </div>
+            {!isPro && (
+              <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+                <span style={{ fontSize: 20 }}>👑</span>
+                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
+              </div>
+            )}
           </div>
         )}
 
-        {/* row 8 — mempool */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={sectionLabel}>Mempool</div>
-          <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-            <IndCard
-              label={<>Pending Txns<Tooltip text="Number of unconfirmed transactions waiting — high means network congested"/></>}
-              value={mempool?.count != null ? mempool.count.toLocaleString() : '—'}
-              sub={mempool?.signal}
-            />
-            <IndCard
-              label={<>Fast Fee<Tooltip text="Minimum fee to get confirmed in next block"/></>}
-              value={mempool?.fastestFee != null ? (mempool.fastestFee + ' sat/vB') : '—'}
-              sub="Next block"
-            />
-            <IndCard
-              label={<>Hour Fee<Tooltip text="Minimum fee to get confirmed within 1 hour"/></>}
-              value={mempool?.hourFee != null ? (mempool.hourFee + ' sat/vB') : '—'}
-              sub="Within 1 hour"
-            />
+        {/* row 8 — mempool (Pro only) */}
+        <div style={{ marginBottom: 40, position: 'relative' }}>
+          <div style={sectionLabel}>Mempool {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+          <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
+            <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+              <IndCard
+                label={<>Pending Txns<Tooltip text="Number of unconfirmed transactions waiting — high means network congested"/></>}
+                value={mempool?.count != null ? mempool.count.toLocaleString() : '—'}
+                sub={mempool?.signal}
+              />
+              <IndCard
+                label={<>Fast Fee<Tooltip text="Minimum fee to get confirmed in next block"/></>}
+                value={mempool?.fastestFee != null ? (mempool.fastestFee + ' sat/vB') : '—'}
+                sub="Next block"
+              />
+              <IndCard
+                label={<>Hour Fee<Tooltip text="Minimum fee to get confirmed within 1 hour"/></>}
+                value={mempool?.hourFee != null ? (mempool.hourFee + ' sat/vB') : '—'}
+                sub="Within 1 hour"
+              />
+            </div>
           </div>
+          {!isPro && (
+            <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+              <span style={{ fontSize: 20 }}>👑</span>
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
+            </div>
+          )}
         </div>
 
         {/* footer */}
