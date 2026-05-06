@@ -593,7 +593,15 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     try {
       if (authTab === 'signup') {
         const { error } = await supabase.auth.signUp({ email: authEmail, password: authPass })
-        if (error) throw error
+        if (error) {
+          const msg = error.message?.toLowerCase() || ''
+          if (msg.includes('already registered') || msg.includes('already in use') || msg.includes('already exists') || msg.includes('user already')) {
+            setAuthError('__already_exists__')
+            setAuthBusy(false)
+            return
+          }
+          throw error
+        }
         setAuthSuccess(true) // show "Check your email" only for new signups
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPass })
@@ -1225,7 +1233,19 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   }}
                 />
                 {authError && (
-                  <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.red, marginBottom:12, letterSpacing:'0.05em' }}>{authError}</div>
+                  <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.red, marginBottom:12, letterSpacing:'0.05em', lineHeight:1.6 }}>
+                    {authError === '__already_exists__' ? (
+                      <>
+                        You already have an account.{' '}
+                        <span
+                          onClick={() => { setAuthTab('login'); setAuthError('') }}
+                          style={{ color:G.gold, cursor:'pointer', textDecoration:'underline' }}
+                        >
+                          Click here to Sign In
+                        </span>
+                      </>
+                    ) : authError}
+                  </div>
                 )}
                 <button
                   type="submit"
