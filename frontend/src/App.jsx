@@ -830,7 +830,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       }}>
         {/* logo */}
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <img src="/logoegyptfinal.webp" alt="PredictAlpha" className="navbar-logo" style={{width:'auto',objectFit:'contain',verticalAlign:'middle'}} />
+          <img src="/logoegyptfinal.webp" alt="Predict Alpha" className="navbar-logo" style={{width:'auto',objectFit:'contain',verticalAlign:'middle'}} />
           <div style={{display:'flex',flexDirection:'column',gap:3}}>
             <span className="navbar-brand" style={{fontFamily:'"Orbitron",sans-serif',letterSpacing:'0.05em',opacity:0.9,whiteSpace:'nowrap'}}>
               <span style={{color:'#f59e0b',fontWeight:400}}>PREDICT</span>{' '}<span style={{color:'#f59e0b',fontWeight:700,textShadow:'0 0 8px rgba(245,158,11,0.4)'}}>ALPHA</span>
@@ -1631,7 +1631,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             border: `2px solid ${G.gold}`, boxShadow: `0 0 60px ${G.goldGlow}`,
           }}>
             <div style={{ padding: '24px 28px', borderBottom: `1px solid ${G.border}`, textAlign: 'center' }}>
-              <img src="/logoegyptfinal.webp" alt="PredictAlpha" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 8 }} />
+              <img src="/logoegyptfinal.webp" alt="Predict Alpha" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 8 }} />
               <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 20, color: G.gold, letterSpacing: '0.15em', marginBottom: 8 }}>
                 PREDICT ALPHA PRO
               </div>
