@@ -1648,18 +1648,23 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 Cancel anytime
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
                 {[
-                  'All prediction horizons (1H–1M)',
-                  'RSI, MACD, Bollinger Bands, EMA',
+                  'All prediction horizons (1H, 4H, 8H, 12H, 24H, 1 Month)',
+                  'RSI, MACD, Bollinger Bands, EMA 50/200',
                   'Fear & Greed 7-day history',
-                  'Media Sentiment Analysis',
-                  'Unlimited Deep Analysis',
+                  'Media Sentiment Analysis (AI-powered)',
+                  'On-Chain Data (Hash Rate, Fees, Block Time)',
+                  'Futures Market (Funding Rate, Long/Short, Open Interest)',
+                  'Order Book & Whale Activity',
+                  'Key Levels, Pivot Points & Fibonacci',
+                  'Mempool & Network Data',
+                  'Unlimited Deep Analysis (9-signal AI score)',
                   'Priority support',
                 ].map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ color: G.green, fontSize: 14 }}>✓</span>
-                    <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.bright }}>{f}</span>
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <span style={{ color: G.green, fontSize: 12, marginTop: 1 }}>✓</span>
+                    <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.bright, lineHeight: 1.4 }}>{f}</span>
                   </div>
                 ))}
               </div>
