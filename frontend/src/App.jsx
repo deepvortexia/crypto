@@ -592,17 +592,28 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setAuthError('')
     try {
       if (authTab === 'signup') {
-        const { error } = await supabase.auth.signUp({ email: authEmail, password: authPass })
+        const { data, error } = await supabase.auth.signUp({ email: authEmail, password: authPass })
         if (error) {
           const msg = error.message?.toLowerCase() || ''
-          if (msg.includes('already registered') || msg.includes('already in use') || msg.includes('already exists') || msg.includes('user already')) {
+          const code = error.code || ''
+          if (
+            msg.includes('already registered') || msg.includes('already in use') ||
+            msg.includes('already exists') || msg.includes('user already') ||
+            code === 'user_already_exists'
+          ) {
             setAuthError('__already_exists__')
             setAuthBusy(false)
             return
           }
           throw error
         }
-        setAuthSuccess(true) // show "Check your email" only for new signups
+        // Supabase returns 200 with empty identities[] when email already exists (no error thrown)
+        if (data?.user?.identities?.length === 0) {
+          setAuthError('__already_exists__')
+          setAuthBusy(false)
+          return
+        }
+        setAuthSuccess(true) // show "Check your email" only for genuine new signups
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email: authEmail, password: authPass })
         if (error) {
