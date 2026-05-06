@@ -12,10 +12,11 @@ logger = logging.getLogger(__name__)
 
 HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
 
+logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
+
 try:
     from prophet import Prophet
     import cmdstanpy as _cmdstanpy  # noqa: F401 — confirms backend is importable
-    logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
     PROPHET_AVAILABLE = True
 except (ImportError, Exception) as _e:
     PROPHET_AVAILABLE = False
