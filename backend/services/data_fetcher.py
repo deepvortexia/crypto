@@ -128,12 +128,6 @@ async def fetch_fear_greed() -> dict:
                 resp.raise_for_status()
                 data = resp.json()
 
-                # DEBUG: Print raw alternative.me response
-                print("=" * 80)
-                print("DEBUG: alternative.me Fear & Greed RAW response:")
-                print(data)
-                print("=" * 80)
-
                 entries = data.get("data", [])
                 latest = entries[0] if entries else {}
                 history = [
@@ -171,12 +165,6 @@ async def fetch_onchain() -> dict:
         try:
             stats = await _get(client, BLOCKCHAIN_STATS_URL)
 
-            # DEBUG: Print raw blockchain.info response
-            print("=" * 80)
-            print("DEBUG: blockchain.info RAW response:")
-            print(stats)
-            print("=" * 80)
-
         except Exception as e:
             logger.warning(f"Blockchain.com API failed: {e}")
             # Return safe default values instead of error object
@@ -202,12 +190,6 @@ async def fetch_onchain() -> dict:
                 )
                 fees_data.raise_for_status()
                 fees_json = fees_data.json()
-
-                # DEBUG: Print raw mempool.space response
-                print("=" * 80)
-                print("DEBUG: mempool.space total fees RAW response:")
-                print(fees_json)
-                print("=" * 80)
 
                 # totalFee is returned as string, need to convert to int
                 total_fee_sat = int(fees_json.get("totalFee", 0))

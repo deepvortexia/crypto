@@ -15,6 +15,7 @@ HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
 try:
     from prophet import Prophet
     import cmdstanpy as _cmdstanpy  # noqa: F401 — confirms backend is importable
+    logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
     PROPHET_AVAILABLE = True
 except (ImportError, Exception) as _e:
     PROPHET_AVAILABLE = False
@@ -37,6 +38,7 @@ class BTCProphetModel:
             return
 
         import cmdstanpy
+        logging.getLogger("cmdstanpy").setLevel(logging.ERROR)
         try:
             cmdstanpy.install_cmdstan(progress=False, overwrite=False)
         except Exception:
