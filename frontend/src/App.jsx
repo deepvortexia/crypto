@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Routes, Route, Link, useLocation } from 'react-router-dom'
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 
 function ScrollToTop() {
@@ -504,6 +504,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
+  // Handle Stripe redirect — strip ?success=true so the app loads cleanly
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('success') === 'true') {
+      window.history.replaceState({}, '', '/')
+    }
+  }, [])
+
   // Supabase auth session
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -811,6 +819,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     <>
     <ScrollToTop />
     <Routes>
+      <Route path="/dashboard" element={<Navigate to="/" replace />} />
       <Route path="/about" element={<About />} />
       <Route path="/" element={
     <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
