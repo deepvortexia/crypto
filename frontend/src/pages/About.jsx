@@ -525,6 +525,19 @@ export default function About() {
         }
       `}</style>
 
+      <div style={{
+        textAlign: 'center',
+        padding: '40px 20px 20px',
+        color: '#6b7280',
+        fontSize: '11px',
+        letterSpacing: '0.15em',
+        fontFamily: '"Orbitron", sans-serif',
+        borderTop: '1px solid #1f2937',
+        marginTop: '40px',
+      }}>
+        CREATED BY YANNICK BOISCLAIR · POWERED BY CLAUDE AI
+      </div>
+
     </div>
   )
 }
