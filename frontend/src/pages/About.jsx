@@ -467,10 +467,14 @@ export default function About() {
         padding: '20px 24px',
         textAlign: 'center',
         display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: 12,
+        overflow: 'hidden',
       }}>
         <div style={{ fontFamily: orb, fontSize: 11, letterSpacing: '0.12em', color: G.gold }}>PREDICT ALPHA</div>
         <div style={{ fontFamily: mono, fontSize: 10, color: '#6b7280', letterSpacing: '0.2em' }}>
           NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
+        </div>
+        <div className="about-credit" style={{ width: '100%', paddingTop: 12, color: '#6b7280', fontSize: '11px', letterSpacing: '0.15em', fontFamily: orb }}>
+          CREATED BY YANNICK BOISCLAIR · POWERED BY ANTHROPIC
         </div>
       </footer>
 
@@ -522,21 +526,13 @@ export default function About() {
             grid-template-columns: 1fr 1fr !important;
             gap: 10px !important;
           }
+          .about-credit {
+            font-size: 9px !important;
+            padding: 20px 10px !important;
+            letter-spacing: 0.08em !important;
+          }
         }
       `}</style>
-
-      <div style={{
-        textAlign: 'center',
-        padding: '40px 20px 20px',
-        color: '#6b7280',
-        fontSize: '11px',
-        letterSpacing: '0.15em',
-        fontFamily: '"Orbitron", sans-serif',
-        borderTop: '1px solid #1f2937',
-        marginTop: '40px',
-      }}>
-        CREATED BY YANNICK BOISCLAIR · POWERED BY ANTHROPIC
-      </div>
 
     </div>
   )

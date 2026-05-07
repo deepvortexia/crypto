@@ -1373,7 +1373,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
           </div>
           <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT US</a>
-          <div style={{ width: '100%', textAlign: 'center', paddingTop: 16, color: '#6b7280', fontSize: '11px', letterSpacing: '0.15em', fontFamily: '"Orbitron", sans-serif' }}>
+          <div className="main-credit" style={{ width: '100%', textAlign: 'center', paddingTop: 16, color: '#6b7280', fontSize: '11px', letterSpacing: '0.15em', fontFamily: '"Orbitron", sans-serif' }}>
             CREATED BY YANNICK BOISCLAIR · POWERED BY ANTHROPIC
           </div>
         </div>
@@ -1812,6 +1812,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .deep-btn     { font-size: 12px !important; padding: 13px 22px !important; }
           .ind-card     { padding: 8px 10px !important; }
           .hide-mobile  { display: none !important; }
+          .main-credit  { font-size: 9px !important; letter-spacing: 0.08em !important; padding-top: 12px !important; }
         }
 
         /* ── Very small: ≤360px (older Androids, iPhone SE 1st gen) ── */
