@@ -535,7 +535,7 @@ export default function About() {
         borderTop: '1px solid #1f2937',
         marginTop: '40px',
       }}>
-        CREATED BY YANNICK BOISCLAIR · POWERED BY CLAUDE AI
+        CREATED BY YANNICK BOISCLAIR · POWERED BY ANTHROPIC
       </div>
 
     </div>
