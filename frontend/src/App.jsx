@@ -1373,6 +1373,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
           </div>
           <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT US</a>
+          <div style={{ width: '100%', textAlign: 'center', paddingTop: 16, color: '#6b7280', fontSize: '11px', letterSpacing: '0.15em', fontFamily: '"Orbitron", sans-serif' }}>
+            CREATED BY YANNICK BOISCLAIR · POWERED BY ANTHROPIC
+          </div>
         </div>
       </main>
 
