@@ -96,7 +96,7 @@ async def lifespan(app: FastAPI):
     retrainer.inject_ensemble(ensemble)
 
     # Try to load pre-trained models from persistent volume
-    logger.info("Checking for existing models in /app/models...")
+    logger.info("Checking for existing models in /app/saved_models...")
     loop = asyncio.get_event_loop()
     loaded = await loop.run_in_executor(None, ensemble.load_models)
 
