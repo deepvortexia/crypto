@@ -429,6 +429,50 @@ async def get_subscription_status(user: dict = Depends(get_current_user)):
     }
 
 
+# ── Deep Analysis credits (2/day for free users, unlimited for PRO) ──────────
+DEEP_ANALYSIS_DAILY_LIMIT = 2
+
+
+def _is_pro(user_id: str) -> bool:
+    try:
+        sub = supabase.table("subscriptions").select("status").eq("user_id", user_id).execute()
+        return bool(sub.data and sub.data[0].get("status") == "active")
+    except Exception:
+        return False
+
+
+@app.get("/api/deep-analysis/remaining")
+async def get_deep_analysis_remaining(user: dict = Depends(get_current_user)):
+    """Return how many Deep Analysis uses the user has left today."""
+    user_id = user["id"]
+    if _is_pro(user_id):
+        return {"remaining": 999, "limit": DEEP_ANALYSIS_DAILY_LIMIT, "is_pro": True}
+
+    today = datetime.now(timezone.utc).date().isoformat()
+    row = supabase.table("deep_analysis_usage").select("count").eq("user_id", user_id).eq("use_date", today).execute()
+    used = row.data[0]["count"] if row.data else 0
+    return {"remaining": max(0, DEEP_ANALYSIS_DAILY_LIMIT - used), "limit": DEEP_ANALYSIS_DAILY_LIMIT, "is_pro": False}
+
+
+@app.post("/api/deep-analysis/use")
+async def use_deep_analysis(user: dict = Depends(get_current_user)):
+    """Atomically consume one Deep Analysis credit. Returns 429 if daily limit reached."""
+    user_id = user["id"]
+    if _is_pro(user_id):
+        return {"allowed": True, "remaining": 999, "is_pro": True}
+
+    result = supabase.rpc("try_use_deep_analysis", {"p_user_id": user_id, "p_limit": DEEP_ANALYSIS_DAILY_LIMIT}).execute()
+    count = result.data
+
+    if count == -1:
+        raise HTTPException(
+            status_code=429,
+            detail={"message": f"Daily limit of {DEEP_ANALYSIS_DAILY_LIMIT} reached. Upgrade to PRO for unlimited access.", "remaining": 0},
+        )
+
+    return {"allowed": True, "remaining": DEEP_ANALYSIS_DAILY_LIMIT - count, "is_pro": False}
+
+
 # ── Market Tensions ───────────────────────────────────────────────────────────
 _ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 _BINANCE_FUTURES = "https://fapi.binance.com"

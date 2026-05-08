@@ -571,6 +571,28 @@ export async function createCheckoutSession() {
   return await res.json()
 }
 
+export async function fetchDeepAnalysisRemaining() {
+  try {
+    const headers = await getAuthHeaders()
+    const res = await fetch(`${BACKEND_URL}/api/deep-analysis/remaining`, { headers })
+    if (!res.ok) return { remaining: 0, is_pro: false }
+    return await res.json()
+  } catch {
+    return { remaining: 0, is_pro: false }
+  }
+}
+
+export async function consumeDeepAnalysisCredit() {
+  const headers = await getAuthHeaders()
+  const res = await fetch(`${BACKEND_URL}/api/deep-analysis/use`, { method: 'POST', headers })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const msg = data?.detail?.message || 'Daily limit reached'
+    throw Object.assign(new Error(msg), { status: res.status })
+  }
+  return data
+}
+
 export async function fetchUserCredits() {
   try {
     const { data: { session } } = await supabase.auth.getSession()

@@ -26,7 +26,8 @@ import {
   fetchKeyLevels,
   fetchLiquidations,
   fetchSubscriptionStatus,
-  fetchUserCredits,
+  fetchDeepAnalysisRemaining,
+  consumeDeepAnalysisCredit,
   createCheckoutSession,
 } from './api/client'
 
@@ -570,8 +571,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       fetchSubscriptionStatus().then(sub => {
         setIsPro(sub.status === 'active')
       })
-      fetchUserCredits().then(c => {
-        setCredits(c.credits_remaining ?? 0)
+      fetchDeepAnalysisRemaining().then(c => {
+        setCredits(c.is_pro ? 999 : (c.remaining ?? 0))
       })
     } else {
       setIsPro(false)
@@ -702,6 +703,19 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   async function runDeepAnalysis(horizon) {
     setDeepOpen(true); setDeepRunning(true); setDeepLogs([]); setDeepResult(null)
+
+    // Server-side gate — consumes one credit atomically; can't be bypassed client-side
+    if (!isPro) {
+      try {
+        const creditResult = await consumeDeepAnalysisCredit()
+        setCredits(creditResult.remaining)
+      } catch (err) {
+        setDeepOpen(false); setDeepRunning(false); setDeepLogs([]); setDeepResult(null)
+        setPricingOpen(true)
+        return
+      }
+    }
+
     const L = [
       'Connecting...',
       'BTC: $'+price?.price?.toLocaleString(),
@@ -1790,7 +1804,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
               {user && !isPro && credits > 0 && (
                 <div style={{ marginTop: 16, textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
-                  You have <span style={{ color: G.gold }}>{credits}</span> free Deep Analysis credits remaining
+                  <span style={{ color: G.gold }}>{credits}/2</span> free Deep Analysis uses remaining today
                 </div>
               )}
             </div>
