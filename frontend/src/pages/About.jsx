@@ -165,6 +165,10 @@ export default function About() {
                 title: 'Transparent Confidence',
                 body: 'Every AI prediction is accompanied by a calibrated confidence score. We do not hide uncertainty behind vague language. A 51% confidence on the 1-month forecast means exactly that — it is a directional lean, not a guarantee, and we show the bar accordingly.',
               },
+              {
+                title: 'AI Market Intelligence',
+                body: 'Market Tensions & Divergences powered by Claude Haiku detects 2–4 live trading setups every 5 minutes — bullish, bearish, warning, and squeeze patterns. Bollinger squeeze detection identifies volatility compression before explosive moves. Real-time whale activity tracks large-wallet accumulation and distribution signals.',
+              },
             ].map(({ title, body }) => (
               <div key={title} style={{ ...cardStyle, position: 'relative' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
