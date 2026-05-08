@@ -1423,39 +1423,59 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           )}
         </div>
 
-        {/* row 9 — market tensions (Pro only) */}
+        {/* row 9 — market tensions */}
         <div style={{ marginBottom: 40, position: 'relative' }}>
           <div style={{ ...sectionLabel, display: 'flex', alignItems: 'center', gap: 8 }}>
             <span>Market Tensions &amp; Divergences</span>
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: '#fff', background: '#a855f7', borderRadius: 3, padding: '2px 7px', fontWeight: 700, textTransform: 'uppercase' }}>AI</span>
             {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}
           </div>
-          <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
-            {tensions && tensions.length > 0 ? (
-              <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-                {tensions.map((t, i) => <TensionCard key={i} setup={t} />)}
-              </div>
-            ) : (
-              <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-                {[0, 1].map(i => (
-                  <div key={i} style={{ ...cardStyle, borderLeft: '4px solid #333', minHeight: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text, opacity: 0.4 }}>
-                      {tensions === null ? 'Loading…' : 'No data'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          {!isPro && (
-            <div onClick={() => setPricingOpen(true)} style={{
-              position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 8,
-            }}>
-              <Lock size={24} color={G.gold} />
-              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.8 }}>PRO FEATURE<br/>$12.99/mo</span>
+
+          {/* Not logged in — teaser only */}
+          {!user && (
+            <div onClick={() => setAuthOpen(true)} style={{ ...cardStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '28px 24px' }}>
+              <span style={{ fontSize: 20 }}>🔒</span>
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text, letterSpacing: '0.1em' }}>
+                AI detected market setups —{' '}
+                <span style={{ color: G.gold, textDecoration: 'underline' }}>Login to see</span>
+              </span>
             </div>
+          )}
+
+          {/* Logged in — show cards */}
+          {user && (
+            <>
+              {tensions && tensions.length > 0 ? (
+                <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                  {tensions.map((t, i) => {
+                    const locked = !isPro && i > 0
+                    return (
+                      <div key={i} style={{ position: 'relative' }}>
+                        <div style={{ filter: locked ? 'blur(4px)' : 'none', pointerEvents: locked ? 'none' : 'auto', userSelect: locked ? 'none' : 'auto' }}>
+                          <TensionCard setup={t} />
+                        </div>
+                        {locked && (
+                          <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
+                            <Lock size={18} color={G.gold} />
+                            <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.8 }}>PRO<br/>$12.99/mo</span>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                  {[0, 1].map(i => (
+                    <div key={i} style={{ ...cardStyle, borderLeft: '4px solid #333', minHeight: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text, opacity: 0.4 }}>
+                        {tensions === null ? 'Loading…' : 'No data'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 
