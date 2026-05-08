@@ -1443,8 +1443,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         </div>
 
         {/* footer */}
-        <div style={{ borderTop: `1px solid ${G.border}`, paddingTop: 28, paddingBottom: 20, marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+        <div className="site-footer" style={{ borderTop: `1px solid ${G.border}`, paddingTop: 28, paddingBottom: 20, marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
+          <div className="footer-row" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.12em', color: G.gold }}>PREDICT ALPHA</span>
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#6b7280', letterSpacing: '0.15em' }}>NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY</span>
             <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '5px 12px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT US</a>
@@ -1833,6 +1833,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         /* ── Mobile + large phone: ≤768px ── */
         @media (max-width: 768px) {
+          .site-footer  { padding-bottom: 20px !important; gap: 12px !important; }
+          .footer-row   { flex-direction: column !important; align-items: center !important; gap: 12px !important; width: 100% !important; }
+          .footer-row span, .footer-row a { width: 100% !important; text-align: center !important; font-size: 10px !important; }
           .grid-2col    { grid-template-columns: 1fr !important; gap: 10px !important; }
           .grid-3       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
           .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
