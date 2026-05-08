@@ -496,6 +496,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [authError,   setAuthError]   = useState('')
   const [authSuccess, setAuthSuccess] = useState(false)
   const [user,        setUser]        = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [isPro,       setIsPro]       = useState(false)
   const [credits,     setCredits]     = useState(0)
   const [pricingOpen, setPricingOpen] = useState(false)
@@ -516,6 +517,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
+      setAuthLoading(false)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
@@ -856,8 +858,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <a href="mailto:admin@predictalpha.app" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', cursor: 'pointer', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
 
         {/* auth — desktop only */}
-        {user ? (
-          <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {authLoading ? (
+          <div className="hide-mobile" style={{ width: 88, height: 32, background: '#1a1a1a', borderRadius: 6, opacity: 0.5 }} />
+        ) : user ? (
+          <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             {user.user_metadata?.avatar_url ? (
               <img
                 src={user.user_metadata.avatar_url}
@@ -891,49 +895,49 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             )}
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.1em', color: G.text, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</span>
             {!isPro && (
-              <button onClick={() => setPricingOpen(true)} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.1em', color: '#000', background: `linear-gradient(135deg, ${G.gold}, #d97706)`, border: 'none', borderRadius: 4, padding: '4px 10px', cursor: 'pointer', textTransform: 'uppercase', fontWeight: 'bold' }}>UPGRADE</button>
+              <button onClick={() => setPricingOpen(true)} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.12em', color: '#000', background: `linear-gradient(135deg, ${G.gold}, #d97706)`, border: 'none', borderRadius: 6, padding: '8px 18px', cursor: 'pointer', textTransform: 'uppercase', fontWeight: 'bold', boxShadow: `0 0 12px ${G.goldGlow}` }}>⚡ UPGRADE</button>
             )}
             {isPro && (
-              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.1em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 4, padding: '4px 8px' }}>PRO</span>
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.12em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 4, padding: '5px 10px' }}>PRO</span>
             )}
-            <button onClick={handleLogout} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, background: 'none', border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '4px 10px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGOUT</button>
+            <button onClick={handleLogout} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.text, background: 'none', border: '1px solid #333', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGOUT</button>
           </div>
         ) : (
-          <button className="hide-mobile" onClick={() => setAuthOpen(true)} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGIN</button>
+          <button className="hide-mobile" onClick={() => setAuthOpen(true)} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '8px 16px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGIN</button>
         )}
 
         {/* hamburger — mobile only */}
-        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:32,lineHeight:1,padding:'8px',display:'none'}}>☰</button>
+        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:28,lineHeight:1,padding:'10px',minWidth:44,minHeight:44,display:'none'}}>☰</button>
 
         {/* mobile dropdown */}
         {menuOpen && (
           <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:200,padding:'12px 0'}}>
             {/* User section for mobile */}
-            {user ? (
-              <div style={{padding:'12px 24px',borderBottom:`1px solid #2a1f00`,marginBottom:8,display:'flex',alignItems:'center',gap:12}}>
-                {user.user_metadata?.avatar_url ? (
-                  <img src={user.user_metadata.avatar_url} alt="User avatar" style={{width:28,height:28,borderRadius:'50%',border:`2px solid ${G.gold}`}} />
-                ) : (
-                  <div style={{width:28,height:28,borderRadius:'50%',background:G.goldDim,border:`2px solid ${G.gold}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'"Share Tech Mono",monospace',fontSize:11,fontWeight:'bold',color:G.gold}}>
-                    {user.email?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                )}
-                <div style={{flex:1,overflow:'hidden'}}>
-                  <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:G.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user.email}</div>
-                  <div style={{display:'flex',gap:8,marginTop:4}}>
-                    {!isPro && (
-                      <button onClick={() => { setPricingOpen(true); setMenuOpen(false) }} style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.1em',color:'#000',background:`linear-gradient(135deg, ${G.gold}, #d97706)`,border:'none',borderRadius:4,padding:'4px 8px',cursor:'pointer',textTransform:'uppercase',fontWeight:'bold'}}>UPGRADE</button>
-                    )}
-                    {isPro && (
-                      <span style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}`,borderRadius:4,padding:'4px 8px'}}>PRO</span>
-                    )}
-                    <button onClick={() => { handleLogout(); setMenuOpen(false) }} style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.1em',color:G.gold,background:'none',border:'none',cursor:'pointer',padding:0,textTransform:'uppercase'}}>LOGOUT</button>
+            {authLoading ? null : user ? (
+              <div style={{padding:'16px 20px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
+                {/* identity row */}
+                <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+                  {user.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="User avatar" style={{width:34,height:34,borderRadius:'50%',border:`2px solid ${G.gold}`,flexShrink:0}} />
+                  ) : (
+                    <div style={{width:34,height:34,borderRadius:'50%',background:G.goldDim,border:`2px solid ${G.gold}`,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'"Share Tech Mono",monospace',fontSize:12,fontWeight:'bold',color:G.gold,flexShrink:0}}>
+                      {user.email?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                  )}
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:G.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user.email}</div>
+                    {isPro && <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:G.gold,letterSpacing:'0.15em',marginTop:2}}>PRO MEMBER</div>}
                   </div>
                 </div>
+                {/* CTA */}
+                {!isPro && (
+                  <button onClick={() => { setPricingOpen(true); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:14,letterSpacing:'0.15em',color:'#000',background:`linear-gradient(135deg, ${G.gold}, #d97706)`,border:'none',borderRadius:8,padding:'15px 20px',cursor:'pointer',textTransform:'uppercase',fontWeight:'bold',marginBottom:10,minHeight:52,boxShadow:`0 0 20px ${G.goldGlow}`}}>⚡ UPGRADE TO PRO</button>
+                )}
+                <button onClick={() => { handleLogout(); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:10,letterSpacing:'0.15em',color:G.text,background:'none',border:'1px solid #333',borderRadius:6,padding:'11px 16px',cursor:'pointer',textTransform:'uppercase',minHeight:44}}>LOGOUT</button>
               </div>
             ) : (
-              <div style={{padding:'12px 24px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
-                <button onClick={() => { setAuthOpen(true); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:10,letterSpacing:'0.15em',color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}44`,borderRadius:4,padding:'8px 12px',cursor:'pointer',textTransform:'uppercase'}}>LOGIN</button>
+              <div style={{padding:'12px 20px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
+                <button onClick={() => { setAuthOpen(true); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.15em',color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}44`,borderRadius:6,padding:'13px 16px',cursor:'pointer',textTransform:'uppercase',minHeight:48}}>LOGIN</button>
               </div>
             )}
             {[
