@@ -1760,6 +1760,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 ))}
               </div>
 
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, opacity: 0.8 }}>
+                  ⚡ Powered by Claude Haiku · Anthropic AI
+                </span>
+              </div>
+
               <button onClick={handleUpgrade} style={{
                 width: '100%', padding: '14px 20px',
                 fontFamily: '"Orbitron",sans-serif', fontSize: 14, letterSpacing: '0.2em',
