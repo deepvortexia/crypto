@@ -1443,19 +1443,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         </div>
 
         {/* footer */}
-        <div style={{borderTop:`1px solid ${G.border}`,paddingTop:24,marginTop:8,
-          display:'flex',flexWrap:'wrap',justifyContent:'center',
-          alignItems:'center',gap:12,textAlign:'center'}}>
-          <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:13,letterSpacing:'0.12em',color:'#f59e0b'}}>
-            PREDICT ALPHA
+        <div style={{ borderTop: `1px solid ${G.border}`, paddingTop: 28, paddingBottom: 20, marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+            <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.12em', color: G.gold }}>PREDICT ALPHA</span>
+            <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#6b7280', letterSpacing: '0.15em' }}>NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY</span>
+            <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '5px 12px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT US</a>
           </div>
-          <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:'#6b7280',letterSpacing:'0.2em'}}>
-            NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
-          </div>
-          <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT US</a>
-          <div className="main-credit" style={{ width: '100%', textAlign: 'center', paddingTop: 16, color: '#6b7280', fontSize: '11px', letterSpacing: '0.15em', fontFamily: '"Orbitron", sans-serif' }}>
-            CREATED BY YANNICK BOISCLAIR · POWERED BY ANTHROPIC
-          </div>
+          <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#4b5563', letterSpacing: '0.2em' }}>POWERED BY ANTHROPIC</div>
         </div>
       </main>
 
