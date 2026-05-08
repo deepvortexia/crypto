@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://predictalpha.app/sitemap.xml
