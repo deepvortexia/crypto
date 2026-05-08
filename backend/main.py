@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -6,6 +7,8 @@ from datetime import datetime, timezone
 from functools import wraps
 from time import time
 from typing import Literal
+
+import httpx
 
 import jwt
 import stripe
@@ -68,6 +71,7 @@ _sentiment_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)     # 30 min
 _onchain_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)       # 30 min
 _predict_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)      # 1 h per horizon
 _news_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)          # 30 min
+_tensions_cache: TTLCache = TTLCache(maxsize=1, ttl=300)       # 5 min
 
 # Shared dataframe cache (refreshed alongside indicators)
 _hourly_df = None
@@ -422,3 +426,162 @@ async def get_subscription_status(user: dict = Depends(get_current_user)):
         "status": sub.get("status", "inactive"),
         "current_period_end": sub.get("current_period_end")
     }
+
+
+# ── Market Tensions ───────────────────────────────────────────────────────────
+_ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+_BINANCE_FUTURES = "https://fapi.binance.com"
+
+
+async def _fetch_funding_rate() -> dict:
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_BINANCE_FUTURES}/fapi/v1/fundingRate",
+                params={"symbol": "BTCUSDT", "limit": 1},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            if data:
+                rate = float(data[0]["fundingRate"]) * 100
+                return {"rate_pct": round(rate, 4), "annualized_pct": round(rate * 3 * 365, 2)}
+    except Exception as exc:
+        logger.warning(f"Funding rate fetch failed: {exc}")
+    return {"rate_pct": None, "annualized_pct": None}
+
+
+async def _fetch_long_short_ratio() -> dict:
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_BINANCE_FUTURES}/futures/data/globalLongShortAccountRatio",
+                params={"symbol": "BTCUSDT", "period": "1h", "limit": 1},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            if data:
+                return {
+                    "ratio": round(float(data[0]["longShortRatio"]), 3),
+                    "long_pct": round(float(data[0]["longAccount"]) * 100, 2),
+                    "short_pct": round(float(data[0]["shortAccount"]) * 100, 2),
+                }
+    except Exception as exc:
+        logger.warning(f"Long/short ratio fetch failed: {exc}")
+    return {"ratio": None, "long_pct": None, "short_pct": None}
+
+
+@app.get("/api/market-tensions")
+async def get_market_tensions():
+    """AI-detected BTC trading setups from live market conditions (Claude Haiku, cached 5 min)."""
+    if "tensions" in _tensions_cache:
+        return _tensions_cache["tensions"]
+
+    if not _ANTHROPIC_API_KEY:
+        raise HTTPException(503, "ANTHROPIC_API_KEY not configured")
+
+    try:
+        price_data, fg_data, onchain_data, funding, ls_ratio, (hourly_df, _) = await asyncio.gather(
+            fetch_live_price(),
+            fetch_fear_greed(),
+            fetch_onchain(),
+            _fetch_funding_rate(),
+            _fetch_long_short_ratio(),
+            _get_dataframes(),
+        )
+
+        indicators_data = get_indicator_snapshot(compute_indicators(hourly_df))
+
+        total_btc_sent = onchain_data.get("total_btc_sent", 0) or 0
+        whale_activity = "high" if total_btc_sent > 600000 else "moderate" if total_btc_sent > 300000 else "low"
+
+        funding_str = (
+            f"{funding['rate_pct']:+.4f}% per 8h (annualized: {funding['annualized_pct']:+.1f}%)"
+            if funding["rate_pct"] is not None else "unavailable"
+        )
+        ls_str = (
+            f"{ls_ratio['ratio']} ({ls_ratio['long_pct']}% long / {ls_ratio['short_pct']}% short)"
+            if ls_ratio["ratio"] is not None else "unavailable"
+        )
+
+        summary = f"""BTC Market Snapshot:
+- Price: ${price_data['price']:,.0f} (24h: {price_data['change_24h_pct']:+.2f}%)
+- RSI (14): {indicators_data['rsi']['value']} ({indicators_data['rsi']['signal']})
+- MACD: {indicators_data['macd']['macd']} / Signal: {indicators_data['macd']['signal']} ({indicators_data['macd']['crossover']})
+- Bollinger %B: {indicators_data['bollinger_bands']['pct_b']} | Bandwidth: {indicators_data['bollinger_bands']['bandwidth']}
+- EMA trend: {indicators_data['ema']['trend']} (EMA50: {indicators_data['ema']['ema50']}, EMA200: {indicators_data['ema']['ema200']})
+- OBV trend: {indicators_data['obv']['trend']}
+- ATR: ${indicators_data['atr']['value']} ({indicators_data['atr']['pct_of_price']}% of price)
+- Fear & Greed: {fg_data['value']} ({fg_data['classification']})
+- Funding Rate: {funding_str}
+- Long/Short Ratio: {ls_str}
+- Whale Activity: {whale_activity} (BTC sent on-chain today: {total_btc_sent:,.0f})
+- Mempool: {onchain_data.get('mempool_size', 0):,} pending txs | Fees: {onchain_data.get('total_fees_btc', 0)} BTC (24h)"""
+
+        prompt = f"""{summary}
+
+You are a professional crypto trading analyst. Based on the market data above, identify 2 to 4 distinct trading setups or tensions currently present in the Bitcoin market.
+
+Respond with ONLY a JSON array, no markdown, no extra text:
+[
+  {{
+    "type": "bullish" | "bearish" | "warning" | "squeeze",
+    "title": "Short setup title (max 8 words)",
+    "description": "1-2 sentence explanation referencing the specific data values",
+    "confidence": "high" | "medium" | "low"
+  }}
+]
+
+Type definitions:
+- bullish: price likely to move up based on current signals
+- bearish: price likely to move down based on current signals
+- warning: risk signal (liquidation cascade risk, extreme sentiment, etc.)
+- squeeze: volatility compression about to expand (Bollinger squeeze, funding extremes, coil)
+
+Return only the 2-4 most significant setups."""
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": _ANTHROPIC_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "claude-haiku-4-5-20251001",
+                    "max_tokens": 512,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+            )
+            resp.raise_for_status()
+            content = resp.json()["content"][0]["text"].strip()
+
+        if content.startswith("```"):
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+            content = content.strip()
+
+        raw_setups = json.loads(content)
+
+        valid_types = {"bullish", "bearish", "warning", "squeeze"}
+        valid_conf = {"high", "medium", "low"}
+        result = [
+            {
+                "type": s["type"],
+                "title": str(s.get("title", ""))[:100],
+                "description": str(s.get("description", ""))[:500],
+                "confidence": s["confidence"],
+            }
+            for s in raw_setups[:4]
+            if s.get("type") in valid_types and s.get("confidence") in valid_conf
+        ]
+
+        _tensions_cache["tensions"] = result
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error(f"Market tensions failed: {exc}", exc_info=True)
+        raise HTTPException(502, f"Failed to fetch market tensions: {exc}")
