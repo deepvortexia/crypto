@@ -535,6 +535,10 @@ export async function fetchOHLCCandles(limit = 100) {
   }
 }
 
+export async function fetchMarketTensions() {
+  return await get(`${BACKEND_URL}/api/market-tensions`, { timeout: 30000, retries: 1 })
+}
+
 // ── Subscription API ────────────────────────────────────────────────────────
 async function getAuthHeaders() {
   const { data: { session } } = await supabase.auth.getSession()

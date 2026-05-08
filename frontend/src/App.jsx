@@ -8,6 +8,8 @@ function ScrollToTop() {
   return null
 }
 import About from './pages/About'
+import { TrendingUp, TrendingDown, AlertTriangle, Zap, Lock } from 'lucide-react'
+import { fetchMarketTensions } from './api/client'
 import {
   fetchLivePrice,
   fetchSentiment,
@@ -451,6 +453,42 @@ function SentimentMeter({ value, label, history }) {
   )
 }
 
+// ── Market Tensions ──────────────────────────────────────────────────────────
+const TENSION_CONFIG = {
+  bullish: { color: '#22c55e', Icon: TrendingUp },
+  bearish: { color: '#ef4444', Icon: TrendingDown },
+  warning: { color: '#f59e0b', Icon: AlertTriangle },
+  squeeze: { color: '#a855f7', Icon: Zap },
+}
+const CONF_COLOR = { high: '#22c55e', medium: '#f59e0b', low: '#6b7280' }
+
+function TensionCard({ setup }) {
+  const cfg = TENSION_CONFIG[setup.type] || TENSION_CONFIG.warning
+  const { color, Icon: TIcon } = cfg
+  const confColor = CONF_COLOR[setup.confidence] || CONF_COLOR.low
+  return (
+    <div style={{ ...cardStyle, borderLeft: `4px solid ${color}`, position: 'relative', paddingBottom: 38 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <TIcon size={24} color={color} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+        <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, letterSpacing: '0.1em', color, textTransform: 'uppercase', lineHeight: 1.3 }}>
+          {setup.title}
+        </span>
+      </div>
+      <p style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text, lineHeight: 1.7, margin: 0, paddingRight: 8 }}>
+        {setup.description}
+      </p>
+      <span style={{
+        position: 'absolute', bottom: 12, right: 14,
+        fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em',
+        color: confColor, background: `${confColor}22`, border: `1px solid ${confColor}55`,
+        borderRadius: 4, padding: '3px 8px', textTransform: 'uppercase', fontWeight: 700,
+      }}>
+        {setup.confidence}
+      </span>
+    </div>
+  )
+}
+
 // ── main ─────────────────────────────────────────────────────────────────────
 const PRED_HORIZONS = ['1h', '4h', '8h', '12h', '24h', '1week', '1month']
 const REFRESH_MS    = 60_000
@@ -502,6 +540,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [pricingOpen, setPricingOpen] = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
+  const [tensions,    setTensions]    = useState(null)
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
@@ -586,6 +625,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   useEffect(() => {
     const tick = setInterval(() => setCountdown(c => Math.max(0, c - 1)), 1000)
     return () => clearInterval(tick)
+  }, [])
+
+  useEffect(() => {
+    const load = async () => { try { setTensions(await fetchMarketTensions()) } catch {} }
+    load()
+    const id = setInterval(load, 300_000)
+    return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
@@ -1366,6 +1412,42 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           )}
         </div>
 
+        {/* row 9 — market tensions (Pro only) */}
+        <div style={{ marginBottom: 40, position: 'relative' }}>
+          <div style={{ ...sectionLabel, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>Market Tensions &amp; Divergences</span>
+            <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: '#fff', background: '#a855f7', borderRadius: 3, padding: '2px 7px', fontWeight: 700, textTransform: 'uppercase' }}>AI</span>
+            {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}
+          </div>
+          <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
+            {tensions && tensions.length > 0 ? (
+              <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                {tensions.map((t, i) => <TensionCard key={i} setup={t} />)}
+              </div>
+            ) : (
+              <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+                {[0, 1].map(i => (
+                  <div key={i} style={{ ...cardStyle, borderLeft: '4px solid #333', minHeight: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text, opacity: 0.4 }}>
+                      {tensions === null ? 'Loading…' : 'No data'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {!isPro && (
+            <div onClick={() => setPricingOpen(true)} style={{
+              position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 8,
+            }}>
+              <Lock size={24} color={G.gold} />
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.8 }}>PRO FEATURE<br/>$12.99/mo</span>
+            </div>
+          )}
+        </div>
+
         {/* footer */}
         <div style={{borderTop:`1px solid ${G.border}`,paddingTop:24,marginTop:8,
           display:'flex',flexWrap:'wrap',justifyContent:'center',
@@ -1763,7 +1845,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         /* ── Mobile + large phone: ≤768px ── */
         @media (max-width: 768px) {
-          .grid-2col    { grid-template-columns: 1fr !important; }
+          .grid-2col    { grid-template-columns: 1fr !important; gap: 10px !important; }
           .grid-3       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
           .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
           .grid-5       { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
