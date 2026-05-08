@@ -114,6 +114,7 @@ async def lifespan(app: FastAPI):
         logger.info("✓ Loaded existing models successfully — skipping retraining")
 
     retrainer.start_scheduler(retrain_interval_hours=RETRAIN_INTERVAL_HOURS)
+    asyncio.create_task(_warmup_tensions())
 
     yield
 
@@ -432,6 +433,21 @@ async def get_subscription_status(user: dict = Depends(get_current_user)):
 _ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 _BINANCE_FUTURES = "https://fapi.binance.com"
 
+_TENSIONS_FALLBACK = [
+    {
+        "type": "warning",
+        "title": "Analysis Temporarily Unavailable",
+        "description": "Market tension analysis is loading. Refresh in a moment for AI-detected trading setups.",
+        "confidence": "low",
+    },
+    {
+        "type": "squeeze",
+        "title": "Monitor Key Levels Closely",
+        "description": "Watch for breakouts above resistance or breakdowns below support during current volatility conditions.",
+        "confidence": "low",
+    },
+]
+
 
 async def _fetch_funding_rate() -> dict:
     try:
@@ -539,43 +555,47 @@ Type definitions:
 
 Return only the 2-4 most significant setups."""
 
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={
-                    "x-api-key": _ANTHROPIC_API_KEY,
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json",
-                },
-                json={
-                    "model": "claude-haiku-4-5-20251001",
-                    "max_tokens": 512,
-                    "messages": [{"role": "user", "content": prompt}],
-                },
-            )
-            resp.raise_for_status()
-            content = resp.json()["content"][0]["text"].strip()
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                resp = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": _ANTHROPIC_API_KEY,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json",
+                    },
+                    json={
+                        "model": "claude-haiku-4-5-20251001",
+                        "max_tokens": 256,
+                        "messages": [{"role": "user", "content": prompt}],
+                    },
+                )
+                resp.raise_for_status()
+                content = resp.json()["content"][0]["text"].strip()
 
-        if content.startswith("```"):
-            content = content.split("```")[1]
-            if content.startswith("json"):
-                content = content[4:]
-            content = content.strip()
+            if content.startswith("```"):
+                content = content.split("```")[1]
+                if content.startswith("json"):
+                    content = content[4:]
+                content = content.strip()
 
-        raw_setups = json.loads(content)
+            raw_setups = json.loads(content)
 
-        valid_types = {"bullish", "bearish", "warning", "squeeze"}
-        valid_conf = {"high", "medium", "low"}
-        result = [
-            {
-                "type": s["type"],
-                "title": str(s.get("title", ""))[:100],
-                "description": str(s.get("description", ""))[:500],
-                "confidence": s["confidence"],
-            }
-            for s in raw_setups[:4]
-            if s.get("type") in valid_types and s.get("confidence") in valid_conf
-        ]
+            valid_types = {"bullish", "bearish", "warning", "squeeze"}
+            valid_conf = {"high", "medium", "low"}
+            result = [
+                {
+                    "type": s["type"],
+                    "title": str(s.get("title", ""))[:100],
+                    "description": str(s.get("description", ""))[:500],
+                    "confidence": s["confidence"],
+                }
+                for s in raw_setups[:4]
+                if s.get("type") in valid_types and s.get("confidence") in valid_conf
+            ]
+        except Exception as exc:
+            logger.warning(f"Haiku call failed or timed out ({exc!r}) — using fallback")
+            result = _TENSIONS_FALLBACK
 
         _tensions_cache["tensions"] = result
         return result
@@ -585,3 +605,11 @@ Return only the 2-4 most significant setups."""
     except Exception as exc:
         logger.error(f"Market tensions failed: {exc}", exc_info=True)
         raise HTTPException(502, f"Failed to fetch market tensions: {exc}")
+
+
+async def _warmup_tensions():
+    try:
+        await get_market_tensions()
+        logger.info("✓ Market tensions pre-warmed")
+    except Exception as exc:
+        logger.warning(f"Tensions warmup failed (non-fatal): {exc}")

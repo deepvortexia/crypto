@@ -609,6 +609,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     try { if (currentPrice) setKeyLevels(await fetchKeyLevels(currentPrice)) } catch {}
     try { setLiquidations(await fetchLiquidations()) } catch {}
     try { setNewsSentiment(await fetchNewsSentiment()) } catch {}
+    try { setTensions(await fetchMarketTensions()) } catch {}
 
     setLoading(false)
     setLastAt(new Date())
@@ -625,13 +626,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   useEffect(() => {
     const tick = setInterval(() => setCountdown(c => Math.max(0, c - 1)), 1000)
     return () => clearInterval(tick)
-  }, [])
-
-  useEffect(() => {
-    const load = async () => { try { setTensions(await fetchMarketTensions()) } catch {} }
-    load()
-    const id = setInterval(load, 300_000)
-    return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
