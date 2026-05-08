@@ -1745,6 +1745,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   'Order Book & Whale Activity',
                   'Key Levels, Pivot Points & Fibonacci',
                   'Mempool & Network Data',
+                  'Market Tensions & Divergences (AI-powered)',
+                  '4 AI trading setups updated every 5 min',
                   'Unlimited Deep Analysis (9-signal AI score)',
                   'Priority support',
                 ].map((f, i) => (
@@ -1870,8 +1872,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           /* Result badges: wrap if needed */
           .deep-result-badges { flex-wrap: wrap !important; justify-content: center !important; }
           /* Pricing modal: scrollable, fits screen */
-          .pricing-modal-box { max-height: 90vh !important; overflow-y: auto !important;
-                               width: 95% !important; border-radius: 12px !important; }
+          .pricing-modal-box { max-height: 90vh !important; max-width: 95vw !important; overflow-y: auto !important;
+                               width: 95% !important; border-radius: 12px !important;
+                               padding: 0 !important; }
+          .pricing-modal-box button { min-height: 48px !important; font-size: 13px !important; }
+          .pricing-modal-box > div { padding: 18px 18px !important; }
           /* Ensure all buttons are tappable */
           button { min-height: 44px; }
         }
