@@ -57,7 +57,7 @@ CORS_ORIGINS = os.getenv(
     "https://predictalpha.app,https://www.predictalpha.app,https://deepvortexai.com,https://www.deepvortexai.com,http://localhost:3000,http://localhost:5173",
 ).split(",")
 
-RETRAIN_INTERVAL_HOURS = int(os.getenv("MODEL_RETRAIN_INTERVAL_HOURS", "48"))
+RETRAIN_INTERVAL_HOURS = int(os.getenv("MODEL_RETRAIN_INTERVAL_HOURS", "24"))
 
 HorizonKey = Literal["1h", "4h", "8h", "12h", "24h", "1month"]
 
