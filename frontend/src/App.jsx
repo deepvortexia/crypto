@@ -836,12 +836,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         backdropFilter: 'blur(14px)',
         borderBottom: `1px solid ${G.border}`,
         padding: '0 32px',
-        height: 68, minHeight: 68,
+        height: 68,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         {/* logo */}
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <img src="/logoegyptfinal.webp" alt="Predict Alpha" className="navbar-logo" width="52" height="52" style={{width:'auto',height:52,objectFit:'contain',verticalAlign:'middle'}} />
+          <img src="/logoegyptfinal.webp" alt="Predict Alpha" className="navbar-logo" style={{width:'auto',objectFit:'contain',verticalAlign:'middle'}} />
           <div style={{display:'flex',flexDirection:'column',gap:3}}>
             <span className="navbar-brand" style={{fontFamily:'"Orbitron",sans-serif',letterSpacing:'0.05em',opacity:0.9,whiteSpace:'nowrap'}}>
               <span style={{color:'#f59e0b',fontWeight:400}}>PREDICT</span>{' '}<span style={{color:'#f59e0b',fontWeight:700,textShadow:'0 0 8px rgba(245,158,11,0.4)'}}>ALPHA</span>
