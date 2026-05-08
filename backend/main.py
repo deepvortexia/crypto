@@ -100,6 +100,9 @@ async def lifespan(app: FastAPI):
     loop = asyncio.get_event_loop()
     loaded = await loop.run_in_executor(None, ensemble.load_models)
 
+    files = os.listdir("/app/saved_models") if os.path.exists("/app/saved_models") else []
+    logger.info(f"Files in /app/saved_models: {files}")
+
     if not loaded:
         logger.info("No saved models found — triggering initial training in background")
         asyncio.create_task(retrainer.initial_train())
