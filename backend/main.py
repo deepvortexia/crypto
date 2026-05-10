@@ -1,4 +1,5 @@
 import asyncio
+import hmac
 import json
 import logging
 import os
@@ -360,9 +361,10 @@ async def get_status():
 
 # ── Manual retrain trigger (protected by env secret) ─────────────────────────
 @app.post("/api/admin/retrain")
-async def trigger_retrain(secret: str):
+async def trigger_retrain(authorization: str = Header(None)):
     admin_secret = os.getenv("ADMIN_SECRET", "")
-    if not admin_secret or secret != admin_secret:
+    provided = (authorization or "").removeprefix("Bearer ").strip()
+    if not admin_secret or not hmac.compare_digest(provided, admin_secret):
         raise HTTPException(403, "Forbidden")
     if retrainer.get_status()["is_training"]:
         return {"message": "Training already in progress"}
