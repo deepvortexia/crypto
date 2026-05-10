@@ -475,7 +475,7 @@ async def use_deep_analysis(user: dict = Depends(get_current_user)):
 
 # ── Market Tensions ───────────────────────────────────────────────────────────
 _ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-_BINANCE_FUTURES = "https://fapi.binance.com"
+_BYBIT_FUTURES = "https://api.bybit.com"
 
 _TENSIONS_FALLBACK = [
     {
@@ -497,13 +497,14 @@ async def _fetch_funding_rate() -> dict:
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
-                f"{_BINANCE_FUTURES}/fapi/v1/fundingRate",
-                params={"symbol": "BTCUSDT", "limit": 1},
+                f"{_BYBIT_FUTURES}/v5/market/funding/history",
+                params={"category": "linear", "symbol": "BTCUSDT", "limit": 1},
             )
             resp.raise_for_status()
             data = resp.json()
-            if data:
-                rate = float(data[0]["fundingRate"]) * 100
+            items = data.get("result", {}).get("list", [])
+            if items:
+                rate = float(items[0]["fundingRate"]) * 100
                 return {"rate_pct": round(rate, 4), "annualized_pct": round(rate * 3 * 365, 2)}
     except Exception as exc:
         logger.warning(f"Funding rate fetch failed: {exc}")
@@ -514,16 +515,17 @@ async def _fetch_long_short_ratio() -> dict:
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
-                f"{_BINANCE_FUTURES}/futures/data/globalLongShortAccountRatio",
-                params={"symbol": "BTCUSDT", "period": "1h", "limit": 1},
+                f"{_BYBIT_FUTURES}/v5/market/account-ratio",
+                params={"category": "linear", "symbol": "BTCUSDT", "period": "1h", "limit": 1},
             )
             resp.raise_for_status()
             data = resp.json()
-            if data:
+            items = data.get("result", {}).get("list", [])
+            if items:
                 return {
-                    "ratio": round(float(data[0]["longShortRatio"]), 3),
-                    "long_pct": round(float(data[0]["longAccount"]) * 100, 2),
-                    "short_pct": round(float(data[0]["shortAccount"]) * 100, 2),
+                    "ratio": round(float(items[0]["buyRatio"]) / float(items[0]["sellRatio"]), 3),
+                    "long_pct": round(float(items[0]["buyRatio"]) * 100, 2),
+                    "short_pct": round(float(items[0]["sellRatio"]) * 100, 2),
                 }
     except Exception as exc:
         logger.warning(f"Long/short ratio fetch failed: {exc}")
