@@ -58,10 +58,10 @@ from services.indicators import compute_indicators, get_indicator_snapshot
 from services.news_sentiment import fetch_news_sentiment
 from services import retrainer
 
-CORS_ORIGINS = os.getenv(
-    "CORS_ORIGINS",
-    "https://predictalpha.app,https://www.predictalpha.app,https://deepvortexai.com,https://www.deepvortexai.com,http://localhost:3000,http://localhost:5173",
-).split(",")
+CORS_ORIGINS = [
+    "https://predictalpha.app",
+    "https://www.predictalpha.app",
+]
 
 RETRAIN_INTERVAL_HOURS = int(os.getenv("MODEL_RETRAIN_INTERVAL_HOURS", "24"))
 
@@ -135,7 +135,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
