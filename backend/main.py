@@ -494,7 +494,7 @@ async def use_deep_analysis(request: Request, user: dict = Depends(get_current_u
 
 # ── Market Tensions ───────────────────────────────────────────────────────────
 _ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-_BYBIT_FUTURES = "https://api.bybit.com"
+_OKX_BASE = "https://www.okx.com"
 
 _TENSIONS_FALLBACK = [
     {
@@ -516,12 +516,12 @@ async def _fetch_funding_rate() -> dict:
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
-                f"{_BYBIT_FUTURES}/v5/market/funding/history",
-                params={"category": "linear", "symbol": "BTCUSDT", "limit": 1},
+                f"{_OKX_BASE}/api/v5/public/funding-rate",
+                params={"instId": "BTC-USDT-SWAP"},
             )
             resp.raise_for_status()
             data = resp.json()
-            items = data.get("result", {}).get("list", [])
+            items = data.get("data", [])
             if items:
                 rate = float(items[0]["fundingRate"]) * 100
                 return {"rate_pct": round(rate, 4), "annualized_pct": round(rate * 3 * 365, 2)}
@@ -534,17 +534,19 @@ async def _fetch_long_short_ratio() -> dict:
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
-                f"{_BYBIT_FUTURES}/v5/market/account-ratio",
-                params={"category": "linear", "symbol": "BTCUSDT", "period": "1h", "limit": 1},
+                f"{_OKX_BASE}/api/v5/rubik/stat/contracts/long-short-account-ratio",
+                params={"ccy": "BTC", "period": "1H", "limit": 1},
             )
             resp.raise_for_status()
             data = resp.json()
-            items = data.get("result", {}).get("list", [])
+            items = data.get("data", [])
             if items:
+                long_pct = round(float(items[0][1]) * 100, 2)
+                short_pct = round(100 - long_pct, 2)
                 return {
-                    "ratio": round(float(items[0]["buyRatio"]) / float(items[0]["sellRatio"]), 3),
-                    "long_pct": round(float(items[0]["buyRatio"]) * 100, 2),
-                    "short_pct": round(float(items[0]["sellRatio"]) * 100, 2),
+                    "ratio": round(long_pct / short_pct, 3),
+                    "long_pct": long_pct,
+                    "short_pct": short_pct,
                 }
     except Exception as exc:
         logger.warning(f"Long/short ratio fetch failed: {exc}")
