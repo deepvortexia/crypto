@@ -17,6 +17,9 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from supabase import create_client, Client
 
 load_dotenv()
@@ -135,6 +138,20 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+
+def _real_ip(request: Request) -> str:
+    xff = request.headers.get("X-Forwarded-For")
+    return xff.split(",")[0].strip() if xff else request.client.host
+
+limiter = Limiter(key_func=_real_ip, default_limits=["60/minute"])
+app.state.limiter = limiter
+
+def _rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    return JSONResponse(status_code=429, content={"error": "Rate limit exceeded. Try again later."})
+
+app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 
 # ── Health ────────────────────────────────────────────────────────────────────
@@ -442,7 +459,8 @@ def _is_pro(user_id: str) -> bool:
 
 
 @app.get("/api/deep-analysis/remaining")
-async def get_deep_analysis_remaining(user: dict = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def get_deep_analysis_remaining(request: Request, user: dict = Depends(get_current_user)):
     """Return how many Deep Analysis uses the user has left today."""
     user_id = user["id"]
     if _is_pro(user_id):
@@ -455,7 +473,8 @@ async def get_deep_analysis_remaining(user: dict = Depends(get_current_user)):
 
 
 @app.post("/api/deep-analysis/use")
-async def use_deep_analysis(user: dict = Depends(get_current_user)):
+@limiter.limit("10/minute")
+async def use_deep_analysis(request: Request, user: dict = Depends(get_current_user)):
     """Atomically consume one Deep Analysis credit. Returns 429 if daily limit reached."""
     user_id = user["id"]
     if _is_pro(user_id):
@@ -533,7 +552,8 @@ async def _fetch_long_short_ratio() -> dict:
 
 
 @app.get("/api/market-tensions")
-async def get_market_tensions():
+@limiter.limit("10/minute")
+async def get_market_tensions(request: Request):
     """AI-detected BTC trading setups from live market conditions (Claude Haiku, cached 5 min)."""
     if "tensions" in _tensions_cache:
         return _tensions_cache["tensions"]
