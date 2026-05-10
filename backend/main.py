@@ -77,6 +77,7 @@ _onchain_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)       # 30 min
 _predict_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)      # 1 h per horizon
 _news_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)          # 30 min
 _tensions_cache: TTLCache = TTLCache(maxsize=1, ttl=300)       # 5 min
+_ohlc_cache: TTLCache = TTLCache(maxsize=1, ttl=600)           # 10 min
 
 # Shared dataframe cache (refreshed alongside indicators)
 _hourly_df = None
@@ -174,6 +175,26 @@ app.add_middleware(SecurityHeadersMiddleware)
 async def health():
     status = retrainer.get_status()
     return {"status": "ok", **status}
+
+
+# ── OHLC proxy (avoids browser CORS on CoinGecko) ────────────────────────────
+@app.get("/api/ohlc")
+async def get_ohlc():
+    if "ohlc" in _ohlc_cache:
+        return _ohlc_cache["ohlc"]
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.get(
+                "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc",
+                params={"vs_currency": "usd", "days": 365},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+        _ohlc_cache["ohlc"] = data
+        return data
+    except Exception as exc:
+        logger.warning(f"OHLC fetch failed: {exc}")
+        raise HTTPException(502, "Failed to fetch OHLC data")
 
 
 # ── Live Price ────────────────────────────────────────────────────────────────

@@ -74,7 +74,7 @@ async function getOhlc() {
   }
 
   try {
-    const data = await get(`${COINGECKO}/coins/bitcoin/ohlc?vs_currency=usd&days=365`, {
+    const data = await get(`${BACKEND_URL}/api/ohlc`, {
       timeout: 10000,
       retries: 2
     })
