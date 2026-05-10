@@ -697,7 +697,16 @@ Return only the 2-4 most significant setups."""
 
 async def _warmup_tensions():
     try:
-        await get_market_tensions()
+        scope = {
+            "type": "http",
+            "method": "GET",
+            "path": "/api/market-tensions",
+            "query_string": b"",
+            "headers": [],
+            "client": ("127.0.0.1", 0),
+            "app": app,
+        }
+        await get_market_tensions(Request(scope))
         logger.info("✓ Market tensions pre-warmed")
     except Exception as exc:
         logger.warning(f"Tensions warmup failed (non-fatal): {exc}")
