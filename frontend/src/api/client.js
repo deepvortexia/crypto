@@ -173,25 +173,11 @@ export async function fetchLivePrice() {
       retries: 2
     })
     const price = parseFloat(ticker.lastPrice)
-    // Fetch total market volume + real market cap from CoinGecko in parallel
-    let volume_24h = parseFloat(ticker.quoteVolume)
-    let market_cap = price * 19700000
-    try {
-      const cg = await get(`${COINGECKO}/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false`, {
-        timeout: 10000,
-        retries: 1,
-      })
-      volume_24h = cg.market_data?.total_volume?.usd ?? volume_24h
-      market_cap = cg.market_data?.market_cap?.usd ?? market_cap
-    } catch (_cgErr) {
-      // fallback to Binance volume silently
-    }
-
     return {
       price,
       change_24h_pct: parseFloat(ticker.priceChangePercent),
-      volume_24h,
-      market_cap,
+      volume_24h: parseFloat(ticker.quoteVolume),
+      market_cap: price * 19700000,
       last_updated: new Date().toISOString(),
     }
   } catch (err) {
