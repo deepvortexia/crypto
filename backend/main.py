@@ -495,7 +495,7 @@ def _is_pro(user_id: str) -> bool:
 
 
 @app.get("/api/deep-analysis/remaining")
-@limiter.limit("10/minute")
+@limiter.limit("30/minute")
 async def get_deep_analysis_remaining(request: Request, user: dict = Depends(get_current_user)):
     """Return how many Deep Analysis uses the user has left today."""
     user_id = user["id"]
@@ -509,7 +509,7 @@ async def get_deep_analysis_remaining(request: Request, user: dict = Depends(get
 
 
 @app.post("/api/deep-analysis/use")
-@limiter.limit("10/minute")
+@limiter.limit("5/minute")
 async def use_deep_analysis(request: Request, user: dict = Depends(get_current_user)):
     """Atomically consume one Deep Analysis credit. Returns 429 if daily limit reached."""
     user_id = user["id"]
