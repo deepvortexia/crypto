@@ -238,14 +238,20 @@ async def get_indicators():
 
 
 # ── Predictions ───────────────────────────────────────────────────────────────
+PRO_HORIZONS = {"4h", "8h", "12h", "24h", "1month"}
+
+
 @app.get("/api/predict/{horizon}")
 async def get_prediction(
     horizon: HorizonKey = Path(..., description="Prediction horizon: 1h, 4h, 8h, 12h, 24h, 1month"),
+    user: dict = Depends(get_current_user),
 ):
     """
     Ensemble prediction (LSTM + XGBoost + Prophet) for the requested horizon.
     Returns predicted price, % change, direction, and per-model breakdown.
     """
+    if horizon in PRO_HORIZONS and not _is_pro(user["id"]):
+        raise HTTPException(403, "PRO subscription required for this horizon")
     if not ensemble.is_ready:
         status = retrainer.get_status()
         if status["is_training"]:

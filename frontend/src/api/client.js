@@ -242,64 +242,14 @@ export async function fetchOnchain() {
   }
 }
 
-const HORIZON_DAYS = { '1h': 1 / 24, '4h': 4 / 24, '8h': 8 / 24, '12h': 12 / 24, '24h': 1, '1week': 7, '1month': 30 }
-
 export async function fetchPrediction(horizon) {
-  if (!(horizon in HORIZON_DAYS)) {
-    throw new Error(`Invalid horizon "${horizon}". Must be one of: ${Object.keys(HORIZON_DAYS).join(', ')}`)
-  }
-  const closes = await getOhlc()
-  const currentPrice = closes[closes.length - 1]
-
-  const sma7 = _sma(closes, 7)
-  const sma14 = _sma(closes, 14)
-  const lastSma7 = sma7[sma7.length - 1]
-  const lastSma14 = sma14[sma14.length - 1]
-
-  const dailyTrend = (lastSma7 - lastSma14) / lastSma14
-  const projectedChange = dailyTrend * HORIZON_DAYS[horizon]
-  const predictedPrice = currentPrice * (1 + projectedChange)
-  const changePct = projectedChange * 100
-
-  // Dynamic confidence for 1H: simulate LSTM+XGB agreement + volatility analysis
-  let confidence
-  if (horizon === '1h') {
-    // Calculate recent volatility (last 7 days)
-    const recentPrices = closes.slice(-7)
-    const volatility = _stddev(recentPrices) / currentPrice
-
-    // Calculate trend strength (how aligned are short-term indicators)
-    const ema3 = _ema(closes, 3)
-    const ema7 = _ema(closes, 7)
-    const lastEma3 = ema3[ema3.length - 1]
-    const lastEma7 = ema7[ema7.length - 1]
-    const trendAlignment = Math.abs((lastEma3 - lastEma7) / lastEma7)
-
-    // Model agreement score (simulated): higher when trend is clear and volatility is moderate
-    const modelAgreement = Math.min(trendAlignment * 200, 1.0) // 0 to 1
-    const volatilityScore = Math.max(0, 1 - volatility * 50) // lower volatility = higher confidence
-
-    // Confidence range: 55-88%
-    const baseConfidence = 55
-    const maxBonus = 33 // 88 - 55
-    const agreementBonus = modelAgreement * maxBonus * 0.6
-    const stabilityBonus = volatilityScore * maxBonus * 0.4
-
-    confidence = parseFloat((baseConfidence + agreementBonus + stabilityBonus).toFixed(1))
-    confidence = Math.max(55, Math.min(88, confidence)) // clamp to 55-88%
-  } else {
-    // Other horizons: keep existing logic
-    confidence = parseFloat((50 + Math.min(Math.abs(dailyTrend) * 100, 1) * 45).toFixed(1))
-  }
-
-  const predicted_price = parseFloat(predictedPrice.toFixed(2))
-  const change_pct = parseFloat(changePct.toFixed(2))
-  return {
-    predicted_price,
-    change_pct,
-    direction: predicted_price >= currentPrice ? 'up' : 'down',
-    confidence,
-  }
+  if (horizon === '1week') return null  // not a backend horizon yet
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) throw new ApiError(401, 'Not authenticated')
+  return get(`${BACKEND_URL}/api/predict/${horizon}`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    retries: 1,
+  })
 }
 
 export async function fetchIndicators() {
