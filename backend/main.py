@@ -88,16 +88,18 @@ _hourly_df = None
 _daily_df = None
 _df_fetched_at: float = 0.0
 _DF_REFRESH_SECONDS = 300  # 5 min
+_df_lock = asyncio.Lock()
 
 
 async def _get_dataframes():
     global _hourly_df, _daily_df, _df_fetched_at
-    if time() - _df_fetched_at > _DF_REFRESH_SECONDS:
-        _hourly_df, _daily_df = await asyncio.gather(
-            fetch_hourly_ohlcv(days=90),
-            fetch_daily_ohlcv(days=365),
-        )
-        _df_fetched_at = time()
+    async with _df_lock:
+        if time() - _df_fetched_at > _DF_REFRESH_SECONDS:
+            _hourly_df, _daily_df = await asyncio.gather(
+                fetch_hourly_ohlcv(days=90),
+                fetch_daily_ohlcv(days=365),
+            )
+            _df_fetched_at = time()
     return _hourly_df, _daily_df
 
 
