@@ -541,6 +541,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [pricingOpen, setPricingOpen] = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
+  const [resetIn,     setResetIn]     = useState('')
   const [tensions,    setTensions]    = useState(null)
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
@@ -630,6 +631,20 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   useEffect(() => {
     const tick = setInterval(() => setCountdown(c => Math.max(0, c - 1)), 1000)
     return () => clearInterval(tick)
+  }, [])
+
+  useEffect(() => {
+    const calcResetIn = () => {
+      const now = new Date()
+      const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1))
+      const diffMs = midnight - now
+      const h = Math.floor(diffMs / 3600000)
+      const m = Math.floor((diffMs % 3600000) / 60000)
+      setResetIn(`${h}h ${m}m`)
+    }
+    calcResetIn()
+    const id = setInterval(calcResetIn, 60000)
+    return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
@@ -1829,6 +1844,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               {user && !isPro && credits > 0 && (
                 <div style={{ marginTop: 16, textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
                   <span style={{ color: G.gold }}>{credits}/2</span> free Deep Analysis uses remaining today
+                </div>
+              )}
+              {user && !isPro && credits === 0 && (
+                <div style={{ marginTop: 16, textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
+                  <span style={{ color: G.red }}>0/2</span> free uses remaining today
+                  <div style={{ marginTop: 4, fontSize: 10, color: '#6b7280' }}>Resets in {resetIn}</div>
                 </div>
               )}
             </div>
