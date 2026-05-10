@@ -610,7 +610,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         setIsPro(sub.status === 'active')
       })
       fetchDeepAnalysisRemaining().then(c => {
-        setCredits(c.is_pro ? 999 : (c.remaining ?? 0))
+        if (c !== null) setCredits(c.is_pro ? 999 : (c.remaining ?? 2))
       })
       if (!prevUserRef.current) loadAll()
     } else {

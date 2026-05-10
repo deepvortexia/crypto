@@ -572,10 +572,10 @@ export async function fetchDeepAnalysisRemaining() {
   try {
     const headers = await getAuthHeaders()
     const res = await fetch(`${BACKEND_URL}/api/deep-analysis/remaining`, { headers })
-    if (!res.ok) return { remaining: 0, is_pro: false }
+    if (!res.ok) return null
     return await res.json()
   } catch {
-    return { remaining: 0, is_pro: false }
+    return null
   }
 }
 
