@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 
 const BINANCE = 'https://api.binance.com/api/v3'
+const COINGECKO = 'https://api.coingecko.com/api/v3'
 const BACKEND_URL = 'https://crypto-production-f7c5.up.railway.app'
 
 class ApiError extends Error {
@@ -73,9 +74,7 @@ async function getOhlc() {
   }
 
   try {
-    // Fetch 400 daily candles for accurate EMA 200 calculation
-    // EMA needs more data than the period for proper convergence
-    const data = await get(`${BINANCE}/klines?symbol=BTCUSDT&interval=1d&limit=400`, {
+    const data = await get(`${COINGECKO}/coins/bitcoin/ohlc?vs_currency=usd&days=365`, {
       timeout: 10000,
       retries: 2
     })
