@@ -166,8 +166,6 @@ function _calcBollinger(closes, period = 20) {
 
 // --- Public API ---
 
-const COINGECKO = 'https://api.coingecko.com/api/v3'
-
 export async function fetchLivePrice() {
   try {
     const ticker = await get(`${BINANCE}/ticker/24hr?symbol=BTCUSDT`, {
