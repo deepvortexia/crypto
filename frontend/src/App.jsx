@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 
@@ -565,7 +565,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     return () => subscription.unsubscribe()
   }, [])
 
-  // Fetch subscription status when user changes
+  // Fetch subscription status when user changes; re-run loadAll on first login
+  const prevUserRef = useRef(null)
   useEffect(() => {
     if (user) {
       fetchSubscriptionStatus().then(sub => {
@@ -574,11 +575,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       fetchDeepAnalysisRemaining().then(c => {
         setCredits(c.is_pro ? 999 : (c.remaining ?? 0))
       })
+      if (!prevUserRef.current) loadAll()
     } else {
       setIsPro(false)
       setCredits(0)
     }
-  }, [user])
+    prevUserRef.current = user
+  }, [user, loadAll])
 
   const loadAll = useCallback(async () => {
     const [p, s, ind] = await Promise.allSettled([
@@ -764,7 +767,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   }
 
   const isLoggedIn = () => !!user
-  const canAccessPremium = () => !!user
+  const canAccessPremium = () => !!user && isPro
   const canDeepAnalysis = () => isPro || credits > 0
 
   const handleDeepClick = () => {
@@ -1752,6 +1755,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <div onClick={e => e.stopPropagation()} className="pricing-modal-box" style={{
             background: G.card, borderRadius: 16, maxWidth: 420, width: '92%',
             border: `2px solid ${G.gold}`, boxShadow: `0 0 60px ${G.goldGlow}`,
+            maxHeight: '90vh', overflowY: 'auto',
           }}>
             <div style={{ padding: '24px 28px', borderBottom: `1px solid ${G.border}`, textAlign: 'center' }}>
               <img src="/logoegyptfinal.webp" alt="Predict Alpha" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 8 }} />
