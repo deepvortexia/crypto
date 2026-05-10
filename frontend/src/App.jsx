@@ -963,7 +963,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <button onClick={handleLogout} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.text, background: 'none', border: '1px solid #333', borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGOUT</button>
           </div>
         ) : (
-          <button className="hide-mobile" onClick={() => setAuthOpen(true)} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '8px 16px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGIN</button>
+          <button className="hide-mobile" onClick={() => { setAuthTab('login'); setAuthOpen(true) }} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '8px 16px', cursor: 'pointer', textTransform: 'uppercase' }}>LOGIN</button>
         )}
 
         {/* hamburger — mobile only */}
@@ -997,7 +997,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               </div>
             ) : (
               <div style={{padding:'12px 20px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
-                <button onClick={() => { setAuthOpen(true); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.15em',color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}44`,borderRadius:6,padding:'13px 16px',cursor:'pointer',textTransform:'uppercase',minHeight:48}}>LOGIN</button>
+                <button onClick={() => { setAuthTab('login'); setAuthOpen(true); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.15em',color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}44`,borderRadius:6,padding:'13px 16px',cursor:'pointer',textTransform:'uppercase',minHeight:48}}>LOGIN</button>
               </div>
             )}
             {[
