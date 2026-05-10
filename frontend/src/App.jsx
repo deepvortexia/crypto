@@ -565,24 +565,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     return () => subscription.unsubscribe()
   }, [])
 
-  // Fetch subscription status when user changes; re-run loadAll on first login
-  const prevUserRef = useRef(null)
-  useEffect(() => {
-    if (user) {
-      fetchSubscriptionStatus().then(sub => {
-        setIsPro(sub.status === 'active')
-      })
-      fetchDeepAnalysisRemaining().then(c => {
-        setCredits(c.is_pro ? 999 : (c.remaining ?? 0))
-      })
-      if (!prevUserRef.current) loadAll()
-    } else {
-      setIsPro(false)
-      setCredits(0)
-    }
-    prevUserRef.current = user
-  }, [user, loadAll])
-
   const loadAll = useCallback(async () => {
     const [p, s, ind] = await Promise.allSettled([
       fetchLivePrice(),
@@ -619,6 +601,24 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setLastAt(new Date())
     setCountdown(REFRESH_MS / 1000)
   }, [])
+
+  // Fetch subscription status when user changes; re-run loadAll on first login
+  const prevUserRef = useRef(null)
+  useEffect(() => {
+    if (user) {
+      fetchSubscriptionStatus().then(sub => {
+        setIsPro(sub.status === 'active')
+      })
+      fetchDeepAnalysisRemaining().then(c => {
+        setCredits(c.is_pro ? 999 : (c.remaining ?? 0))
+      })
+      if (!prevUserRef.current) loadAll()
+    } else {
+      setIsPro(false)
+      setCredits(0)
+    }
+    prevUserRef.current = user
+  }, [user, loadAll])
 
   useEffect(() => {
     loadAll()
