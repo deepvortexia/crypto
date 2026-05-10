@@ -3,6 +3,8 @@ import pickle
 from pathlib import Path
 from typing import Optional
 
+from models import write_checksum, verify_checksum
+
 import numpy as np
 import pandas as pd
 import xgboost as xgb
@@ -172,20 +174,26 @@ class BTCXGBoostModel:
         self.data_dir.mkdir(parents=True, exist_ok=True)
         for key, model in self.models.items():
             model.save_model(str(self.data_dir / f"xgb_{key}.ubj"))
+            write_checksum(self.data_dir / f"xgb_{key}.ubj")
             with open(self.data_dir / f"xgb_{key}_scaler.pkl", "wb") as f:
                 pickle.dump(self.scalers[key], f)
+            write_checksum(self.data_dir / f"xgb_{key}_scaler.pkl")
         feat_cols = getattr(self, "_feature_cols", {})
         if feat_cols:
             with open(self.data_dir / "xgb_feature_cols.pkl", "wb") as f:
                 pickle.dump(feat_cols, f)
+            write_checksum(self.data_dir / "xgb_feature_cols.pkl")
         logger.info("XGBoost models saved")
 
     def load(self) -> bool:
         feat_path = self.data_dir / "xgb_feature_cols.pkl"
         if feat_path.exists():
             try:
-                with open(feat_path, "rb") as f:
-                    self._feature_cols = pickle.load(f)
+                if verify_checksum(feat_path):
+                    with open(feat_path, "rb") as f:
+                        self._feature_cols = pickle.load(f)
+                else:
+                    logger.error("Checksum mismatch for xgb_feature_cols.pkl — skipping")
             except Exception:
                 pass
 
@@ -196,6 +204,9 @@ class BTCXGBoostModel:
             if not (model_path.exists() and scaler_path.exists()):
                 continue
             try:
+                if not (verify_checksum(model_path) and verify_checksum(scaler_path)):
+                    logger.error(f"Checksum mismatch for XGBoost {key} — skipping")
+                    continue
                 model = xgb.XGBRegressor()
                 model.load_model(str(model_path))
                 with open(scaler_path, "rb") as f:

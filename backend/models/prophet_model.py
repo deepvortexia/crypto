@@ -4,6 +4,8 @@ import pickle
 from pathlib import Path
 from typing import Optional
 
+from models import write_checksum, verify_checksum
+
 import pandas as pd
 
 os.environ["CMDSTAN"] = "/root/.cmdstan/cmdstan-2.38.0"
@@ -132,9 +134,11 @@ class BTCProphetModel:
         if self.model_hourly:
             with open(self.data_dir / "prophet_hourly.pkl", "wb") as f:
                 pickle.dump(self.model_hourly, f)
+            write_checksum(self.data_dir / "prophet_hourly.pkl")
         if self.model_daily:
             with open(self.data_dir / "prophet_daily.pkl", "wb") as f:
                 pickle.dump(self.model_daily, f)
+            write_checksum(self.data_dir / "prophet_daily.pkl")
         logger.info("Prophet models saved")
 
     def load(self) -> bool:
@@ -145,6 +149,9 @@ class BTCProphetModel:
             path = self.data_dir / f"prophet_{name}.pkl"
             if path.exists():
                 try:
+                    if not verify_checksum(path):
+                        logger.error(f"Checksum mismatch for Prophet {name} — skipping")
+                        continue
                     with open(path, "rb") as f:
                         model = pickle.load(f)
                     setattr(self, f"model_{name}", model)

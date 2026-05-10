@@ -3,6 +3,8 @@ import pickle
 from pathlib import Path
 from typing import Optional
 
+from models import write_checksum, verify_checksum
+
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
@@ -357,10 +359,13 @@ class BTCLSTMModel:
         for key, net in self.models.items():
             with open(self.data_dir / f"lstm_{key}.pkl", "wb") as f:
                 pickle.dump(net.get_state(), f)
+            write_checksum(self.data_dir / f"lstm_{key}.pkl")
             with open(self.data_dir / f"lstm_{key}_scaler.pkl", "wb") as f:
                 pickle.dump(self.scalers[key], f)
+            write_checksum(self.data_dir / f"lstm_{key}_scaler.pkl")
             with open(self.data_dir / f"lstm_{key}_price_scaler.pkl", "wb") as f:
                 pickle.dump(self.price_scalers[key], f)
+            write_checksum(self.data_dir / f"lstm_{key}_price_scaler.pkl")
         logger.info("LSTM models saved")
 
     def load(self) -> bool:
@@ -372,6 +377,9 @@ class BTCLSTMModel:
             if not (model_path.exists() and scaler_path.exists() and price_path.exists()):
                 continue
             try:
+                if not (verify_checksum(model_path) and verify_checksum(scaler_path) and verify_checksum(price_path)):
+                    logger.error(f"Checksum mismatch for LSTM {key} — skipping")
+                    continue
                 with open(model_path, "rb") as f:
                     self.models[key] = _LSTMNet.from_state(pickle.load(f))
                 with open(scaler_path, "rb") as f:
