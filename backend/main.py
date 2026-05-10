@@ -512,8 +512,12 @@ async def use_deep_analysis(request: Request, user: dict = Depends(get_current_u
     if _is_pro(user_id):
         return {"allowed": True, "remaining": 999, "is_pro": True}
 
-    result = supabase.rpc("try_use_deep_analysis", {"p_user_id": user_id, "p_limit": DEEP_ANALYSIS_DAILY_LIMIT}).execute()
-    count = result.data
+    try:
+        result = supabase.rpc("try_use_deep_analysis", {"p_user_id": user_id, "p_limit": DEEP_ANALYSIS_DAILY_LIMIT}).execute()
+        count = result.data
+    except Exception as e:
+        logger.error(f"deep_analysis RPC failed: {e}")
+        raise HTTPException(503, "Credit check temporarily unavailable")
 
     if count == -1:
         raise HTTPException(
