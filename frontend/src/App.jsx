@@ -989,7 +989,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* mobile dropdown */}
         {menuOpen && (
-          <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:200,padding:'12px 0'}}>
+          <div onClick={() => setMenuOpen(false)} style={{
+            position: 'fixed', top: 68, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.7)', zIndex: 998
+          }} />
+        )}
+        {menuOpen && (
+          <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:999,padding:'12px 0'}}>
             {/* User section for mobile */}
             {authLoading ? null : user ? (
               <div style={{padding:'16px 20px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
@@ -1003,7 +1009,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     </div>
                   )}
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:G.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user.email}</div>
+                    <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:13,color:G.text,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'200px'}}>{user.email}</div>
                     {isPro && <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:G.gold,letterSpacing:'0.15em',marginTop:2}}>PRO MEMBER</div>}
                   </div>
                 </div>
