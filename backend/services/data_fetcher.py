@@ -8,58 +8,34 @@ import ccxt.async_support as ccxt_async
 import httpx
 import pandas as pd
 
-COINGECKO_BASE = "https://api.coingecko.com/api/v3"
 FEAR_GREED_URL = "https://api.alternative.me/fng/?limit=7&format=json"
 BLOCKCHAIN_STATS_URL = "https://api.blockchain.info/stats"
 BLOCKCHAIN_CHARTS_BASE = "https://api.blockchain.info/charts"
 
-_HTTP_TIMEOUT = 20.0
-_COINGECKO_KEY = os.getenv("COINGECKO_API_KEY", "")
-
-
-def _coingecko_headers() -> dict:
-    if _COINGECKO_KEY:
-        return {"x-cg-demo-api-key": _COINGECKO_KEY}
-    return {}
-
-
-_RETRY_BACKOFF = [5, 15, 30]  # seconds between attempts (handles CoinGecko 429s)
-
-
-async def _get(client: httpx.AsyncClient, url: str, params: dict = None, retries: int = 3) -> dict:
-    for attempt in range(retries):
-        try:
-            resp = await client.get(url, params=params, headers=_coingecko_headers(), timeout=_HTTP_TIMEOUT)
-            if resp.status_code == 429:
-                await asyncio.sleep(_RETRY_BACKOFF[min(attempt, len(_RETRY_BACKOFF) - 1)])
-                continue
-            resp.raise_for_status()
-            return resp.json()
-        except httpx.HTTPError as exc:
-            if attempt == retries - 1:
-                raise
-            await asyncio.sleep(_RETRY_BACKOFF[min(attempt, len(_RETRY_BACKOFF) - 1)])
-    raise RuntimeError(f"Failed to fetch {url} after {retries} attempts")
+_HTTP_TIMEOUT = 10.0
 
 
 async def fetch_live_price() -> dict:
-    async with httpx.AsyncClient() as client:
-        data = await _get(client, f"{COINGECKO_BASE}/simple/price", {
-            "ids": "bitcoin",
-            "vs_currencies": "usd",
-            "include_24hr_change": "true",
-            "include_market_cap": "true",
-            "include_24hr_vol": "true",
-            "include_last_updated_at": "true",
-        })
-    btc = data["bitcoin"]
-    return {
-        "price": btc["usd"],
-        "change_24h_pct": btc.get("usd_24h_change", 0),
-        "market_cap": btc.get("usd_market_cap", 0),
-        "volume_24h": btc.get("usd_24h_vol", 0),
-        "last_updated": btc.get("last_updated_at", int(time.time())),
-    }
+    """Current BTC price via CCXT (Coinbase primary, Kraken fallback)."""
+    for exchange_cls, symbol in [
+        (ccxt_async.coinbase, "BTC/USD"),
+        (ccxt_async.kraken, "BTC/USD"),
+    ]:
+        exchange = exchange_cls()
+        try:
+            ticker = await exchange.fetch_ticker(symbol)
+            return {
+                "price": ticker["last"],
+                "change_24h_pct": ticker.get("percentage") or 0,
+                "market_cap": 0,
+                "volume_24h": ticker.get("quoteVolume") or 0,
+                "last_updated": int((ticker["timestamp"] or time.time() * 1000) / 1000),
+            }
+        except Exception:
+            pass
+        finally:
+            await exchange.close()
+    raise RuntimeError("All CCXT exchanges failed for live price fetch")
 
 
 async def _fetch_ohlcv_ccxt(timeframe: str, since_ms: int, total_limit: int) -> list:
