@@ -13,6 +13,25 @@ BLOCKCHAIN_STATS_URL = "https://api.blockchain.info/stats"
 BLOCKCHAIN_CHARTS_BASE = "https://api.blockchain.info/charts"
 
 _HTTP_TIMEOUT = 10.0
+_CMC_API_KEY = os.getenv("CMC_API_KEY", "")
+_CMC_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
+
+
+async def _fetch_cmc_market_cap() -> float:
+    """Fetch BTC market cap from CoinMarketCap. Returns 0 on any failure."""
+    if not _CMC_API_KEY:
+        return 0
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(
+                _CMC_URL,
+                params={"symbol": "BTC", "convert": "USD"},
+                headers={"X-CMC_PRO_API_KEY": _CMC_API_KEY},
+            )
+            resp.raise_for_status()
+            return resp.json()["data"]["BTC"]["quote"]["USD"]["market_cap"]
+    except Exception:
+        return 0
 
 
 async def fetch_live_price() -> dict:
@@ -23,11 +42,14 @@ async def fetch_live_price() -> dict:
     ]:
         exchange = exchange_cls()
         try:
-            ticker = await exchange.fetch_ticker(symbol)
+            ticker, market_cap = await asyncio.gather(
+                exchange.fetch_ticker(symbol),
+                _fetch_cmc_market_cap(),
+            )
             return {
                 "price": ticker["last"],
                 "change_24h_pct": ticker.get("percentage") or 0,
-                "market_cap": 0,
+                "market_cap": market_cap,
                 "volume_24h": ticker.get("quoteVolume") or 0,
                 "last_updated": int((ticker["timestamp"] or time.time() * 1000) / 1000),
             }
