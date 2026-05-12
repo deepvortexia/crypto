@@ -879,13 +879,23 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   return (
     <>
     {loadingBar > 0 && (
-      <div style={{
-        position: 'fixed', top: 0, left: 0, zIndex: 9999,
-        height: 3, width: loadingBar + '%',
-        background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
-        transition: 'width 0.4s ease',
-        boxShadow: '0 0 10px #f59e0b'
-      }} />
+      <>
+        <div style={{
+          position: 'fixed', top: 0, left: 0, zIndex: 9999,
+          height: 3, width: loadingBar + '%',
+          background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+          transition: 'width 0.4s ease',
+          boxShadow: '0 0 10px #f59e0b'
+        }} />
+        <div style={{
+          position: 'fixed', top: 6, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, color: '#f59e0b', fontSize: 11,
+          fontFamily: '"Share Tech Mono", monospace',
+          letterSpacing: '0.15em', opacity: 0.9
+        }}>
+          LOADING {loadingBar}%
+        </div>
+      </>
     )}
     <ScrollToTop />
     <Routes>
