@@ -814,6 +814,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     }
     setAuthBusy(true)
     setAuthError('')
+    const _authTimer = setTimeout(() => setAuthBusy(false), 10000)
     try {
       if (authTab === 'signup') {
         const { data, error } = await supabase.auth.signUp({ email: authEmail, password: authPass })
@@ -826,7 +827,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             code === 'user_already_exists'
           ) {
             setAuthError('__already_exists__')
-            setAuthBusy(false)
             return
           }
           throw error
@@ -834,7 +834,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         // Supabase returns 200 with empty identities[] when email already exists (no error thrown)
         if (data?.user?.identities?.length === 0) {
           setAuthError('__already_exists__')
-          setAuthBusy(false)
           return
         }
         setAuthSuccess(true) // show "Check your email" only for genuine new signups
@@ -856,8 +855,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       }
     } catch (err) {
       setAuthError(err.message || 'Authentication failed.')
+    } finally {
+      clearTimeout(_authTimer)
+      setAuthBusy(false)
     }
-    setAuthBusy(false)
   }
 
   const handleLogout = async () => {
@@ -868,6 +869,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const handleGoogleLogin = async () => {
     setAuthBusy(true)
     setAuthError('')
+    const _authTimer = setTimeout(() => setAuthBusy(false), 10000)
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -876,7 +878,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         }
       })
       if (error) throw error
+      // success → browser redirects, timer is gc'd naturally
     } catch (err) {
+      clearTimeout(_authTimer)
       setAuthError(err.message || 'Google login failed.')
       setAuthBusy(false)
     }
@@ -1510,11 +1514,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
       {/* ── auth modal ── */}
       {authOpen && (
-        <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.92)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)' }}>
+        <div style={{ position:'fixed', inset:0, zIndex:300, background:'rgba(0,0,0,0.92)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(8px)', overflowY:'auto', WebkitOverflowScrolling:'touch', padding:'16px' }}>
           {authSuccess ? (
             /* success screen */
             <div style={{
-              background:G.card, borderRadius:14, width:'95%', maxWidth:400, padding:'48px 32px', textAlign:'center',
+              background:G.card, borderRadius:14, width:'100%', maxWidth:400, padding:'40px 24px', textAlign:'center',
+              maxHeight:'calc(100vh - 32px)', overflowY:'auto',
               border:`2px solid ${G.gold}`,
               boxShadow:`0 0 60px ${G.goldGlow}`,
               animation:'authSuccessPulse 2s ease-in-out infinite',
@@ -1540,10 +1545,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
           ) : (
             /* form */
-            <div style={{ background:G.card, border:`1px solid ${G.gold}55`, borderRadius:14, boxShadow:`0 0 60px ${G.goldGlow}`, width:'95%', maxWidth:400, padding:'32px 28px' }}>
+            <div style={{ background:G.card, border:`1px solid ${G.gold}55`, borderRadius:14, boxShadow:`0 0 60px ${G.goldGlow}`, width:'100%', maxWidth:400, padding:'28px 24px', maxHeight:'calc(100vh - 32px)', overflowY:'auto' }}>
               {/* close */}
               <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:16 }}>
-                <button onClick={() => { setAuthOpen(false); setAuthError('') }} style={{ background:'none', border:'none', color:G.text, cursor:'pointer', fontSize:18, lineHeight:1 }}>✕</button>
+                <button onClick={() => { setAuthOpen(false); setAuthError('') }} style={{ background:'none', border:'none', color:G.text, cursor:'pointer', fontSize:20, padding:'8px 10px', minWidth:44, minHeight:44, display:'flex', alignItems:'center', justifyContent:'center' }}>✕</button>
               </div>
               {/* tabs */}
               <div style={{ display:'flex', gap:0, marginBottom:24, borderBottom:`1px solid ${G.border}` }}>
@@ -1597,10 +1602,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   onChange={e => { setAuthEmail(e.target.value); setAuthError('') }}
                   style={{
                     width:'100%', boxSizing:'border-box',
-                    fontFamily:'"Share Tech Mono",monospace', fontSize:13,
+                    fontFamily:'"Share Tech Mono",monospace', fontSize:16,
                     background:'#0a0a0a', border:`1px solid ${authError ? G.red : G.border}`,
                     borderRadius:8, color:G.bright, padding:'12px 16px',
                     outline:'none', marginBottom:12, letterSpacing:'0.05em',
+                    WebkitAppearance:'none',
                   }}
                 />
                 <input
@@ -1610,10 +1616,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   onChange={e => { setAuthPass(e.target.value); setAuthError('') }}
                   style={{
                     width:'100%', boxSizing:'border-box',
-                    fontFamily:'"Share Tech Mono",monospace', fontSize:13,
+                    fontFamily:'"Share Tech Mono",monospace', fontSize:16,
                     background:'#0a0a0a', border:`1px solid ${authError ? G.red : G.border}`,
                     borderRadius:8, color:G.bright, padding:'12px 16px',
                     outline:'none', marginBottom: authError ? 8 : 20, letterSpacing:'0.05em',
+                    WebkitAppearance:'none',
                   }}
                 />
                 {authError && (
