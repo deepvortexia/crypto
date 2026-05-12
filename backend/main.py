@@ -275,7 +275,7 @@ async def get_prediction(
         return _predict_cache[cache_key]
 
     try:
-        live = await fetch_live_price()
+        live = _price_cache["price"] if "price" in _price_cache else await fetch_live_price()
         current_price = live["price"]
         hourly_df, daily_df = await _get_dataframes()
 
