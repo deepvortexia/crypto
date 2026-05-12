@@ -132,7 +132,9 @@ async def fetch_onchain() -> dict:
     async with httpx.AsyncClient() as client:
         # Fetch blockchain.info stats with fallback
         try:
-            stats = await _get(client, BLOCKCHAIN_STATS_URL)
+            resp = await client.get(BLOCKCHAIN_STATS_URL, timeout=_HTTP_TIMEOUT)
+            resp.raise_for_status()
+            stats = resp.json()
 
         except Exception as e:
             logger.warning(f"Blockchain.com API failed: {e}")
