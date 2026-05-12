@@ -11,7 +11,6 @@ import About from './pages/About'
 import { TrendingUp, TrendingDown, AlertTriangle, Zap, Lock } from 'lucide-react'
 import { fetchMarketTensions } from './api/client'
 import {
-  fetchLivePrice,
   fetchSentiment,
   fetchNewsSentiment,
   fetchPrediction,
@@ -568,7 +567,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   const loadAll = useCallback(async () => {
     const [p, s, ind] = await Promise.allSettled([
-      fetchLivePrice(),
+      fetch('https://crypto-production-f7c5.up.railway.app/api/price/live').then(r => r.json()),
       fetchSentiment(),
       fetchIndicators(),
     ])
@@ -648,75 +647,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   }, [])
 
   useEffect(() => {
-    let ws = null
-    let reconnectAttempts = 0
-    let reconnectTimeout = null
-    let restFallbackInterval = null
-    const MAX_RECONNECT_ATTEMPTS = 5
-
-    function connectWebSocket() {
+    const interval = setInterval(async () => {
       try {
-        ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker')
-
-        ws.onopen = () => {
-          reconnectAttempts = 0
-          // Clear REST fallback if WebSocket connects
-          if (restFallbackInterval) {
-            clearInterval(restFallbackInterval)
-            restFallbackInterval = null
-          }
-        }
-
-        ws.onmessage = (e) => {
-          const d = JSON.parse(e.data)
-          setPrice(prev => ({
-            ...prev,
-            price: parseFloat(d.c),
-            change_24h_pct: parseFloat(d.P),
-            // volume_24h and market_cap intentionally omitted — kept from CoinGecko
-          }))
-        }
-
-        ws.onerror = () => {}
-
-        ws.onclose = () => {
-          if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-            const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000)
-            reconnectTimeout = setTimeout(() => {
-              reconnectAttempts++
-              connectWebSocket()
-            }, delay)
-          } else {
-            if (!restFallbackInterval) {
-              restFallbackInterval = setInterval(async () => {
-                try {
-                  const ticker = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
-                    .then(r => r.json())
-                  setPrice(prev => ({
-                    ...prev,
-                    price: parseFloat(ticker.lastPrice),
-                    change_24h_pct: parseFloat(ticker.priceChangePercent),
-                    // volume_24h and market_cap intentionally omitted — kept from CoinGecko
-                  }))
-                } catch (err) {
-                  console.error('[REST Fallback] Failed to fetch price:', err)
-                }
-              }, 5000) // Poll every 5 seconds
-            }
-          }
-        }
+        const data = await fetch('https://crypto-production-f7c5.up.railway.app/api/price/live').then(r => r.json())
+        setPrice(data)
       } catch (err) {
-        console.error('[WebSocket] Failed to create connection:', err)
+        console.error('[Price poll] Failed to fetch price:', err)
       }
-    }
+    }, 15000)
 
-    connectWebSocket()
-
-    return () => {
-      if (ws) ws.close()
-      if (reconnectTimeout) clearTimeout(reconnectTimeout)
-      if (restFallbackInterval) clearInterval(restFallbackInterval)
-    }
+    return () => clearInterval(interval)
   }, [])
 
   async function runDeepAnalysis(horizon) {
