@@ -504,6 +504,10 @@ function Tooltip({text}) {
   )
 }
 
+function Skel({ h = 80 }) {
+  return <div style={{ height: h, borderRadius: 10, background: 'linear-gradient(90deg, #1a1a2e 25%, #2a2a3e 50%, #1a1a2e 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+}
+
 export default function App() {
   const [price,       setPrice]       = useState(null)
   const [sentiment,   setSentiment]   = useState(null)
@@ -542,6 +546,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
   const [resetIn,     setResetIn]     = useState('')
   const [tensions,    setTensions]    = useState(null)
+  const [priceLoaded, setPriceLoaded] = useState(false)
+  const [slowLoaded,  setSlowLoaded]  = useState(false)
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
@@ -566,22 +572,29 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   }, [])
 
   const loadAll = useCallback(async () => {
-    const [p, s, ind] = await Promise.allSettled([
+    // Phase 1: price + 1h prediction — unblocks hero stats and 1h card immediately
+    const [p, pred1h] = await Promise.allSettled([
       fetch('https://crypto-production-f7c5.up.railway.app/api/price/live').then(r => r.json()),
-      fetchSentiment(),
-      fetchIndicators(),
+      fetchPrediction('1h'),
     ])
-    if (p.status  === 'fulfilled') setPrice(p.value)
-    if (s.status  === 'fulfilled') setSentiment(s.value)
-    if (ind.status=== 'fulfilled') setIndics(ind.value)
+    if (p.status      === 'fulfilled') setPrice(p.value)
+    if (pred1h.status === 'fulfilled') setPreds(prev => ({ ...prev, '1h': pred1h.value }))
+    setPriceLoaded(true)
 
-    // predictions in parallel
-    const predResults = await Promise.allSettled(PRED_HORIZONS.map(h => fetchPrediction(h)))
-    const map = {}
-    PRED_HORIZONS.forEach((h, i) => {
-      if (predResults[i].status === 'fulfilled') map[h] = predResults[i].value
+    // Phase 2: sentiment, indicators, remaining predictions, and all other data
+    const [s, ind] = await Promise.allSettled([fetchSentiment(), fetchIndicators()])
+    if (s.status   === 'fulfilled') setSentiment(s.value)
+    if (ind.status === 'fulfilled') setIndics(ind.value)
+
+    const otherHorizons = PRED_HORIZONS.filter(h => h !== '1h')
+    const predResults = await Promise.allSettled(otherHorizons.map(h => fetchPrediction(h)))
+    setPreds(prev => {
+      const map = { ...prev }
+      otherHorizons.forEach((h, i) => {
+        if (predResults[i].status === 'fulfilled') map[h] = predResults[i].value
+      })
+      return map
     })
-    setPreds(map)
 
     // onchain (may fail — proxied)
     try { setOnchain(await fetchOnchain()) } catch {}
@@ -597,6 +610,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     try { setNewsSentiment(await fetchNewsSentiment()) } catch {}
     try { setTensions(await fetchMarketTensions()) } catch {}
 
+    setSlowLoaded(true)
     setLoading(false)
     setLastAt(new Date())
     setCountdown(REFRESH_MS / 1000)
@@ -1062,10 +1076,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Market Overview</div>
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-            <StatCard label={<>BTC Price<Tooltip text="Live price updated every 30s via Binance WebSocket"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
-            <StatCard label={<>24h Change<Tooltip text="Price change last 24h — positive means bullish momentum"/></>}  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
-            <StatCard label={<>24h Volume<Tooltip text="Total trading volume spot + derivatives"/></>}  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
-            <StatCard label={<>Market Cap<Tooltip text="Total market value = price × circulating supply"/></>}  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
+            {!priceLoaded ? (
+              [0,1,2,3].map(i => <Skel key={i} h={80} />)
+            ) : (
+              <>
+                <StatCard label={<>BTC Price<Tooltip text="Live price updated every 30s via Binance WebSocket"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
+                <StatCard label={<>24h Change<Tooltip text="Price change last 24h — positive means bullish momentum"/></>}  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
+                <StatCard label={<>24h Volume<Tooltip text="Total trading volume spot + derivatives"/></>}  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
+                <StatCard label={<>Market Cap<Tooltip text="Total market value = price × circulating supply"/></>}  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
+              </>
+            )}
           </div>
         </div>
 
@@ -1076,8 +1096,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
             {/* 1H — always free */}
             <div style={{ position: 'relative' }}>
-              <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, background: '#10b981', color: '#000', fontFamily: '"Share Tech Mono",monospace', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', padding: '2px 7px', borderRadius: 4 }}>FREE</div>
-              <PredCard key="1h" horizonKey="1h" horizon={<>1H<Tooltip text="Shortest horizon — highest confidence intraday signal"/></>} data={preds['1h']} loading={loading} />
+              {!priceLoaded ? <Skel h={120} /> : (
+                <>
+                  <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, background: '#10b981', color: '#000', fontFamily: '"Share Tech Mono",monospace', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', padding: '2px 7px', borderRadius: 4 }}>FREE</div>
+                  <PredCard key="1h" horizonKey="1h" horizon={<>1H<Tooltip text="Shortest horizon — highest confidence intraday signal"/></>} data={preds['1h']} loading={loading} />
+                </>
+              )}
             </div>
 
             {/* 4H–1MONTH — locked for non-Pro users */}
@@ -1090,6 +1114,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               { k: '1month', label: '1MONTH', tip: 'Monthly AI ensemble prediction' },
             ].map(({ k, label, tip }) => (
               <div key={k} style={{ position: 'relative' }}>
+                {!slowLoaded ? <Skel h={120} /> : (
+                <>
                 {/* blurred card underneath */}
                 <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none', userSelect: 'none' }}>
                   <PredCard horizonKey={k} horizon={<>{label}<Tooltip text={tip}/></>} data={preds[k]} loading={loading} />
@@ -1109,6 +1135,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.5 }}>PRO<br/>$12.99/mo</span>
                   </div>
                 )}
+                </>
+                )}
               </div>
             ))}
           </div>
@@ -1117,6 +1145,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 3 — sentiment (full-width) + indicators */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>Market Sentiment & Technical Indicators</div>
+          {!slowLoaded ? <Skel h={220} /> : <>
           {/* Fear & Greed: non-logged-in sees today only, logged-in sees history */}
           <SentimentMeter value={sentiment?.value} label={sentiment?.classification} history={user ? sentiment?.history : []} />
           {/* Media Sentiment: locked for non-logged-in */}
@@ -1204,9 +1233,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               🟢 GOLDEN CROSS — Bullish
             </div>
           )}
+          </>}
         </div>
 
         {/* row 4 — onchain (Pro only) */}
+        {!slowLoaded && <div style={{ marginBottom: 40 }}><div style={sectionLabel}>On-Chain Data</div><Skel h={100} /></div>}
         {onchain && (
           <div style={{ marginBottom: 40, position: 'relative' }}>
             <div style={sectionLabel}>On-Chain Data {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
@@ -1835,6 +1866,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       )}
 
       <style>{`
+        @keyframes shimmer     { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes textPulse   { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
         @keyframes rotateDash  { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
         @keyframes circlePulse { 0%,100%{box-shadow:0 0 15px currentColor} 50%{box-shadow:0 0 30px currentColor, 0 0 60px currentColor} }
