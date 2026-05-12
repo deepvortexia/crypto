@@ -242,15 +242,27 @@ PRO_HORIZONS = {"4h", "8h", "12h", "24h", "1week", "1month"}
 
 @app.get("/api/predict/{horizon}")
 async def get_prediction(
-    horizon: HorizonKey = Path(..., description="Prediction horizon: 1h, 4h, 8h, 12h, 24h, 1month"),
-    user: dict = Depends(get_current_user),
+    horizon: HorizonKey = Path(..., description="Prediction horizon: 1h, 4h, 8h, 12h, 24h, 1week, 1month"),
+    authorization: str = Header(None),
 ):
     """
     Ensemble prediction (LSTM + XGBoost + Prophet) for the requested horizon.
-    Returns predicted price, % change, direction, and per-model breakdown.
+    1h is unauthenticated; 4h/8h/12h/24h/1week/1month require a PRO subscription.
     """
-    if horizon in PRO_HORIZONS and not _is_pro(user["id"]):
-        raise HTTPException(403, "PRO subscription required for this horizon")
+    if horizon in PRO_HORIZONS:
+        if not authorization or not authorization.startswith("Bearer "):
+            raise HTTPException(401, "Authentication required for this horizon")
+        try:
+            response = supabase.auth.get_user(authorization.split(" ")[1])
+            user = response.user
+            if not user:
+                raise HTTPException(401, "Invalid token")
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(401, f"Invalid token: {str(e)}")
+        if not _is_pro(str(user.id)):
+            raise HTTPException(403, "PRO subscription required for this horizon")
     if not ensemble.is_ready:
         status = retrainer.get_status()
         if status["is_training"]:
