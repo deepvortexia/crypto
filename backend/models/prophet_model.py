@@ -12,7 +12,7 @@ os.environ["CMDSTAN"] = "/root/.cmdstan/cmdstan-2.38.0"
 
 logger = logging.getLogger(__name__)
 
-HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
+HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1week": 168, "1month": 720}
 
 
 class _IgnoreAll(logging.Filter):

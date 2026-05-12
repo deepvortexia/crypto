@@ -13,13 +13,14 @@ from models.prophet_model import BTCProphetModel
 
 logger = logging.getLogger(__name__)
 
-HORIZONS = ["1h", "4h", "8h", "12h", "24h", "1month"]
-HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1month": 720}
+HORIZONS = ["1h", "4h", "8h", "12h", "24h", "1week", "1month"]
+HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1week": 168, "1month": 720}
 
 # Default weights: [lstm, xgboost, prophet]
 DEFAULT_WEIGHTS = {"1h": [0.50, 0.45, 0.05], "4h": [0.45, 0.40, 0.15],
                    "8h": [0.40, 0.40, 0.20], "12h": [0.35, 0.40, 0.25],
-                   "24h": [0.35, 0.35, 0.30], "1month": [0.25, 0.35, 0.40]}
+                   "24h": [0.35, 0.35, 0.30], "1week": [0.25, 0.40, 0.35],
+                   "1month": [0.25, 0.35, 0.40]}
 
 
 class BTCEnsemble:
