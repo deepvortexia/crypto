@@ -246,7 +246,11 @@ export async function fetchPrediction(horizon) {
   if (horizon === '1h') {
     return get(`${BACKEND_URL}/api/predict/1h`, { retries: 1 })
   }
-  const { data: { session } } = await supabase.auth.getSession()
+  let { data: { session } } = await supabase.auth.getSession()
+  if (session?.expires_at && session.expires_at * 1000 < Date.now() + 60000) {
+    const { data: refreshed } = await supabase.auth.refreshSession()
+    if (refreshed?.session) session = refreshed.session
+  }
   if (!session) throw new ApiError(401, 'Not authenticated')
   return get(`${BACKEND_URL}/api/predict/${horizon}`, {
     headers: { Authorization: `Bearer ${session.access_token}` },
