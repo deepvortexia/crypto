@@ -548,6 +548,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [tensions,    setTensions]    = useState(null)
   const [priceLoaded, setPriceLoaded] = useState(false)
   const [slowLoaded,  setSlowLoaded]  = useState(false)
+  const [loadingBar,  setLoadingBar]  = useState(0)
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
@@ -572,6 +573,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   }, [])
 
   const loadAll = useCallback(async () => {
+    setLoadingBar(10)
     // Phase 1: price + 1h prediction — unblocks hero stats and 1h card immediately
     const [p, pred1h] = await Promise.allSettled([
       fetch('https://crypto-production-f7c5.up.railway.app/api/price/live').then(r => r.json()),
@@ -580,6 +582,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     if (p.status      === 'fulfilled') setPrice(p.value)
     if (pred1h.status === 'fulfilled') setPreds(prev => ({ ...prev, '1h': pred1h.value }))
     setPriceLoaded(true)
+    setLoadingBar(50)
 
     // Phase 2: sentiment, indicators, remaining predictions, and all other data
     const [s, ind] = await Promise.allSettled([fetchSentiment(), fetchIndicators()])
@@ -611,9 +614,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     try { setTensions(await fetchMarketTensions()) } catch {}
 
     setSlowLoaded(true)
+    setLoadingBar(90)
     setLoading(false)
     setLastAt(new Date())
     setCountdown(REFRESH_MS / 1000)
+    setLoadingBar(100)
+    setTimeout(() => setLoadingBar(0), 400)
   }, [])
 
   // Fetch subscription status when user changes; re-run loadAll on first login
@@ -872,6 +878,15 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   return (
     <>
+    {loadingBar > 0 && (
+      <div style={{
+        position: 'fixed', top: 0, left: 0, zIndex: 9999,
+        height: 3, width: loadingBar + '%',
+        background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+        transition: 'width 0.4s ease',
+        boxShadow: '0 0 10px #f59e0b'
+      }} />
+    )}
     <ScrollToTop />
     <Routes>
       <Route path="/dashboard" element={<Navigate to="/" replace />} />
