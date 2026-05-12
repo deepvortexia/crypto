@@ -722,16 +722,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   async function runDeepAnalysis(horizon) {
     setDeepOpen(true); setDeepRunning(true); setDeepLogs([]); setDeepResult(null)
 
-    // Server-side gate — consumes one credit atomically; can't be bypassed client-side
-    if (!isPro) {
-      try {
-        const creditResult = await consumeDeepAnalysisCredit()
-        setCredits(creditResult.remaining)
-      } catch (err) {
-        setDeepOpen(false); setDeepRunning(false); setDeepLogs([]); setDeepResult(null)
-        setPricingOpen(true)
-        return
-      }
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      setDeepOpen(false); setDeepRunning(false)
+      setAuthOpen(true)
+      return
     }
 
     const L = [
@@ -756,28 +751,53 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       'Bollinger squeeze: '+(indics?.bollinger_bands?.bandwidth < 0.05 ? 'Detected ⚠️' : 'Not detected'),
       'Whale activity: '+(whales?.signal ?? 'N/A'),
       'Horizon: '+horizon,
-      'Predicted: $'+preds[horizon?.toLowerCase()]?.predicted_price?.toLocaleString(),
-      'Running model...','CONSENSUS REACHED',
+      'Calling AI model...','CONSENSUS REACHED',
     ]
+
+    // Fire the API call concurrently with the log animation
+    const apiPromise = fetch('https://crypto-production-f7c5.up.railway.app/api/deep-analysis/analyze', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        horizon,
+        rsi: indics?.rsi,
+        macd_histogram: indics?.macd?.histogram,
+        ema50: indics?.ema50,
+        ema200: indics?.ema200,
+        funding_rate: fundingRate?.rate,
+        long_short_ratio: longShort?.ratio,
+      }),
+    })
+
     for(const l of L){await new Promise(r=>setTimeout(r,500));setDeepLogs(p=>[...p,l])}
-    // Scoring: 9 signals, each grounded in historical analyst thresholds
-    // RSI>50 = bullish momentum | MACD>0 = bullish crossover | Fear&Greed<40 = contrarian buy
-    // Golden Cross | L/S ratio<1 = shorts dominant (squeeze risk, contrarian buy) | OB ratio>1 = bid pressure
-    // News sentiment>=0.15 = net bullish narrative (backend label threshold)
-    // Hash rate>=700 EH/s = robust mining ecosystem (above bear-era 200-300 EH/s floor)
-    // Fees>=15 BTC/24h = meaningful on-chain demand (bear floor ~5-10, bull avg ~84+)
-    const s=Math.round([
-      indics?.rsi>50,
-      indics?.macd?.histogram>0,
-      sentiment?.value<40,
-      indics?.ema50>indics?.ema200,
-      longShort?.ratio<1,
-      orderBook?.ratio>1,
-      (newsSentiment?.score??-1)>=0.15,
-      (onchain?.hash_rate??0)>=700,
-      (onchain?.total_fees_btc??0)>=15,
-    ].filter(Boolean).length/9*100)
-    setDeepResult({score:s,direction:s>50?'BULLISH':'BEARISH',recommendation:s>65?'Strong Buy':s>50?'Weak Buy':s>35?'Hold':'Sell'})
+
+    try {
+      const res = await apiPromise
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        if (res.status === 429) {
+          setDeepOpen(false); setDeepRunning(false); setDeepLogs([]); setDeepResult(null)
+          setPricingOpen(true)
+          return
+        }
+        throw new Error(data?.detail?.message || 'Analysis failed')
+      }
+      setCredits(data.remaining)
+      setDeepResult({
+        score: data.score,
+        direction: data.direction,
+        recommendation: data.recommendation,
+        analysis: data.analysis,
+        current_price: data.current_price,
+      })
+    } catch (err) {
+      console.error('Deep analysis failed:', err)
+      setDeepOpen(false); setDeepRunning(false); setDeepLogs([]); setDeepResult(null)
+    }
+
     setDeepRunning(false)
   }
 
@@ -1731,9 +1751,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 <div style={{textAlign:'center',padding:20,borderTop:`1px solid ${G.border}`}}>
                   <div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
                   <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:36,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
-                    ${preds[deepHorizon?.toLowerCase()]?.predicted_price?.toLocaleString()}
+                    ${deepResult?.current_price?.toLocaleString()}
                   </div>
-                  <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:20}}>USD PREDICTED PRICE</div>
+                  <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:20}}>CURRENT BTC PRICE</div>
                   <div className="deep-result-badges" style={{display:'flex',gap:12,justifyContent:'center',marginBottom:12}}>
                     <div style={{border:`1px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,borderRadius:8,padding:'8px 20px',color:deepResult.score>50?'#10b981':'#ef4444',fontFamily:'"Orbitron",sans-serif',fontSize:12}}>
                       {deepResult.direction?.toUpperCase()}
@@ -1850,12 +1870,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
               {user && !isPro && credits > 0 && (
                 <div style={{ marginTop: 16, textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
-                  <span style={{ color: G.gold }}>{credits}/2</span> free Deep Analysis uses remaining today
+                  <span style={{ color: G.gold }}>{credits}</span> {credits !== 1 ? 'analyses' : 'analyse'} remaining today
                 </div>
               )}
               {user && !isPro && credits === 0 && (
                 <div style={{ marginTop: 16, textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
-                  <span style={{ color: G.red }}>0/2</span> free uses remaining today
+                  <span style={{ color: G.red }}>0</span> analyses remaining today
                   <div style={{ marginTop: 4, fontSize: 10, color: '#6b7280' }}>Resets in {resetIn}</div>
                 </div>
               )}

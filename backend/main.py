@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from functools import wraps
 from time import time
-from typing import Literal
+from typing import Literal, Optional
 
 import httpx
 
@@ -16,6 +16,7 @@ import stripe
 from cachetools import TTLCache
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -543,6 +544,133 @@ async def use_deep_analysis(request: Request, user: dict = Depends(get_current_u
         )
 
     return {"allowed": True, "remaining": DEEP_ANALYSIS_DAILY_LIMIT - count, "is_pro": False}
+
+
+# ── Deep Analysis / Analyze ───────────────────────────────────────────────────
+class DeepAnalysisRequest(BaseModel):
+    horizon: str
+    rsi: Optional[float] = None
+    macd_histogram: Optional[float] = None
+    ema50: Optional[float] = None
+    ema200: Optional[float] = None
+    funding_rate: Optional[float] = None
+    long_short_ratio: Optional[float] = None
+
+
+@app.post("/api/deep-analysis/analyze")
+@limiter.limit("5/minute")
+async def deep_analysis_analyze(
+    request: Request,
+    body: DeepAnalysisRequest,
+    user: dict = Depends(get_current_user),
+):
+    """Consume one credit, fetch live price, call Claude Haiku, return structured analysis."""
+    user_id = user["id"]
+    is_pro = _is_pro(user_id)
+
+    if is_pro:
+        remaining = 999
+    else:
+        try:
+            rpc_result = supabase.rpc("try_use_deep_analysis", {"p_user_id": user_id, "p_limit": DEEP_ANALYSIS_DAILY_LIMIT}).execute()
+            count = rpc_result.data
+        except Exception as e:
+            logger.error(f"deep_analysis RPC failed: {e}")
+            raise HTTPException(503, "Credit check temporarily unavailable")
+
+        if count == -1:
+            raise HTTPException(
+                status_code=429,
+                detail={"message": f"Daily limit of {DEEP_ANALYSIS_DAILY_LIMIT} reached. Upgrade to PRO for unlimited access.", "remaining": 0},
+            )
+        remaining = DEEP_ANALYSIS_DAILY_LIMIT - count
+
+    if not _ANTHROPIC_API_KEY:
+        raise HTTPException(503, "ANTHROPIC_API_KEY not configured")
+
+    try:
+        price_data = await fetch_live_price()
+        current_price = price_data["price"]
+    except Exception as e:
+        logger.error(f"fetch_live_price failed in deep analysis: {e}")
+        raise HTTPException(502, "Failed to fetch live BTC price")
+
+    def _fmt(v, unit=""):
+        return f"{v}{unit}" if v is not None else "N/A"
+
+    if body.ema50 is not None and body.ema200 is not None:
+        ema_trend = "Golden Cross (bullish)" if body.ema50 > body.ema200 else "Death Cross (bearish)"
+    else:
+        ema_trend = "N/A"
+
+    prompt = f"""You are a professional Bitcoin trading analyst. Analyze the following market snapshot and provide a structured assessment.
+
+Market Snapshot:
+- Current BTC Price: ${current_price:,.2f}
+- Horizon: {body.horizon}
+- RSI (14): {_fmt(body.rsi)}
+- MACD Histogram: {_fmt(body.macd_histogram)}
+- EMA50: {_fmt(body.ema50, ' USD')}
+- EMA200: {_fmt(body.ema200, ' USD')}
+- EMA Trend: {ema_trend}
+- Funding Rate: {_fmt(body.funding_rate, '%')}
+- Long/Short Ratio: {_fmt(body.long_short_ratio)}
+
+Respond with ONLY valid JSON, no markdown, no extra text:
+{{
+  "direction": "BULLISH" or "BEARISH",
+  "score": integer 0-100 (overall bullish confidence),
+  "recommendation": "Strong Buy" | "Weak Buy" | "Hold" | "Sell",
+  "analysis": "2-3 sentence explanation referencing the specific data values above"
+}}"""
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            resp = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key": _ANTHROPIC_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": "claude-haiku-4-5-20251001",
+                    "max_tokens": 300,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+            )
+            resp.raise_for_status()
+            content = resp.json()["content"][0]["text"].strip()
+
+        if content.startswith("```"):
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+            content = content.strip()
+
+        parsed = json.loads(content)
+        direction = parsed.get("direction", "BEARISH").upper()
+        if direction not in ("BULLISH", "BEARISH"):
+            direction = "BEARISH"
+        score = max(0, min(100, int(parsed.get("score", 50))))
+        recommendation = parsed.get("recommendation", "Hold")
+        if recommendation not in ("Strong Buy", "Weak Buy", "Hold", "Sell"):
+            recommendation = "Hold"
+        analysis = str(parsed.get("analysis", ""))[:1000]
+
+    except Exception as exc:
+        logger.warning(f"Haiku deep analysis call failed ({exc!r})")
+        raise HTTPException(502, "AI analysis temporarily unavailable")
+
+    return {
+        "allowed": True,
+        "remaining": remaining,
+        "current_price": current_price,
+        "analysis": analysis,
+        "direction": direction,
+        "score": score,
+        "recommendation": recommendation,
+    }
 
 
 # ── Market Tensions ───────────────────────────────────────────────────────────
