@@ -183,19 +183,18 @@ async def health():
     return {"status": "ok", **status}
 
 
-# ── OHLC proxy (avoids browser CORS on CoinGecko) ────────────────────────────
+# ── OHLC proxy ────────────────────────────────────────────────────────────────
 @app.get("/api/ohlc")
 async def get_ohlc():
     if "ohlc" in _ohlc_cache:
         return _ohlc_cache["ohlc"]
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.get(
-                "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc",
-                params={"vs_currency": "usd", "days": 365},
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        df = await fetch_daily_ohlcv(days=365)
+        # Return [[timestamp_ms, open, high, low, close], ...] matching prior CoinGecko shape
+        data = [
+            [int(ts.timestamp() * 1000), row["open"], row["high"], row["low"], row["close"]]
+            for ts, row in df.iterrows()
+        ]
         _ohlc_cache["ohlc"] = data
         return data
     except Exception as exc:

@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timezone
 from typing import Optional
 
+import ccxt.async_support as ccxt_async
 import httpx
 import pandas as pd
 
@@ -61,64 +62,53 @@ async def fetch_live_price() -> dict:
     }
 
 
+async def _fetch_ohlcv_ccxt(timeframe: str, since_ms: int, total_limit: int) -> list:
+    """Fetch OHLCV from Coinbase (primary) with Kraken fallback, paginating as needed."""
+    exchanges = [
+        (ccxt_async.coinbase, "BTC/USD", 300),
+        (ccxt_async.kraken, "BTC/USD", 720),
+    ]
+    for exchange_cls, symbol, per_call in exchanges:
+        exchange = exchange_cls()
+        try:
+            candles = []
+            fetch_since = since_ms
+            while len(candles) < total_limit:
+                batch = await exchange.fetch_ohlcv(symbol, timeframe, since=fetch_since, limit=per_call)
+                if not batch:
+                    break
+                candles.extend(batch)
+                if len(batch) < per_call:
+                    break
+                fetch_since = batch[-1][0] + 1
+            if candles:
+                return candles
+        except Exception:
+            pass
+        finally:
+            await exchange.close()
+    raise RuntimeError("All CCXT exchanges failed for OHLCV fetch")
+
+
 async def fetch_hourly_ohlcv(days: int = 90) -> pd.DataFrame:
-    """Returns hourly OHLCV DataFrame (~2160 rows). market_chart is the primary source
-    for close price and volume; OHLC enriches with open/high/low where timestamps align."""
-    async with httpx.AsyncClient() as client:
-        ohlc_raw, chart_raw = await asyncio.gather(
-            _get(client, f"{COINGECKO_BASE}/coins/bitcoin/ohlc", {"vs_currency": "usd", "days": 90}),
-            _get(client, f"{COINGECKO_BASE}/coins/bitcoin/market_chart", {
-                "vs_currency": "usd", "days": 90, "interval": "hourly",
-            }),
-        )
-
-    # Primary: market_chart gives true hourly close + volume (~2160 rows for 90 days)
-    prices = pd.DataFrame(chart_raw["prices"], columns=["timestamp", "close"])
-    prices["timestamp"] = pd.to_datetime(prices["timestamp"], unit="ms", utc=True)
-    prices = prices.set_index("timestamp").sort_index()
-
-    vols = pd.DataFrame(chart_raw["total_volumes"], columns=["timestamp", "volume"])
-    vols["timestamp"] = pd.to_datetime(vols["timestamp"], unit="ms", utc=True)
-    vols = vols.set_index("timestamp").sort_index()
-
-    df = prices.join(vols, how="left")
-
-    # Enrich: OHLC endpoint returns coarser candles (4h or daily); left-join then
-    # forward-fill so each hourly row inherits the open/high/low of its parent candle.
-    ohlc_df = pd.DataFrame(ohlc_raw, columns=["timestamp", "open", "high", "low", "_close"])
-    ohlc_df["timestamp"] = pd.to_datetime(ohlc_df["timestamp"], unit="ms", utc=True)
-    ohlc_df = ohlc_df.set_index("timestamp").sort_index()[["open", "high", "low"]]
-
-    df = df.join(ohlc_df, how="left")
-    df[["open", "high", "low"]] = df[["open", "high", "low"]].ffill()
-    # Any leading NaNs (before first OHLC candle) fall back to close
-    for col in ["open", "high", "low"]:
-        df[col] = df[col].fillna(df["close"])
-
+    """Returns hourly OHLCV DataFrame via CCXT (Coinbase primary, Kraken fallback)."""
+    since_ms = int((datetime.now(timezone.utc).timestamp() - days * 86400) * 1000)
+    candles = await _fetch_ohlcv_ccxt("1h", since_ms, days * 24 + 24)
+    df = pd.DataFrame(candles, columns=["timestamp", "open", "high", "low", "close", "volume"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
+    df = df.set_index("timestamp").sort_index()
+    df = df[~df.index.duplicated(keep="last")]
     return df
 
 
 async def fetch_daily_ohlcv(days: int = 365) -> pd.DataFrame:
-    """Returns daily OHLCV DataFrame."""
-    async with httpx.AsyncClient() as client:
-        ohlc_raw, chart_raw = await asyncio.gather(
-            _get(client, f"{COINGECKO_BASE}/coins/bitcoin/ohlc", {"vs_currency": "usd", "days": days}),
-            _get(client, f"{COINGECKO_BASE}/coins/bitcoin/market_chart", {
-                "vs_currency": "usd", "days": days, "interval": "daily",
-            }),
-        )
-
-    ohlc_df = pd.DataFrame(ohlc_raw, columns=["timestamp", "open", "high", "low", "close"])
-    ohlc_df["timestamp"] = pd.to_datetime(ohlc_df["timestamp"], unit="ms", utc=True)
-    ohlc_df = ohlc_df.set_index("timestamp").sort_index()
-    # Deduplicate keeping last per day
-    ohlc_df = ohlc_df[~ohlc_df.index.duplicated(keep="last")]
-
-    vols = pd.DataFrame(chart_raw["total_volumes"], columns=["timestamp", "volume"])
-    vols["timestamp"] = pd.to_datetime(vols["timestamp"], unit="ms", utc=True)
-    vols = vols.set_index("timestamp").sort_index()
-
-    df = ohlc_df.join(vols, how="left").ffill()
+    """Returns daily OHLCV DataFrame via CCXT (Coinbase primary, Kraken fallback)."""
+    since_ms = int((datetime.now(timezone.utc).timestamp() - days * 86400) * 1000)
+    candles = await _fetch_ohlcv_ccxt("1d", since_ms, days + 5)
+    df = pd.DataFrame(candles, columns=["timestamp", "open", "high", "low", "close", "volume"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms", utc=True)
+    df = df.set_index("timestamp").sort_index()
+    df = df[~df.index.duplicated(keep="last")]
     return df
 
 
