@@ -243,7 +243,6 @@ export async function fetchOnchain() {
 }
 
 export async function fetchPrediction(horizon) {
-  if (horizon === '1week') return null  // not a backend horizon yet
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) throw new ApiError(401, 'Not authenticated')
   return get(`${BACKEND_URL}/api/predict/${horizon}`, {
