@@ -17,10 +17,10 @@ _CMC_API_KEY = os.getenv("CMC_API_KEY", "")
 _CMC_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 
 
-async def _fetch_cmc_market_cap() -> float:
-    """Fetch BTC market cap from CoinMarketCap. Returns 0 on any failure."""
+async def _fetch_cmc_data() -> dict:
+    """Fetch BTC market cap and 24h volume from CoinMarketCap. Returns zeros on any failure."""
     if not _CMC_API_KEY:
-        return 0
+        return {"market_cap": 0, "volume_24h": 0}
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(
@@ -29,9 +29,10 @@ async def _fetch_cmc_market_cap() -> float:
                 headers={"X-CMC_PRO_API_KEY": _CMC_API_KEY},
             )
             resp.raise_for_status()
-            return resp.json()["data"]["BTC"]["quote"]["USD"]["market_cap"]
+            usd = resp.json()["data"]["BTC"]["quote"]["USD"]
+            return {"market_cap": usd["market_cap"], "volume_24h": usd["volume_24h"]}
     except Exception:
-        return 0
+        return {"market_cap": 0, "volume_24h": 0}
 
 
 async def fetch_live_price() -> dict:
@@ -42,15 +43,15 @@ async def fetch_live_price() -> dict:
     ]:
         exchange = exchange_cls()
         try:
-            ticker, market_cap = await asyncio.gather(
+            ticker, cmc = await asyncio.gather(
                 exchange.fetch_ticker(symbol),
-                _fetch_cmc_market_cap(),
+                _fetch_cmc_data(),
             )
             return {
                 "price": ticker["last"],
                 "change_24h_pct": ticker.get("percentage") or 0,
-                "market_cap": market_cap,
-                "volume_24h": ticker.get("quoteVolume") or 0,
+                "market_cap": cmc["market_cap"],
+                "volume_24h": cmc["volume_24h"],
                 "last_updated": int((ticker["timestamp"] or time.time() * 1000) / 1000),
             }
         except Exception:
