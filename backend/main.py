@@ -567,6 +567,8 @@ async def deep_analysis_analyze(
     """Consume one credit, fetch live price, call Claude Haiku, return structured analysis."""
     user_id = user["id"]
     is_pro = _is_pro(user_id)
+    count = None
+    today = None
 
     if is_pro:
         remaining = 999
@@ -583,6 +585,7 @@ async def deep_analysis_analyze(
                 status_code=429,
                 detail={"message": f"Daily limit of {DEEP_ANALYSIS_DAILY_LIMIT} reached. Upgrade to PRO for unlimited access.", "remaining": 0},
             )
+        today = datetime.now(timezone.utc).date().isoformat()
         remaining = DEEP_ANALYSIS_DAILY_LIMIT - count
 
     if not _ANTHROPIC_API_KEY:
@@ -660,6 +663,12 @@ Respond with ONLY valid JSON, no markdown, no extra text:
 
     except Exception as exc:
         logger.warning(f"Haiku deep analysis call failed ({exc!r})")
+        if not is_pro and count is not None and today is not None:
+            try:
+                supabase.table("deep_analysis_usage").update({"count": count - 1}).eq("user_id", user_id).eq("use_date", today).execute()
+                logger.info(f"Credit rolled back for user {user_id} (count restored to {count - 1})")
+            except Exception as rollback_exc:
+                logger.error(f"Credit rollback failed for user {user_id}: {rollback_exc}")
         raise HTTPException(502, "AI analysis temporarily unavailable")
 
     return {
