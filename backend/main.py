@@ -721,23 +721,21 @@ async def _fetch_funding_rate() -> dict:
 
 
 async def _fetch_long_short_ratio() -> dict:
+    """Fetch BTC global long/short ratio from Binance — same source as the UI."""
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
-                f"{_OKX_BASE}/api/v5/rubik/stat/contracts/long-short-account-ratio",
-                params={"ccy": "BTC", "period": "1H", "limit": 1},
+                "https://fapi.binance.com/futures/data/globalLongShortAccountRatio",
+                params={"symbol": "BTCUSDT", "period": "1h", "limit": 1},
             )
             resp.raise_for_status()
-            data = resp.json()
-            items = data.get("data", [])
+            items = resp.json()
             if items:
-                long_pct = round(float(items[0][1]) * 100, 2)
-                short_pct = round(100 - long_pct, 2)
-                return {
-                    "ratio": round(long_pct / short_pct, 3),
-                    "long_pct": long_pct,
-                    "short_pct": short_pct,
-                }
+                ratio    = round(float(items[0]["longShortRatio"]), 3)
+                long_pct = round(float(items[0]["longAccount"]) * 100, 2)
+                short_pct = round(float(items[0]["shortAccount"]) * 100, 2)
+                logger.info(f"DEBUG AI INPUT → long_short_ratio: {ratio}, long_pct: {long_pct}, short_pct: {short_pct}")
+                return {"ratio": ratio, "long_pct": long_pct, "short_pct": short_pct}
     except Exception as exc:
         logger.warning(f"Long/short ratio fetch failed: {exc}")
     return {"ratio": None, "long_pct": None, "short_pct": None}
