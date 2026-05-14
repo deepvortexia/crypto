@@ -81,7 +81,7 @@ _sentiment_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)     # 30 min
 _onchain_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)       # 30 min
 _predict_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)      # 1 h per horizon
 _news_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)          # 30 min
-_tensions_cache: TTLCache = TTLCache(maxsize=1, ttl=300)       # 5 min
+_tensions_cache: TTLCache = TTLCache(maxsize=1, ttl=60)        # 1 min
 _ohlc_cache: TTLCache = TTLCache(maxsize=1, ttl=600)           # 10 min
 _funding_rate_cache:  TTLCache = TTLCache(maxsize=1,  ttl=300)  # 5 min
 _ls_ratio_cache:      TTLCache = TTLCache(maxsize=1,  ttl=60)   # 1 min
@@ -135,7 +135,7 @@ async def lifespan(app: FastAPI):
         logger.info("✓ Loaded existing models successfully — skipping retraining")
 
     retrainer.start_scheduler(retrain_interval_hours=RETRAIN_INTERVAL_HOURS)
-    asyncio.create_task(_warmup_tensions())
+    # market-tensions pre-warm removed — regenerated on demand with 60s TTL
 
     yield
 
@@ -1022,41 +1022,68 @@ async def get_market_tensions(request: Request):
         indicators_data = get_indicator_snapshot(compute_indicators(hourly_df))
 
         total_btc_sent = onchain_data.get("total_btc_sent", 0) or 0
-        whale_activity = "high" if total_btc_sent > 600000 else "moderate" if total_btc_sent > 300000 else "low"
+
+        # Extract exact values for injection — no aliases, no rounding by Haiku
+        btc_price       = price_data["price"]
+        change_24h      = price_data["change_24h_pct"]
+        rsi             = indicators_data["rsi"]["value"]
+        rsi_signal      = indicators_data["rsi"]["signal"]
+        macd            = indicators_data["macd"]["macd"]
+        macd_signal     = indicators_data["macd"]["signal"]
+        macd_hist       = indicators_data["macd"]["histogram"]
+        macd_cross      = indicators_data["macd"]["crossover"]
+        bb_pct          = indicators_data["bollinger_bands"]["pct_b"]
+        bb_bw           = indicators_data["bollinger_bands"]["bandwidth"]
+        ema50           = indicators_data["ema"]["ema50"]
+        ema200          = indicators_data["ema"]["ema200"]
+        ema_trend       = indicators_data["ema"]["trend"]
+        obv_trend       = indicators_data["obv"]["trend"]
+        atr             = indicators_data["atr"]["value"]
+        atr_pct         = indicators_data["atr"]["pct_of_price"]
+        fear_greed      = fg_data["value"]
+        fg_class        = fg_data["classification"]
+        funding_rate    = funding["rate_pct"]
+        long_short      = ls_ratio["ratio"]
+        long_pct        = ls_ratio["long_pct"]
+        short_pct       = ls_ratio["short_pct"]
 
         funding_str = (
-            f"{funding['rate_pct']:+.4f}% per 8h (annualized: {funding['annualized_pct']:+.1f}%)"
-            if funding["rate_pct"] is not None else "unavailable"
+            f"{funding_rate:+.4f}% per 8h" if funding_rate is not None else "unavailable"
         )
         ls_str = (
-            f"{ls_ratio['ratio']} ({ls_ratio['long_pct']}% long / {ls_ratio['short_pct']}% short)"
-            if ls_ratio["ratio"] is not None else "unavailable"
+            f"{long_short} ({long_pct}% long / {short_pct}% short)"
+            if long_short is not None else "unavailable"
         )
 
-        summary = f"""BTC Market Snapshot:
-- Price: ${price_data['price']:,.0f} (24h: {price_data['change_24h_pct']:+.2f}%)
-- RSI (14): {indicators_data['rsi']['value']} ({indicators_data['rsi']['signal']})
-- MACD: {indicators_data['macd']['macd']} / Signal: {indicators_data['macd']['signal']} ({indicators_data['macd']['crossover']})
-- Bollinger %B: {indicators_data['bollinger_bands']['pct_b']} | Bandwidth: {indicators_data['bollinger_bands']['bandwidth']}
-- EMA trend: {indicators_data['ema']['trend']} (EMA50: {indicators_data['ema']['ema50']}, EMA200: {indicators_data['ema']['ema200']})
-- OBV trend: {indicators_data['obv']['trend']}
-- ATR: ${indicators_data['atr']['value']} ({indicators_data['atr']['pct_of_price']}% of price)
-- Fear & Greed: {fg_data['value']} ({fg_data['classification']})
-- Funding Rate: {funding_str}
-- Long/Short Ratio: {ls_str}
-- Whale Activity: {whale_activity} (BTC sent on-chain today: {total_btc_sent:,.0f})
-- Mempool: {onchain_data.get('mempool_size', 0):,} pending txs | Fees: {onchain_data.get('total_fees_btc', 0)} BTC (24h)"""
+        prompt = f"""You are a professional crypto trading analyst. Analyze the exact live market data below and identify 2 to 4 distinct trading setups or tensions currently present in the Bitcoin market.
 
-        prompt = f"""{summary}
+Use ONLY these exact numbers, no estimates.
 
-You are a professional crypto trading analyst. Based on the market data above, identify 2 to 4 distinct trading setups or tensions currently present in the Bitcoin market.
+BTC Price:          ${btc_price:,.2f}
+24h Change:         {change_24h:+.2f}%
+RSI (14):           {rsi} ({rsi_signal})
+MACD:               {macd}
+MACD Signal:        {macd_signal}
+MACD Histogram:     {macd_hist} ({macd_cross} crossover)
+Bollinger %B:       {bb_pct}
+Bollinger Bandwidth:{bb_bw}
+EMA50:              ${ema50}
+EMA200:             ${ema200}
+EMA Trend:          {ema_trend}
+OBV Trend:          {obv_trend}
+ATR:                ${atr} ({atr_pct}% of price)
+Fear & Greed:       {fear_greed} ({fg_class})
+Funding Rate:       {funding_str}
+Long/Short Ratio:   {ls_str}
+BTC Sent On-Chain:  {total_btc_sent:,.0f} BTC today
+Mempool:            {onchain_data.get('mempool_size', 0):,} pending txs
 
 Respond with ONLY a JSON array, no markdown, no extra text:
 [
   {{
     "type": "bullish" | "bearish" | "warning" | "squeeze",
     "title": "Short setup title (max 8 words)",
-    "description": "1-2 sentence explanation referencing the specific data values",
+    "description": "1-2 sentence explanation quoting the exact numbers above",
     "confidence": "high" | "medium" | "low"
   }}
 ]
@@ -1124,18 +1151,3 @@ Return only the 2-4 most significant setups."""
         raise HTTPException(502, f"Failed to fetch market tensions: {exc}")
 
 
-async def _warmup_tensions():
-    try:
-        scope = {
-            "type": "http",
-            "method": "GET",
-            "path": "/api/market-tensions",
-            "query_string": b"",
-            "headers": [],
-            "client": ("127.0.0.1", 0),
-            "app": app,
-        }
-        await get_market_tensions(Request(scope))
-        logger.info("✓ Market tensions pre-warmed")
-    except Exception as exc:
-        logger.warning(f"Tensions warmup failed (non-fatal): {exc}")
