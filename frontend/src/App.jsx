@@ -702,17 +702,25 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     return () => clearInterval(id)
   }, [])
 
-  // Group 3 — 5 min: 1h prediction, indicators, key-levels, whales
+  // Group 3 — 60s: indicators, key-levels, whales
   useEffect(() => {
     const id = setInterval(async () => {
       setRefreshing(true)
       setTimeout(() => setRefreshing(false), 1000)
-      const [ind, wh, kl, pred1h] = await Promise.allSettled([
-        fetchIndicators(), fetchWhales(), fetchKeyLevels(), fetchPrediction('1h'),
+      const [ind, wh, kl] = await Promise.allSettled([
+        fetchIndicators(), fetchWhales(), fetchKeyLevels(),
       ])
-      if (ind.status    === 'fulfilled' && ind.value)    setIndics(ind.value)
-      if (wh.status     === 'fulfilled' && wh.value)     setWhales(wh.value)
-      if (kl.status     === 'fulfilled' && kl.value)     setKeyLevels(kl.value)
+      if (ind.status === 'fulfilled' && ind.value) setIndics(ind.value)
+      if (wh.status  === 'fulfilled' && wh.value)  setWhales(wh.value)
+      if (kl.status  === 'fulfilled' && kl.value)  setKeyLevels(kl.value)
+    }, 60_000)
+    return () => clearInterval(id)
+  }, [])
+
+  // 1h prediction — 5 min (matches backend cache TTL)
+  useEffect(() => {
+    const id = setInterval(async () => {
+      const [pred1h] = await Promise.allSettled([fetchPrediction('1h')])
       if (pred1h.status === 'fulfilled' && pred1h.value) setPreds(prev => ({ ...prev, '1h': pred1h.value }))
     }, 5 * 60_000)
     return () => clearInterval(id)
