@@ -235,9 +235,9 @@ async def get_indicators():
         return _indicators_cache["indicators"]
 
     try:
-        hourly_df, _ = await _get_dataframes()
-        df_with_ind = compute_indicators(hourly_df)
-        snapshot = get_indicator_snapshot(df_with_ind)
+        hourly_df, daily_df = await _get_dataframes()
+        snapshot = get_indicator_snapshot(compute_indicators(hourly_df))
+        snapshot["ema"] = get_indicator_snapshot(compute_indicators(daily_df))["ema"]
         _indicators_cache["indicators"] = snapshot
         return snapshot
     except Exception as exc:
@@ -1010,7 +1010,7 @@ async def get_market_tensions(request: Request):
         raise HTTPException(503, "ANTHROPIC_API_KEY not configured")
 
     try:
-        price_data, fg_data, onchain_data, funding, ls_ratio, (hourly_df, _) = await asyncio.gather(
+        price_data, fg_data, onchain_data, funding, ls_ratio, (hourly_df, daily_df) = await asyncio.gather(
             fetch_live_price(),
             fetch_fear_greed(),
             fetch_onchain(),
@@ -1020,6 +1020,7 @@ async def get_market_tensions(request: Request):
         )
 
         indicators_data = get_indicator_snapshot(compute_indicators(hourly_df))
+        daily_ema = get_indicator_snapshot(compute_indicators(daily_df))["ema"]
 
         total_btc_sent = onchain_data.get("total_btc_sent", 0) or 0
 
@@ -1034,9 +1035,9 @@ async def get_market_tensions(request: Request):
         macd_cross      = indicators_data["macd"]["crossover"]
         bb_pct          = indicators_data["bollinger_bands"]["pct_b"]
         bb_bw           = indicators_data["bollinger_bands"]["bandwidth"]
-        ema50           = indicators_data["ema"]["ema50"]
-        ema200          = indicators_data["ema"]["ema200"]
-        ema_trend       = indicators_data["ema"]["trend"]
+        ema50           = daily_ema["ema50"]
+        ema200          = daily_ema["ema200"]
+        ema_trend       = daily_ema["trend"]
         obv_trend       = indicators_data["obv"]["trend"]
         atr             = indicators_data["atr"]["value"]
         atr_pct         = indicators_data["atr"]["pct_of_price"]

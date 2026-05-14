@@ -250,12 +250,19 @@ export async function fetchPrediction(horizon) {
 
 export async function fetchIndicators() {
   const closes = await getOhlc()
+  let ema50  = parseFloat(_ema(closes, 50).at(-1).toFixed(2))
+  let ema200 = parseFloat(_ema(closes, 200).at(-1).toFixed(2))
+  try {
+    const backend = await get(`${BACKEND_URL}/api/indicators`, { timeout: 10000, retries: 1 })
+    if (backend?.ema?.ema50)  ema50  = backend.ema.ema50
+    if (backend?.ema?.ema200) ema200 = backend.ema.ema200
+  } catch (_) {}
   return {
     rsi: _calcRsi(closes),
     macd: _calcMacd(closes),
     bollinger_bands: _calcBollinger(closes),
-    ema50:  parseFloat(_ema(closes, 50).at(-1).toFixed(2)),
-    ema200: parseFloat(_ema(closes, 200).at(-1).toFixed(2)),
+    ema50,
+    ema200,
     price: closes[closes.length - 1],
     timestamp: new Date().toISOString(),
   }
