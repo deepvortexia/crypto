@@ -1128,6 +1128,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           pointerEvents:'none',
         }}>
           <div style={{width:'100%',height:3,background:'linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent)',backgroundSize:'200% 100%',animation:'analysisShimmer 1.5s linear infinite'}} />
+          <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',textAlign:'center',marginTop:4,animation:'textPulse 2s ease-in-out infinite'}}>AI ANALYSING...</div>
         </div>
       </header>
 
