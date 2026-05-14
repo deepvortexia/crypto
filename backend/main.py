@@ -283,9 +283,11 @@ async def get_prediction(
         return _predict_cache[cache_key]
 
     try:
-        live = _price_cache["price"] if "price" in _price_cache else await fetch_live_price()
+        async def _get_price():
+            return _price_cache["price"] if "price" in _price_cache else await fetch_live_price()
+
+        live, (hourly_df, daily_df) = await asyncio.gather(_get_price(), _get_dataframes())
         current_price = live["price"]
-        hourly_df, daily_df = await _get_dataframes()
 
         result = await asyncio.get_event_loop().run_in_executor(
             None,

@@ -583,34 +583,48 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setPriceLoaded(true)
     setLoadingBar(50)
 
-    // Phase 2: sentiment, indicators, remaining predictions, and all other data
-    const [s, ind] = await Promise.allSettled([fetchSentiment(), fetchIndicators()])
-    if (s.status   === 'fulfilled') setSentiment(s.value)
-    if (ind.status === 'fulfilled') setIndics(ind.value)
-
+    // Phase 2: all secondary data fired simultaneously
     const otherHorizons = PRED_HORIZONS.filter(h => h !== '1h')
-    const predResults = await Promise.allSettled(otherHorizons.map(h => fetchPrediction(h)))
+    const currentPrice = p.status === 'fulfilled' ? p.value?.price : null
+    const predPromises = otherHorizons.map(h => fetchPrediction(h))
+
+    const [s, ind, oc, fr, ls, oi, wh, mp, ob, kl, liq, ns, mt] = await Promise.allSettled([
+      fetchSentiment(),
+      fetchIndicators(),
+      fetchOnchain(),
+      fetchFundingRate(),
+      fetchLongShortRatio(),
+      fetchOpenInterest(),
+      fetchWhales(),
+      fetchMempool(),
+      fetchOrderBook(),
+      currentPrice ? fetchKeyLevels(currentPrice) : Promise.resolve(null),
+      fetchLiquidations(),
+      fetchNewsSentiment(),
+      fetchMarketTensions(),
+    ])
+    if (s.status   === 'fulfilled' && s.value)   setSentiment(s.value)
+    if (ind.status === 'fulfilled' && ind.value)  setIndics(ind.value)
+    if (oc.status  === 'fulfilled' && oc.value)   setOnchain(oc.value)
+    if (fr.status  === 'fulfilled' && fr.value)   setFundingRate(fr.value)
+    if (ls.status  === 'fulfilled' && ls.value)   setLongShort(ls.value)
+    if (oi.status  === 'fulfilled' && oi.value)   setOpenInterest(oi.value)
+    if (wh.status  === 'fulfilled' && wh.value)   setWhales(wh.value)
+    if (mp.status  === 'fulfilled' && mp.value)   setMempool(mp.value)
+    if (ob.status  === 'fulfilled' && ob.value)   setOrderBook(ob.value)
+    if (kl.status  === 'fulfilled' && kl.value)   setKeyLevels(kl.value)
+    if (liq.status === 'fulfilled' && liq.value)  setLiquidations(liq.value)
+    if (ns.status  === 'fulfilled' && ns.value)   setNewsSentiment(ns.value)
+    if (mt.status  === 'fulfilled' && mt.value)   setTensions(mt.value)
+
+    const predResults = await Promise.allSettled(predPromises)
     setPreds(prev => {
       const map = { ...prev }
-      otherHorizons.forEach((h, i) => {
-        if (predResults[i].status === 'fulfilled') map[h] = predResults[i].value
+      predResults.forEach((r, i) => {
+        if (r.status === 'fulfilled' && r.value) map[otherHorizons[i]] = r.value
       })
       return map
     })
-
-    // onchain (may fail — proxied)
-    try { setOnchain(await fetchOnchain()) } catch {}
-    try { setFundingRate(await fetchFundingRate()) } catch {}
-    try { setLongShort(await fetchLongShortRatio()) } catch {}
-    try { setOpenInterest(await fetchOpenInterest()) } catch {}
-    try { setWhales(await fetchWhales()) } catch {}
-    try { setMempool(await fetchMempool()) } catch {}
-    try { setOrderBook(await fetchOrderBook()) } catch {}
-    const currentPrice = p.status === 'fulfilled' ? p.value?.price : null
-    try { if (currentPrice) setKeyLevels(await fetchKeyLevels(currentPrice)) } catch {}
-    try { setLiquidations(await fetchLiquidations()) } catch {}
-    try { setNewsSentiment(await fetchNewsSentiment()) } catch {}
-    try { setTensions(await fetchMarketTensions()) } catch {}
 
     setSlowLoaded(true)
     setLoadingBar(90)

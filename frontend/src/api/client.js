@@ -249,21 +249,23 @@ export async function fetchPrediction(horizon) {
 }
 
 export async function fetchIndicators() {
-  const closes = await getOhlc()
-  let ema50  = parseFloat(_ema(closes, 50).at(-1).toFixed(2))
-  let ema200 = parseFloat(_ema(closes, 200).at(-1).toFixed(2))
-  try {
-    const backend = await get(`${BACKEND_URL}/api/indicators`, { timeout: 10000, retries: 1 })
-    if (backend?.ema?.ema50)  ema50  = backend.ema.ema50
-    if (backend?.ema?.ema200) ema200 = backend.ema.ema200
-  } catch (_) {}
+  const [ohlcResult, backendResult] = await Promise.allSettled([
+    getOhlc(),
+    get(`${BACKEND_URL}/api/indicators`, { timeout: 10000, retries: 1 }),
+  ])
+  const closes = ohlcResult.status === 'fulfilled' ? ohlcResult.value : []
+  let ema50  = closes.length ? parseFloat(_ema(closes, 50).at(-1).toFixed(2))  : null
+  let ema200 = closes.length ? parseFloat(_ema(closes, 200).at(-1).toFixed(2)) : null
+  const backend = backendResult.status === 'fulfilled' ? backendResult.value : null
+  if (backend?.ema?.ema50)  ema50  = backend.ema.ema50
+  if (backend?.ema?.ema200) ema200 = backend.ema.ema200
   return {
     rsi: _calcRsi(closes),
     macd: _calcMacd(closes),
     bollinger_bands: _calcBollinger(closes),
     ema50,
     ema200,
-    price: closes[closes.length - 1],
+    price: closes[closes.length - 1] ?? null,
     timestamp: new Date().toISOString(),
   }
 }
