@@ -560,6 +560,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
   const [liveCountdown, setLiveCountdown] = useState(60)
   const [msgIdx,        setMsgIdx]        = useState(0)
+  const [loadProgress,  setLoadProgress]  = useState(0)
   const [resetIn,     setResetIn]     = useState('')
   const [tensions,    setTensions]    = useState(null)
   const [priceLoaded, setPriceLoaded] = useState(false)
@@ -706,6 +707,27 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       setMsgIdx(0)
     }
   }, [loading, deepRunning, refreshing])
+
+  // Simulate load progress during initial load only
+  useEffect(() => {
+    if (!loading) {
+      setLoadProgress(100)
+      const t = setTimeout(() => setLoadProgress(0), 500)
+      return () => clearTimeout(t)
+    }
+    let cancelled = false
+    let p = 0
+    const set = v => { if (!cancelled) setLoadProgress(v) }
+    // Phase 1: 0→30 in ~1s (every 33ms)
+    const i1 = setInterval(() => { p = Math.min(p + 1, 30); set(p); if (p >= 30) clearInterval(i1) }, 33)
+    // Phase 2: 30→70 in ~3s (starts at 1s)
+    let i2
+    const t2 = setTimeout(() => { i2 = setInterval(() => { p = Math.min(p + 1, 70); set(p); if (p >= 70) clearInterval(i2) }, 75) }, 1000)
+    // Phase 3: 70→90 in ~4s (starts at 4s)
+    let i3
+    const t3 = setTimeout(() => { i3 = setInterval(() => { p = Math.min(p + 1, 90); set(p); if (p >= 90) clearInterval(i3) }, 200) }, 4000)
+    return () => { cancelled = true; clearInterval(i1); clearTimeout(t2); clearInterval(i2); clearTimeout(t3); clearInterval(i3) }
+  }, [loading])
 
   // Group 2 — 60s: futures, order-book, mempool + countdown reset
   useEffect(() => {
@@ -1166,6 +1188,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{opacity:(loading||deepRunning||refreshing)?1:0,transition:'opacity 0.5s'}}>
           <div style={{width:'100%',height:3,background:'linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent)',backgroundSize:'200% 100%',animation:'analysisShimmer 1.5s linear infinite'}} />
           <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',textAlign:'center',marginTop:6,animation:'textPulse 2s ease-in-out infinite'}}>{ANALYSIS_MSGS[msgIdx]}</div>
+          {loading && loadProgress > 0 && (
+            <>
+              <div style={{width:'100%',height:2,background:'#1a1a1a',marginTop:6}}>
+                <div style={{width:`${loadProgress}%`,height:'100%',background:'#f59e0b',transition:'width 0.1s linear'}} />
+              </div>
+              <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:10,color:'#f59e0b',textAlign:'center',marginTop:2}}>{loadProgress}%</div>
+            </>
+          )}
         </div>
         <div style={{textAlign:'center',padding:'16px 0'}}>
           <button className="deep-btn" onClick={handleDeepClick}
