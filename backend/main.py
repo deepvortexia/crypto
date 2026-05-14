@@ -511,7 +511,7 @@ DEEP_ANALYSIS_DAILY_LIMIT = 2
 _pro_cache: dict[str, tuple[bool, float]] = {}
 
 def _is_pro(user_id: str) -> bool:
-    now = time.time()
+    now = time()
     if user_id in _pro_cache:
         result, ts = _pro_cache[user_id]
         if now - ts < 60:
