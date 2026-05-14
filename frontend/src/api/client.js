@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 
-const BINANCE = 'https://api.binance.com/api/v3'
+const OKX = 'https://www.okx.com/api/v5'
 const COINGECKO = 'https://api.coingecko.com/api/v3'
 const BACKEND_URL = 'https://crypto-production-f7c5.up.railway.app'
 
@@ -172,15 +172,17 @@ export async function pingHealth() {
 
 export async function fetchLivePrice() {
   try {
-    const ticker = await get(`${BINANCE}/ticker/24hr?symbol=BTCUSDT`, {
+    const data = await get(`${OKX}/market/ticker?instId=BTC-USDT`, {
       timeout: 10000,
       retries: 2
     })
-    const price = parseFloat(ticker.lastPrice)
+    const t = data.data[0]
+    const price = parseFloat(t.last)
+    const open24h = parseFloat(t.open24h)
     return {
       price,
-      change_24h_pct: parseFloat(ticker.priceChangePercent),
-      volume_24h: parseFloat(ticker.quoteVolume),
+      change_24h_pct: parseFloat(((price - open24h) / open24h * 100).toFixed(2)),
+      volume_24h: parseFloat(t.volCcy24h),
       market_cap: price * 19700000,
       last_updated: new Date().toISOString(),
     }
@@ -192,11 +194,9 @@ export async function fetchLivePrice() {
 
 export async function fetchPriceHistory() {
   try {
-    const data = await get(`${BINANCE}/klines?symbol=BTCUSDT&interval=1d&limit=60`, {
-      timeout: 10000,
-      retries: 2
-    })
-    return data.map(k => [k[0], parseFloat(k[4])])
+    // Route through backend proxy (already fetched from CoinGecko) — avoids geo-blocks
+    const data = await get(`${BACKEND_URL}/api/ohlc`, { timeout: 10000, retries: 2 })
+    return data.slice(-60).map(k => [k[0], k[4]])
   } catch (err) {
     console.error('[fetchPriceHistory] Failed:', err.message)
     return []
@@ -277,11 +277,11 @@ export async function fetchIndicators() {
 
 export async function fetchFundingRate() {
   try {
-    const data = await get('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1', {
+    const data = await get(`${OKX}/public/funding-rate?instId=BTC-USDT-SWAP`, {
       timeout: 10000,
       retries: 2
     })
-    const rate = parseFloat(data[0].fundingRate) * 100
+    const rate = parseFloat(data.data[0].fundingRate) * 100
     return { rate, signal: rate > 0.05 ? 'Longs overloaded' : rate < -0.05 ? 'Shorts overloaded' : 'Neutral' }
   } catch (err) {
     console.error('[fetchFundingRate] Failed:', err.message)
@@ -291,12 +291,16 @@ export async function fetchFundingRate() {
 
 export async function fetchLongShortRatio() {
   try {
-    const data = await get('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=1h&limit=1', {
+    const data = await get(`${OKX}/rubik/stat/contracts/long-short-account-ratio?ccy=BTC&period=1H&limit=1`, {
       timeout: 10000,
       retries: 2
     })
-    const ratio = parseFloat(data[0].longShortRatio)
-    return { ratio, longPct: parseFloat(data[0].longAccount)*100, shortPct: parseFloat(data[0].shortAccount)*100, signal: ratio > 1.5 ? 'Too many longs' : ratio < 0.7 ? 'Too many shorts' : 'Balanced' }
+    const item = data.data[0]
+    // OKX returns either {longShortRatio} dict or [timestamp, ratio] array
+    const ratio = parseFloat(item.longShortRatio ?? item[1])
+    const longPct = parseFloat((ratio / (1 + ratio) * 100).toFixed(2))
+    const shortPct = parseFloat((100 - longPct).toFixed(2))
+    return { ratio: parseFloat(ratio.toFixed(3)), longPct, shortPct, signal: ratio > 1.5 ? 'Too many longs' : ratio < 0.7 ? 'Too many shorts' : 'Balanced' }
   } catch (err) {
     console.error('[fetchLongShortRatio] Failed:', err.message)
     return { ratio: 1.0, longPct: 50, shortPct: 50, signal: 'Unknown' }
@@ -305,11 +309,11 @@ export async function fetchLongShortRatio() {
 
 export async function fetchOpenInterest() {
   try {
-    const data = await get('https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT', {
+    const data = await get(`${OKX}/public/open-interest?instId=BTC-USDT-SWAP&instType=SWAP`, {
       timeout: 10000,
       retries: 2
     })
-    return { value: parseFloat(data.openInterest) }
+    return { value: parseFloat(data.data[0].oi) }
   } catch (err) {
     console.error('[fetchOpenInterest] Failed:', err.message)
     return { value: null }
@@ -318,16 +322,21 @@ export async function fetchOpenInterest() {
 
 export async function fetchWhales() {
   try {
-    const data = await get('https://fapi.binance.com/futures/data/takerlongshortRatio?symbol=BTCUSDT&period=1h&limit=1', {
+    const data = await get(`${OKX}/rubik/stat/taker-volume?ccy=BTC&instType=CONTRACTS&period=1H&limit=1`, {
       timeout: 10000,
       retries: 2
     })
-    const buyRatio = parseFloat(data[0].buyVol) / (parseFloat(data[0].buyVol) + parseFloat(data[0].sellVol)) * 100
+    // OKX returns [timestamp, sellVol, buyVol]
+    const item = data.data[0]
+    const sellVol = parseFloat(item[1])
+    const buyVol  = parseFloat(item[2])
+    const total = buyVol + sellVol
+    const buyRatio  = total > 0 ? buyVol  / total * 100 : 50
     const sellRatio = 100 - buyRatio
     return {
       largeCount: Math.round(buyRatio) + '% buy / ' + Math.round(sellRatio) + '% sell',
-      buyVol: parseFloat(data[0].buyVol),
-      sellVol: parseFloat(data[0].sellVol),
+      buyVol,
+      sellVol,
       signal: buyRatio > 55 ? 'Whales buying' : buyRatio < 45 ? 'Whales selling' : 'Neutral'
     }
   } catch (err) {
@@ -338,15 +347,17 @@ export async function fetchWhales() {
 
 export async function fetchLiquidations() {
   try {
-    const data = await get('https://fapi.binance.com/futures/data/openInterestHist?symbol=BTCUSDT&period=1h&limit=24', {
+    const data = await get(`${OKX}/rubik/stat/contracts/open-interest-volume?ccy=BTC&period=1H&limit=25`, {
       timeout: 10000,
       retries: 2
     })
-    const latest = parseFloat(data[data.length-1].sumOpenInterest)
-    const prev = parseFloat(data[0].sumOpenInterest)
-    const change = ((latest-prev)/prev*100).toFixed(2)
-    const latestUsd = parseFloat(data[data.length-1].sumOpenInterestValue)
-    return { current: latestUsd, change: parseFloat(change), signal: change > 5 ? 'OI rising - trend strengthening' : change < -5 ? 'OI dropping - trend weakening' : 'OI stable' }
+    // OKX returns [timestamp, oi, volume] in DESC order — item[1] is OI
+    const items = data.data
+    if (!items || items.length < 2) return { current: null, change: 0, signal: 'Unknown' }
+    const latest = parseFloat(items[0][1])
+    const oldest = parseFloat(items[items.length - 1][1])
+    const change = ((latest - oldest) / oldest * 100).toFixed(2)
+    return { current: latest, change: parseFloat(change), signal: change > 5 ? 'OI rising - trend strengthening' : change < -5 ? 'OI dropping - trend weakening' : 'OI stable' }
   } catch (err) {
     console.error('[fetchLiquidations] Failed:', err.message)
     return { current: null, change: 0, signal: 'Unknown' }
@@ -355,14 +366,16 @@ export async function fetchLiquidations() {
 
 export async function fetchOrderBook() {
   try {
-    const data = await get('https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=5', {
+    const data = await get(`${OKX}/market/books?instId=BTC-USDT&sz=5`, {
       timeout: 10000,
       retries: 2
     })
-    const bestBid = parseFloat(data.bids[0][0])  // highest buy price
-    const bestAsk = parseFloat(data.asks[0][0])  // lowest sell price
-    const bidVol = data.bids.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
-    const askVol = data.asks.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
+    const book = data.data[0]
+    // OKX bids/asks: [[price, size, ...], ...] — same shape as Binance
+    const bestBid = parseFloat(book.bids[0][0])
+    const bestAsk = parseFloat(book.asks[0][0])
+    const bidVol = book.bids.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
+    const askVol = book.asks.reduce((a,b)=>a+parseFloat(b[0])*parseFloat(b[1]),0)
     const ratio = parseFloat((bidVol/askVol).toFixed(2))
     return { topBid: bestBid, topAsk: bestAsk, ratio, signal:ratio>1.3?'Strong buy wall':ratio<0.7?'Strong sell wall':'Balanced' }
   } catch (err) {
@@ -415,13 +428,15 @@ export async function fetchNews() {
 export async function fetchKeyLevels(currentPrice) {
   try {
     // Use 7-day data for more dynamic Fibonacci levels
-    const data = await get('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=42', {
+    const data = await get(`${OKX}/market/candles?instId=BTC-USDT&bar=4H&limit=42`, {
       timeout: 10000,
       retries: 2
     })
-    const highs = data.map(k => parseFloat(k[2]))
-    const lows = data.map(k => parseFloat(k[3]))
-    const closes = data.map(k => parseFloat(k[4]))
+    // OKX returns [ts, o, h, l, c, vol, volCcy] in DESC order — reverse to ASC
+    const candles = data.data.slice().reverse()
+    const highs = candles.map(k => parseFloat(k[2]))
+    const lows = candles.map(k => parseFloat(k[3]))
+    const closes = candles.map(k => parseFloat(k[4]))
 
     // 7-day high/low for Fibonacci
     const H = Math.max(...highs)
@@ -461,12 +476,13 @@ export async function fetchKeyLevels(currentPrice) {
 
 export async function fetchOHLCCandles(limit = 100) {
   try {
-    const data = await get(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=${limit}`, {
+    const data = await get(`${OKX}/market/candles?instId=BTC-USDT&bar=1H&limit=${limit}`, {
       timeout: 10000,
       retries: 2
     })
-    return data.map(k => ({
-      x: k[0],
+    // OKX returns [ts, o, h, l, c, vol, volCcy] in DESC order — reverse to ASC
+    return data.data.slice().reverse().map(k => ({
+      x: parseInt(k[0]),
       o: parseFloat(k[1]),
       h: parseFloat(k[2]),
       l: parseFloat(k[3]),

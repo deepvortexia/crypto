@@ -26,16 +26,17 @@ const TIMEFRAMES = [
   { label: '30D', days: 30 },
 ]
 
-const BINANCE_KLINES = 'https://api.binance.com/api/v3/klines'
+const OKX_CANDLES = 'https://www.okx.com/api/v5/market/candles'
 
 async function fetchHistory(days) {
-  const interval = days <= 1 ? '1h' : days <= 7 ? '4h' : '1d'
-  const limit    = days <= 1 ? 24   : days <= 7 ? 42   : 30
-  const url = `${BINANCE_KLINES}?symbol=BTCUSDT&interval=${interval}&limit=${limit}`
+  const bar   = days <= 1 ? '1H' : days <= 7 ? '4H' : '1D'
+  const limit = days <= 1 ? 24   : days <= 7 ? 42   : 30
+  const url = `${OKX_CANDLES}?instId=BTC-USDT&bar=${bar}&limit=${limit}`
   const res = await fetch(url)
-  if (!res.ok) throw new Error(`Binance ${res.status}`)
+  if (!res.ok) throw new Error(`OKX ${res.status}`)
   const body = await res.json()
-  return body.map(k => [k[0], parseFloat(k[4])])
+  // OKX returns [ts, o, h, l, c, vol, volCcy] in DESC order — reverse to ASC
+  return body.data.slice().reverse().map(k => [parseInt(k[0]), parseFloat(k[4])])
 }
 
 const tooltipPlugin = {
