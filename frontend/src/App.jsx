@@ -530,6 +530,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepHorizon,   setDeepHorizon]   = useState(null)
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [loading,     setLoading]     = useState(true)
+  const [refreshing,  setRefreshing]  = useState(false)
   const [authOpen,    setAuthOpen]    = useState(false)
   const [authTab,     setAuthTab]     = useState('signup') // 'signup' | 'login'
   const [authEmail,   setAuthEmail]   = useState('')
@@ -657,8 +658,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   useEffect(() => {
     // Wake the server with a lightweight ping before the heavy data fetch
     pingHealth().catch(() => {}).finally(() => loadAll())
-    const id = setInterval(loadAll, REFRESH_MS)
-    return () => clearInterval(id)
   }, [loadAll])
 
 
@@ -677,10 +676,71 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     return () => clearInterval(id)
   }, [])
 
-  // Live countdown tick — decrements every second, reset to 60 by loadAll()
+  // Live countdown tick — decrements every second, reset to 60 by Group 2
   useEffect(() => {
     const tick = setInterval(() => setLiveCountdown(c => Math.max(0, c - 1)), 1000)
     return () => clearInterval(tick)
+  }, [])
+
+  // Group 2 — 60s: futures, order-book, mempool + countdown reset
+  useEffect(() => {
+    const id = setInterval(async () => {
+      setRefreshing(true)
+      setTimeout(() => setRefreshing(false), 1000)
+      setLiveCountdown(60)
+      const [fr, ls, oi, ob, liq, mp] = await Promise.allSettled([
+        fetchFundingRate(), fetchLongShortRatio(), fetchOpenInterest(),
+        fetchOrderBook(), fetchLiquidations(), fetchMempool(),
+      ])
+      if (fr.status  === 'fulfilled' && fr.value)  setFundingRate(fr.value)
+      if (ls.status  === 'fulfilled' && ls.value)  setLongShort(ls.value)
+      if (oi.status  === 'fulfilled' && oi.value)  setOpenInterest(oi.value)
+      if (ob.status  === 'fulfilled' && ob.value)  setOrderBook(ob.value)
+      if (liq.status === 'fulfilled' && liq.value) setLiquidations(liq.value)
+      if (mp.status  === 'fulfilled' && mp.value)  setMempool(mp.value)
+    }, 60_000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Group 3 — 5 min: 1h prediction, indicators, key-levels, whales
+  useEffect(() => {
+    const id = setInterval(async () => {
+      setRefreshing(true)
+      setTimeout(() => setRefreshing(false), 1000)
+      const [ind, wh, kl, pred1h] = await Promise.allSettled([
+        fetchIndicators(), fetchWhales(), fetchKeyLevels(), fetchPrediction('1h'),
+      ])
+      if (ind.status    === 'fulfilled' && ind.value)    setIndics(ind.value)
+      if (wh.status     === 'fulfilled' && wh.value)     setWhales(wh.value)
+      if (kl.status     === 'fulfilled' && kl.value)     setKeyLevels(kl.value)
+      if (pred1h.status === 'fulfilled' && pred1h.value) setPreds(prev => ({ ...prev, '1h': pred1h.value }))
+    }, 5 * 60_000)
+    return () => clearInterval(id)
+  }, [])
+
+  // Group 4 — 15 min: sentiment, onchain, news, market-tensions, 4h+ predictions
+  useEffect(() => {
+    const id = setInterval(async () => {
+      setRefreshing(true)
+      setTimeout(() => setRefreshing(false), 1000)
+      const longHorizons = PRED_HORIZONS.filter(h => h !== '1h')
+      const [s, oc, ns, mt, ...predResults] = await Promise.allSettled([
+        fetchSentiment(), fetchOnchain(), fetchNewsSentiment(), fetchMarketTensions(),
+        ...longHorizons.map(h => fetchPrediction(h)),
+      ])
+      if (s.status  === 'fulfilled' && s.value)  setSentiment(s.value)
+      if (oc.status === 'fulfilled' && oc.value)  setOnchain(oc.value)
+      if (ns.status === 'fulfilled' && ns.value)  setNewsSentiment(ns.value)
+      if (mt.status === 'fulfilled' && mt.value)  setTensions(mt.value)
+      setPreds(prev => {
+        const map = { ...prev }
+        predResults.forEach((r, i) => {
+          if (r.status === 'fulfilled' && r.value) map[longHorizons[i]] = r.value
+        })
+        return map
+      })
+    }, 15 * 60_000)
+    return () => clearInterval(id)
   }, [])
 
   useEffect(() => {
@@ -691,7 +751,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       } catch (err) {
         console.error('[Price poll] Failed to fetch price:', err)
       }
-    }, 15000)
+    }, 30_000)
 
     return () => clearInterval(interval)
   }, [])
@@ -1060,7 +1120,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
         </div>
         {/* analysis loading bar */}
-        <div style={{opacity:(loading||deepRunning)?1:0,transition:'opacity 0.5s'}}>
+        <div style={{opacity:(loading||deepRunning||refreshing)?1:0,transition:'opacity 0.5s'}}>
           <div style={{width:'100%',height:3,background:'linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent)',backgroundSize:'200% 100%',animation:'analysisShimmer 1.5s linear infinite'}} />
           <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',textAlign:'center',marginTop:6,animation:'textPulse 2s ease-in-out infinite'}}>AI ANALYSING...</div>
         </div>
