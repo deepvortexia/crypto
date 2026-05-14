@@ -1,10 +1,13 @@
 import logging
 import os
 import pickle
+import time
 from pathlib import Path
 from typing import Optional
 
 from models import write_checksum, verify_checksum
+
+PROPHET_CACHE_TTL = 1800  # 30 min — Prophet output only changes on retrain (every 24h)
 
 import pandas as pd
 
@@ -48,11 +51,13 @@ class BTCProphetModel:
         self.is_trained = False
         self._last_train_df_hourly: Optional[pd.DataFrame] = None
         self._last_train_df_daily: Optional[pd.DataFrame] = None
+        self._cache: dict = {}  # {horizon_key: (predicted_price, timestamp)}
 
     def train(self, hourly_df: pd.DataFrame, daily_df: pd.DataFrame):
         if not PROPHET_AVAILABLE:
             logger.warning("Skipping Prophet training — library not installed")
             return
+        self._cache.clear()
 
         import cmdstanpy
         try:
@@ -112,20 +117,29 @@ class BTCProphetModel:
         if not self.is_trained or not PROPHET_AVAILABLE:
             return None
         try:
+            cached = self._cache.get(horizon_key)
+            if cached and (time.time() - cached[1]) < PROPHET_CACHE_TTL:
+                logger.info(f"PROPHET cache hit {horizon_key}")
+                return cached[0]
+
             horizon_h = HORIZON_HOURS[horizon_key]
             if horizon_h <= 24:
                 if self.model_hourly is None:
                     return None
                 future = self.model_hourly.make_future_dataframe(periods=horizon_h, freq="h")
                 forecast = self.model_hourly.predict(future)
-                return float(forecast.iloc[-1]["yhat"])
+                forecast_price = float(forecast.iloc[-1]["yhat"])
             else:
                 if self.model_daily is None:
                     return None
                 horizon_days = horizon_h // 24
                 future = self.model_daily.make_future_dataframe(periods=horizon_days, freq="D")
                 forecast = self.model_daily.predict(future)
-                return float(forecast.iloc[-1]["yhat"])
+                forecast_price = float(forecast.iloc[-1]["yhat"])
+
+            self._cache[horizon_key] = (forecast_price, time.time())
+            logger.info(f"PROPHET cache miss {horizon_key} — computed fresh")
+            return forecast_price
         except Exception as exc:
             logger.error(f"Prophet predict error ({horizon_key}): {exc}")
             return None
