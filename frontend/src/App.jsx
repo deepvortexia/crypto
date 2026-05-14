@@ -519,7 +519,7 @@ function Tooltip({text}) {
 }
 
 function Skel({ h = 80 }) {
-  return <div style={{ height: h, borderRadius: 10, background: 'linear-gradient(90deg, #1a1a2e 25%, #2a2a3e 50%, #1a1a2e 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+  return <div style={{ height: h, borderRadius: 10, background: 'linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
 }
 
 export default function App() {
@@ -1167,15 +1167,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
         </div>
 
-        {/* AI ANALYSING bar — pinned to bottom edge of sticky header */}
-        <div style={{
-          position:'absolute', bottom:0, left:0, right:0,
-          opacity:(loading||deepRunning||refreshing)?1:0,
-          transition:'opacity 0.5s',
-          pointerEvents:'none',
-        }}>
-          <div style={{width:'100%',height:3,background:'linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent)',backgroundSize:'200% 100%',animation:'analysisShimmer 1.5s linear infinite'}} />
-        </div>
       </header>
 
       {/* HERO SECTION */}
