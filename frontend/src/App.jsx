@@ -543,7 +543,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [credits,     setCredits]     = useState(2)
   const [pricingOpen, setPricingOpen] = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
-  // countdown removed — replaced by egyptian-dial spinner
   const [resetIn,     setResetIn]     = useState('')
   const [tensions,    setTensions]    = useState(null)
   const [priceLoaded, setPriceLoaded] = useState(false)
@@ -897,7 +896,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       }}>
         {/* logo */}
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <img src="/logoegyptfinal.webp" alt="Predict Alpha" className="navbar-logo" style={{width:'auto',objectFit:'contain',verticalAlign:'middle'}} />
           <div style={{display:'flex',flexDirection:'column',gap:3}}>
             <span className="navbar-brand" style={{fontFamily:'"Orbitron",sans-serif',letterSpacing:'0.05em',opacity:0.9,whiteSpace:'nowrap'}}>
               <span style={{color:'#f59e0b',fontWeight:400}}>PREDICT</span>{' '}<span style={{color:'#f59e0b',fontWeight:700,textShadow:'0 0 8px rgba(245,158,11,0.4)'}}>ALPHA</span>
@@ -1018,24 +1016,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
         )}
 
-        {/* egyptian dial — absolutely positioned, never affects flex layout */}
-        <img
-          src="/egyptian-dial.webp"
-          alt=""
-          style={{
-            position: 'absolute', right: 32, top: '50%', transform: 'translateY(-50%)',
-            display: 'block',
-            width: 72, height: 72,
-            borderRadius: '50%',
-            overflow: 'hidden',
-            objectFit: 'cover',
-            pointerEvents: 'none',
-            opacity: (loadingBar > 0 || deepRunning) ? 1 : 0,
-            transition: 'opacity 0.3s',
-            animation: (loadingBar > 0 || deepRunning) ? 'egyptianSpin 3s linear infinite' : 'none',
-          }}
-        />
-
         {/* live ticker */}
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
 <div style={{ textAlign: 'right' }}>
@@ -1057,13 +1037,18 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
           <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
         </div>
+        {/* analysis loading bar */}
+        <div style={{opacity:(loading||deepRunning)?1:0,transition:'opacity 0.5s'}}>
+          <div style={{width:'100%',height:3,background:'linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent)',backgroundSize:'200% 100%',animation:'analysisShimmer 1.5s linear infinite'}} />
+          <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',textAlign:'center',marginTop:6,animation:'textPulse 2s ease-in-out infinite'}}>AI ANALYSING...</div>
+        </div>
         <div style={{textAlign:'center',padding:'16px 0'}}>
           <button className="deep-btn" onClick={handleDeepClick}
           style={{
             fontFamily:'"Orbitron",sans-serif',
-            fontSize:14,
+            fontSize:10,
             letterSpacing:'0.35em',
-            padding:'16px 40px',
+            padding:'11px 28px',
             background:'linear-gradient(135deg, #f59e0b 0%, #fbbf24 25%, #d97706 50%, #f59e0b 75%, #fbbf24 100%)',
             backgroundSize:'200% 200%',
             animation:'gradientShift 3s ease infinite, buttonGlow 2s ease-in-out infinite',
@@ -1887,8 +1872,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       )}
 
       <style>{`
-        @keyframes egyptianSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        @keyframes shimmer     { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        @keyframes shimmer          { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        @keyframes analysisShimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
         @keyframes textPulse   { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
         @keyframes rotateDash  { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
         @keyframes circlePulse { 0%,100%{box-shadow:0 0 15px currentColor} 50%{box-shadow:0 0 30px currentColor, 0 0 60px currentColor} }
@@ -1906,7 +1891,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         /* ── Desktop base ── */
         * { box-sizing: border-box; }
         body { overflow-x: hidden; }
-        .navbar-logo  { height: 80px; margin-right: 10px; }
         .navbar-brand { font-size: 22px; }
 
         /* ── Tablet landscape: 1025px (desktop grid kicks in naturally) ── */
@@ -1918,7 +1902,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
           .grid-3       { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
           .grid-6       { grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
-          .navbar-logo  { height: 64px !important; }
           .navbar-brand { font-size: 18px !important; }
         }
 
@@ -1941,7 +1924,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .header-price { font-size: 20px !important; }
           .hide-mobile  { display: none !important; }
           .show-mobile  { display: flex !important; align-items: center !important; }
-          .navbar-logo  { height: 52px !important; }
           .navbar-brand { font-size: 14px !important; white-space: nowrap !important; }
           .ai-title     { font-size: 13px !important; }
           .ai-banner    { font-size: 11px !important; letter-spacing: 0.1em !important; }
@@ -1977,7 +1959,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .grid-6       { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
           .main-pad     { padding: 10px !important; }
           .header-price { font-size: 18px !important; }
-          .navbar-logo  { height: 44px !important; }
           .navbar-brand { font-size: 13px !important; letter-spacing: 0.03em !important; }
           .pred-horizon { font-size: 11px !important; }
           .deep-btn     { font-size: 12px !important; padding: 13px 22px !important; }
