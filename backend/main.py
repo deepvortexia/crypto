@@ -508,12 +508,21 @@ async def get_subscription_status(user: dict = Depends(get_current_user)):
 DEEP_ANALYSIS_DAILY_LIMIT = 2
 
 
+_pro_cache: dict[str, tuple[bool, float]] = {}
+
 def _is_pro(user_id: str) -> bool:
+    now = time.time()
+    if user_id in _pro_cache:
+        result, ts = _pro_cache[user_id]
+        if now - ts < 60:
+            return result
     try:
         sub = supabase.table("subscriptions").select("status").eq("user_id", user_id).execute()
-        return bool(sub.data and sub.data[0].get("status") == "active")
+        result = bool(sub.data and sub.data[0].get("status") == "active")
     except Exception:
-        return False
+        result = False
+    _pro_cache[user_id] = (result, now)
+    return result
 
 
 @app.get("/api/deep-analysis/remaining")
