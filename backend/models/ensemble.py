@@ -36,6 +36,17 @@ HORIZON_WEIGHTS = {
     "1month": {"lstm": 0.20, "xgboost": 0.15, "prophet": 0.65},
 }
 
+# Maximum realistic price move per horizon — ensemble output is clamped to this range
+HORIZON_MAX_MOVE = {
+    "1h":     0.008,   # ±0.8%
+    "4h":     0.020,   # ±2.0%
+    "8h":     0.030,   # ±3.0%
+    "12h":    0.040,   # ±4.0%
+    "24h":    0.055,   # ±5.5%
+    "1week":  0.12,    # ±12%
+    "1month": 0.25,    # ±25%
+}
+
 
 class BTCEnsemble:
     def __init__(self, data_dir: str = "models"):
@@ -151,11 +162,10 @@ class BTCEnsemble:
             ensemble_price = weighted_sum / weight_total if weight_total > 0 else current_price
             weights_used = {name: w[i] for i, name in enumerate(model_order)}
 
-        # Clamp 1h prediction to ±1.5% max (realistic 1h BTC move)
-        if horizon_key == "1h":
-            max_move = current_price * 0.015
-            ensemble_price = max(current_price - max_move,
-                                 min(current_price + max_move, ensemble_price))
+        # Clamp predictions to realistic max moves per horizon
+        max_move = current_price * HORIZON_MAX_MOVE.get(horizon_key, 0.10)
+        ensemble_price = max(current_price - max_move,
+                             min(current_price + max_move, ensemble_price))
 
         change_pct = (ensemble_price - current_price) / current_price * 100
 
