@@ -20,7 +20,7 @@ _CMC_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 async def _fetch_cmc_data() -> dict:
     """Fetch BTC market cap and 24h volume from CoinMarketCap. Returns zeros on any failure."""
     if not _CMC_API_KEY:
-        return {"market_cap": 0, "volume_24h": 0}
+        return {"market_cap": 0, "volume_24h": 0, "percent_change_24h": None}
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(
@@ -30,9 +30,13 @@ async def _fetch_cmc_data() -> dict:
             )
             resp.raise_for_status()
             usd = resp.json()["data"]["BTC"]["quote"]["USD"]
-            return {"market_cap": usd["market_cap"], "volume_24h": usd["volume_24h"]}
+            return {
+                "market_cap": usd["market_cap"],
+                "volume_24h": usd["volume_24h"],
+                "percent_change_24h": usd["percent_change_24h"],
+            }
     except Exception:
-        return {"market_cap": 0, "volume_24h": 0}
+        return {"market_cap": 0, "volume_24h": 0, "percent_change_24h": None}
 
 
 async def fetch_live_price() -> dict:
@@ -49,7 +53,7 @@ async def fetch_live_price() -> dict:
             )
             return {
                 "price": ticker["last"],
-                "change_24h_pct": ticker.get("percentage") or 0,
+                "change_24h_pct": cmc.get("percent_change_24h") or ticker.get("percentage") or 0,
                 "market_cap": cmc["market_cap"],
                 "volume_24h": cmc["volume_24h"],
                 "last_updated": int((ticker["timestamp"] or time.time() * 1000) / 1000),
