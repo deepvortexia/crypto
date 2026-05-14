@@ -338,7 +338,7 @@ export async function fetchMempool() {
       fastestFee: fees.fastestFee,
       halfHourFee: fees.halfHourFee,
       hourFee: fees.hourFee,
-      signal: stats.count > 50000 ? 'Network congested' : stats.count > 20000 ? 'Moderate activity' : 'Network clear'
+      signal: fees.fastestFee >= 50 ? 'Network congested 🔥' : fees.fastestFee >= 20 ? 'Moderate congestion' : fees.fastestFee >= 5 ? 'Normal activity' : 'Network quiet'
     }
   } catch (err) {
     console.error('[fetchMempool] Failed:', err.message)
