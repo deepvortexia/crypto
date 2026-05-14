@@ -151,6 +151,12 @@ class BTCEnsemble:
             ensemble_price = weighted_sum / weight_total if weight_total > 0 else current_price
             weights_used = {name: w[i] for i, name in enumerate(model_order)}
 
+        # Clamp 1h prediction to ±1.5% max (realistic 1h BTC move)
+        if horizon_key == "1h":
+            max_move = current_price * 0.015
+            ensemble_price = max(current_price - max_move,
+                                 min(current_price + max_move, ensemble_price))
+
         change_pct = (ensemble_price - current_price) / current_price * 100
 
         result = {
