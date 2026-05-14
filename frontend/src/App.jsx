@@ -543,6 +543,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [credits,     setCredits]     = useState(2)
   const [pricingOpen, setPricingOpen] = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
+  const [liveCountdown, setLiveCountdown] = useState(60)
   const [resetIn,     setResetIn]     = useState('')
   const [tensions,    setTensions]    = useState(null)
   const [priceLoaded, setPriceLoaded] = useState(false)
@@ -630,7 +631,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setLoadingBar(90)
     setLoading(false)
     setLastAt(new Date())
-    // countdown reset removed
+    setLiveCountdown(60)
     setLoadingBar(100)
     setTimeout(() => setLoadingBar(0), 400)
   }, [])
@@ -674,6 +675,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     calcResetIn()
     const id = setInterval(calcResetIn, 60000)
     return () => clearInterval(id)
+  }, [])
+
+  // Live countdown tick — decrements every second, reset to 60 by loadAll()
+  useEffect(() => {
+    const tick = setInterval(() => setLiveCountdown(c => Math.max(0, c - 1)), 1000)
+    return () => clearInterval(tick)
   }, [])
 
   useEffect(() => {
@@ -917,6 +924,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <div style={{display:'flex',alignItems:'center',gap:5}}>
               <span style={{display:'inline-block',width:6,height:6,borderRadius:'50%',background:G.green,boxShadow:`0 0 8px ${G.green}`,animation:'blink 0.5s ease-in-out infinite'}} />
               <span style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,letterSpacing:'0.3em',color:G.green}}>LIVE</span>
+              <span style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:G.green,marginLeft:6,opacity:0.8}}>{liveCountdown}s</span>
             </div>
           </div>
         </div>
