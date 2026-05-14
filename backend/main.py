@@ -6,7 +6,7 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from functools import wraps
-from time import time
+from time import time, perf_counter
 from typing import Literal, Optional
 
 import httpx
@@ -291,6 +291,7 @@ async def get_prediction(
         live, (hourly_df, daily_df) = await asyncio.gather(_get_price(), _get_dataframes())
         current_price = live["price"]
 
+        t_start = perf_counter()
         result = await asyncio.get_event_loop().run_in_executor(
             None,
             ensemble.predict,
@@ -299,6 +300,7 @@ async def get_prediction(
             daily_df,
             current_price,
         )
+        logger.info(f"TIMING total predict {horizon}: {perf_counter()-t_start:.3f}s")
 
         if "error" in result:
             raise HTTPException(503, detail=result["error"])

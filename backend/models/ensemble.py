@@ -1,6 +1,7 @@
 import concurrent.futures
 import json
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
@@ -66,6 +67,7 @@ class BTCEnsemble:
     def predict(self, horizon_key: str, hourly_df: pd.DataFrame, daily_df: pd.DataFrame, current_price: float) -> dict:
         df_for_xgb = hourly_df  # always hourly, matches training
 
+        t_dispatch = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             lstm_future    = executor.submit(self.lstm.predict,    hourly_df,  horizon_key)
             xgb_future     = executor.submit(self.xgb.predict,     df_for_xgb, horizon_key)
@@ -74,9 +76,11 @@ class BTCEnsemble:
             done, not_done = concurrent.futures.wait(
                 [lstm_future, xgb_future, prophet_future], timeout=25
             )
+        logger.info(f"TIMING all-models wall {horizon_key}: {time.perf_counter()-t_dispatch:.3f}s")
 
         lstm_pred = xgb_pred = prophet_pred = None
 
+        t0 = time.perf_counter()
         if lstm_future in done:
             try:
                 lstm_pred = lstm_future.result()
@@ -84,7 +88,9 @@ class BTCEnsemble:
                 logger.warning(f"[Ensemble] LSTM failed for {horizon_key}: {exc}")
         else:
             logger.warning(f"[Ensemble] LSTM timed out for {horizon_key}")
+        logger.info(f"TIMING lstm {horizon_key}: {time.perf_counter()-t0:.3f}s")
 
+        t1 = time.perf_counter()
         if xgb_future in done:
             try:
                 xgb_pred = xgb_future.result()
@@ -92,7 +98,9 @@ class BTCEnsemble:
                 logger.warning(f"[Ensemble] XGBoost failed for {horizon_key}: {exc}")
         else:
             logger.warning(f"[Ensemble] XGBoost timed out for {horizon_key}")
+        logger.info(f"TIMING xgb {horizon_key}: {time.perf_counter()-t1:.3f}s")
 
+        t2 = time.perf_counter()
         if prophet_future in done:
             try:
                 prophet_pred = prophet_future.result()
@@ -100,6 +108,7 @@ class BTCEnsemble:
                 logger.warning(f"[Ensemble] Prophet failed for {horizon_key}: {exc}")
         else:
             logger.warning(f"[Ensemble] Prophet timed out for {horizon_key}")
+        logger.info(f"TIMING prophet {horizon_key}: {time.perf_counter()-t2:.3f}s")
 
         preds = {"lstm": lstm_pred, "xgboost": xgb_pred, "prophet": prophet_pred}
         valid = {k: v for k, v in preds.items() if v is not None and v > 0}
