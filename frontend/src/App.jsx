@@ -490,6 +490,20 @@ function TensionCard({ setup }) {
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────
+const ANALYSIS_MSGS = [
+  "AI ANALYSING...",
+  "Analysing mempool...",
+  "Calibrating LSTM models...",
+  "Reading on-chain signals...",
+  "Synchronising model data...",
+  "Loading OKX market data...",
+  "Computing indicators...",
+  "Fetching whale activity...",
+  "Evaluating key levels...",
+  "Processing sentiment data...",
+  "Running ensemble forecast...",
+]
+
 const PRED_HORIZONS = ['1h', '4h', '8h', '12h', '24h', '1week', '1month']
 const REFRESH_MS    = 60_000
 
@@ -545,6 +559,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [pricingOpen, setPricingOpen] = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
   const [liveCountdown, setLiveCountdown] = useState(60)
+  const [msgIdx,        setMsgIdx]        = useState(0)
   const [resetIn,     setResetIn]     = useState('')
   const [tensions,    setTensions]    = useState(null)
   const [priceLoaded, setPriceLoaded] = useState(false)
@@ -681,6 +696,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     const tick = setInterval(() => setLiveCountdown(c => Math.max(0, c - 1)), 1000)
     return () => clearInterval(tick)
   }, [])
+
+  // Rotate analysis message every 2s while loading/running
+  useEffect(() => {
+    if (loading || deepRunning || refreshing) {
+      const id = setInterval(() => setMsgIdx(i => (i + 1) % ANALYSIS_MSGS.length), 2000)
+      return () => clearInterval(id)
+    } else {
+      setMsgIdx(0)
+    }
+  }, [loading, deepRunning, refreshing])
 
   // Group 2 — 60s: futures, order-book, mempool + countdown reset
   useEffect(() => {
@@ -1140,7 +1165,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* analysis loading bar */}
         <div style={{opacity:(loading||deepRunning||refreshing)?1:0,transition:'opacity 0.5s'}}>
           <div style={{width:'100%',height:3,background:'linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent)',backgroundSize:'200% 100%',animation:'analysisShimmer 1.5s linear infinite'}} />
-          <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',textAlign:'center',marginTop:6,animation:'textPulse 2s ease-in-out infinite'}}>AI ANALYSING...</div>
+          <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',textAlign:'center',marginTop:6,animation:'textPulse 2s ease-in-out infinite'}}>{ANALYSIS_MSGS[msgIdx]}</div>
         </div>
         <div style={{textAlign:'center',padding:'16px 0'}}>
           <button className="deep-btn" onClick={handleDeepClick}
