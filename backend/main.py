@@ -83,6 +83,14 @@ _predict_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)      # 1 h per horizon
 _news_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)          # 30 min
 _tensions_cache: TTLCache = TTLCache(maxsize=1, ttl=300)       # 5 min
 _ohlc_cache: TTLCache = TTLCache(maxsize=1, ttl=600)           # 10 min
+_funding_rate_cache:  TTLCache = TTLCache(maxsize=1,  ttl=300)  # 5 min
+_ls_ratio_cache:      TTLCache = TTLCache(maxsize=1,  ttl=60)   # 1 min
+_whales_cache:        TTLCache = TTLCache(maxsize=1,  ttl=60)   # 1 min
+_open_interest_cache: TTLCache = TTLCache(maxsize=1,  ttl=60)   # 1 min
+_liquidations_cache:  TTLCache = TTLCache(maxsize=1,  ttl=300)  # 5 min
+_order_book_cache:    TTLCache = TTLCache(maxsize=1,  ttl=30)   # 30 s
+_key_levels_cache:    TTLCache = TTLCache(maxsize=1,  ttl=300)  # 5 min
+_ohlc_candles_cache:  TTLCache = TTLCache(maxsize=10, ttl=60)   # 1 min per limit
 
 # Shared dataframe cache (refreshed alongside indicators)
 _hourly_df = None
@@ -742,6 +750,242 @@ async def _fetch_long_short_ratio() -> dict:
     except Exception as exc:
         logger.warning(f"Long/short ratio fetch failed: {exc}")
     return {"ratio": None, "long_pct": None, "short_pct": None}
+
+
+# ── Funding Rate ──────────────────────────────────────────────────────────────
+@app.get("/api/funding-rate")
+async def get_funding_rate():
+    if "fr" in _funding_rate_cache:
+        return _funding_rate_cache["fr"]
+    data = await _fetch_funding_rate()
+    rate = data.get("rate_pct")
+    result = {
+        "rate": rate,
+        "signal": (
+            "Longs overloaded" if rate is not None and rate > 0.05
+            else "Shorts overloaded" if rate is not None and rate < -0.05
+            else "Neutral"
+        ),
+    }
+    _funding_rate_cache["fr"] = result
+    return result
+
+
+# ── Long/Short Ratio ──────────────────────────────────────────────────────────
+@app.get("/api/long-short-ratio")
+async def get_long_short_ratio():
+    if "lsr" in _ls_ratio_cache:
+        return _ls_ratio_cache["lsr"]
+    data = await _fetch_long_short_ratio()
+    ratio = data.get("ratio")
+    result = {
+        "ratio": ratio,
+        "longPct": data.get("long_pct"),
+        "shortPct": data.get("short_pct"),
+        "signal": (
+            "Too many longs" if ratio is not None and ratio > 1.5
+            else "Too many shorts" if ratio is not None and ratio < 0.7
+            else "Balanced"
+        ),
+    }
+    _ls_ratio_cache["lsr"] = result
+    return result
+
+
+# ── Whales (taker volume) ─────────────────────────────────────────────────────
+@app.get("/api/whales")
+async def get_whales():
+    if "whales" in _whales_cache:
+        return _whales_cache["whales"]
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_OKX_BASE}/api/v5/rubik/stat/taker-volume",
+                params={"ccy": "BTC", "instType": "CONTRACTS", "period": "1H", "limit": 1},
+            )
+            resp.raise_for_status()
+            items = resp.json().get("data", [])
+        if items:
+            item = items[0]  # [timestamp, sellVol, buyVol]
+            sell_vol = float(item[1])
+            buy_vol  = float(item[2])
+            total = buy_vol + sell_vol
+            buy_ratio  = buy_vol  / total * 100 if total > 0 else 50
+            sell_ratio = 100 - buy_ratio
+            result = {
+                "largeCount": f"{round(buy_ratio)}% buy / {round(sell_ratio)}% sell",
+                "buyVol":  round(buy_vol,  2),
+                "sellVol": round(sell_vol, 2),
+                "signal": (
+                    "Whales buying"  if buy_ratio > 55
+                    else "Whales selling" if buy_ratio < 45
+                    else "Neutral"
+                ),
+            }
+            _whales_cache["whales"] = result
+            return result
+    except Exception as exc:
+        logger.warning(f"Whales fetch failed: {exc}")
+    return {"largeCount": "50% buy / 50% sell", "buyVol": 0, "sellVol": 0, "signal": "Unknown"}
+
+
+# ── Open Interest ─────────────────────────────────────────────────────────────
+@app.get("/api/open-interest")
+async def get_open_interest():
+    if "oi" in _open_interest_cache:
+        return _open_interest_cache["oi"]
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_OKX_BASE}/api/v5/public/open-interest",
+                params={"instId": "BTC-USDT-SWAP", "instType": "SWAP"},
+            )
+            resp.raise_for_status()
+            items = resp.json().get("data", [])
+        if items:
+            result = {"value": float(items[0]["oi"])}
+            _open_interest_cache["oi"] = result
+            return result
+    except Exception as exc:
+        logger.warning(f"Open interest fetch failed: {exc}")
+    return {"value": None}
+
+
+# ── Liquidations (OI history) ─────────────────────────────────────────────────
+@app.get("/api/liquidations")
+async def get_liquidations():
+    if "liq" in _liquidations_cache:
+        return _liquidations_cache["liq"]
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_OKX_BASE}/api/v5/rubik/stat/contracts/open-interest-volume",
+                params={"ccy": "BTC", "period": "1H", "limit": 25},
+            )
+            resp.raise_for_status()
+            items = resp.json().get("data", [])  # DESC — [ts, oi, vol]
+        if items and len(items) >= 2:
+            latest = float(items[0][1])
+            oldest = float(items[-1][1])
+            change = round((latest - oldest) / oldest * 100, 2) if oldest else 0
+            result = {
+                "current": round(latest, 2),
+                "change":  change,
+                "signal": (
+                    "OI rising - trend strengthening" if change > 5
+                    else "OI dropping - trend weakening" if change < -5
+                    else "OI stable"
+                ),
+            }
+            _liquidations_cache["liq"] = result
+            return result
+    except Exception as exc:
+        logger.warning(f"Liquidations fetch failed: {exc}")
+    return {"current": None, "change": 0, "signal": "Unknown"}
+
+
+# ── Order Book ────────────────────────────────────────────────────────────────
+@app.get("/api/order-book")
+async def get_order_book():
+    if "ob" in _order_book_cache:
+        return _order_book_cache["ob"]
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_OKX_BASE}/api/v5/market/books",
+                params={"instId": "BTC-USDT", "sz": 5},
+            )
+            resp.raise_for_status()
+            book = resp.json()["data"][0]  # bids/asks: [[price, size, ...], ...]
+        best_bid = float(book["bids"][0][0])
+        best_ask = float(book["asks"][0][0])
+        bid_vol = sum(float(b[0]) * float(b[1]) for b in book["bids"])
+        ask_vol = sum(float(a[0]) * float(a[1]) for a in book["asks"])
+        ratio = round(bid_vol / ask_vol, 2) if ask_vol else 1.0
+        result = {
+            "topBid": best_bid,
+            "topAsk": best_ask,
+            "ratio": ratio,
+            "signal": (
+                "Strong buy wall"  if ratio > 1.3
+                else "Strong sell wall" if ratio < 0.7
+                else "Balanced"
+            ),
+        }
+        _order_book_cache["ob"] = result
+        return result
+    except Exception as exc:
+        logger.warning(f"Order book fetch failed: {exc}")
+    return {"topBid": None, "topAsk": None, "ratio": 1.0, "signal": "Unknown"}
+
+
+# ── Key Levels (Fibonacci + Pivots) ──────────────────────────────────────────
+@app.get("/api/key-levels")
+async def get_key_levels():
+    if "kl" in _key_levels_cache:
+        return _key_levels_cache["kl"]
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_OKX_BASE}/api/v5/market/candles",
+                params={"instId": "BTC-USDT", "bar": "4H", "limit": 42},
+            )
+            resp.raise_for_status()
+            candles = list(reversed(resp.json().get("data", [])))  # ASC order
+        if not candles:
+            raise HTTPException(502, "No candle data returned")
+        highs  = [float(k[2]) for k in candles]
+        lows   = [float(k[3]) for k in candles]
+        closes = [float(k[4]) for k in candles]
+        H, L, current = max(highs), min(lows), closes[-1]
+        P = (H + L + current) / 3
+        r = H - L
+        fib = [{"level": f, "price": round(H - r * f)} for f in [0.236, 0.382, 0.5, 0.618, 0.786]]
+        near_level = next((f for f in fib if abs(f["price"] - current) / current < 0.008), None)
+        result = {
+            "pivot": round(P),
+            "r1": round(2 * P - L),
+            "r2": round(P + r),
+            "r3": round(H + 2 * (P - L)),
+            "s1": round(2 * P - H),
+            "s2": round(P - r),
+            "s3": round(L - 2 * (H - P)),
+            "fib": fib,
+            "nearLevel": near_level,
+            "range": {"high": round(H), "low": round(L)},
+        }
+        _key_levels_cache["kl"] = result
+        return result
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.warning(f"Key levels fetch failed: {exc}")
+        raise HTTPException(502, f"Failed to fetch key levels: {exc}")
+
+
+# ── OHLC Candles (1H) ─────────────────────────────────────────────────────────
+@app.get("/api/ohlc-candles")
+async def get_ohlc_candles(limit: int = 100):
+    cache_key = f"ohlcc_{limit}"
+    if cache_key in _ohlc_candles_cache:
+        return _ohlc_candles_cache[cache_key]
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_OKX_BASE}/api/v5/market/candles",
+                params={"instId": "BTC-USDT", "bar": "1H", "limit": limit},
+            )
+            resp.raise_for_status()
+            candles = list(reversed(resp.json().get("data", [])))  # ASC order
+        result = [
+            {"x": int(k[0]), "o": float(k[1]), "h": float(k[2]), "l": float(k[3]), "c": float(k[4])}
+            for k in candles
+        ]
+        _ohlc_candles_cache[cache_key] = result
+        return result
+    except Exception as exc:
+        logger.warning(f"OHLC candles fetch failed: {exc}")
+        raise HTTPException(502, f"Failed to fetch OHLC candles: {exc}")
 
 
 @app.get("/api/market-tensions")
