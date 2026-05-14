@@ -1119,6 +1119,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             )}
           </div>
         </div>
+
+        {/* AI ANALYSING bar — pinned to bottom edge of sticky header */}
+        <div style={{
+          position:'absolute', bottom:0, left:0, right:0,
+          opacity:(loading||deepRunning||refreshing)?1:0,
+          transition:'opacity 0.5s',
+          pointerEvents:'none',
+        }}>
+          <div style={{width:'100%',height:3,background:'linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent)',backgroundSize:'200% 100%',animation:'analysisShimmer 1.5s linear infinite'}} />
+        </div>
       </header>
 
       {/* HERO SECTION */}
@@ -1126,11 +1136,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         <div style={{padding:'10px 16px',borderBottom:'1px solid #1a1a1a',textAlign:'center',background:'#0a0a0a'}}>
           <span className="ai-title ai-banner" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:16,letterSpacing:'0.3em',color:'#f59e0b',opacity:0.8,animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
           <div className="ai-sub" style={{fontFamily:'"Share Tech Mono",monospace',fontSize:9,color:'#6b7280',letterSpacing:'0.15em',opacity:0.6,marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
-        </div>
-        {/* analysis loading bar */}
-        <div style={{opacity:(loading||deepRunning||refreshing)?1:0,transition:'opacity 0.5s'}}>
-          <div style={{width:'100%',height:3,background:'linear-gradient(90deg,transparent,#f59e0b,#fbbf24,#f59e0b,transparent)',backgroundSize:'200% 100%',animation:'analysisShimmer 1.5s linear infinite'}} />
-          <div style={{fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.3em',color:'#f59e0b',textAlign:'center',marginTop:6,animation:'textPulse 2s ease-in-out infinite'}}>AI ANALYSING...</div>
         </div>
         <div style={{textAlign:'center',padding:'16px 0'}}>
           <button className="deep-btn" onClick={handleDeepClick}
