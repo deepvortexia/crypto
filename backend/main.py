@@ -952,10 +952,25 @@ async def get_key_levels():
         highs  = [float(k[2]) for k in candles]
         lows   = [float(k[3]) for k in candles]
         closes = [float(k[4]) for k in candles]
-        H, L, current = max(highs), min(lows), closes[-1]
+        current = closes[-1]
+
+        # Fibonacci: full 42-candle swing (7-day range)
+        fib_H = max(highs)
+        fib_L = min(lows)
+        fib_r = fib_H - fib_L
+        # Direction: retrace down from high if in upper half, up from low if in lower half
+        if current > fib_H - fib_r * 0.5:
+            fib = [{"level": f, "price": round(fib_H - fib_r * f)} for f in [0.236, 0.382, 0.5, 0.618, 0.786]]
+        else:
+            fib = [{"level": f, "price": round(fib_L + fib_r * f)} for f in [0.236, 0.382, 0.5, 0.618, 0.786]]
+
+        # Pivots: last 6 candles only (~24h) — standard daily pivot methodology
+        daily = candles[-6:]
+        H = max(float(k[2]) for k in daily)
+        L = min(float(k[3]) for k in daily)
         P = (H + L + current) / 3
         r = H - L
-        fib = [{"level": f, "price": round(H - r * f)} for f in [0.236, 0.382, 0.5, 0.618, 0.786]]
+
         near_level = next((f for f in fib if abs(f["price"] - current) / current < 0.008), None)
         result = {
             "pivot": round(P),
