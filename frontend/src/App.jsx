@@ -1025,8 +1025,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             alt=""
             style={{
               display: 'block',
-              width: 48, height: 48,
+              width: 72, height: 72,
               borderRadius: '50%',
+              overflow: 'hidden',
               objectFit: 'cover',
               opacity: (loadingBar > 0 || deepRunning) ? 1 : 0,
               transition: 'opacity 0.3s',
