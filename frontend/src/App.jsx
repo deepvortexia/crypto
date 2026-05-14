@@ -1018,22 +1018,26 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
         )}
 
+        {/* egyptian dial — absolutely positioned, never affects flex layout */}
+        <img
+          src="/egyptian-dial.webp"
+          alt=""
+          style={{
+            position: 'absolute', right: 32, top: '50%', transform: 'translateY(-50%)',
+            display: 'block',
+            width: 72, height: 72,
+            borderRadius: '50%',
+            overflow: 'hidden',
+            objectFit: 'cover',
+            pointerEvents: 'none',
+            opacity: (loadingBar > 0 || deepRunning) ? 1 : 0,
+            transition: 'opacity 0.3s',
+            animation: (loadingBar > 0 || deepRunning) ? 'egyptianSpin 3s linear infinite' : 'none',
+          }}
+        />
+
         {/* live ticker */}
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <img
-            src="/egyptian-dial.webp"
-            alt=""
-            style={{
-              display: 'block',
-              width: 72, height: 72,
-              borderRadius: '50%',
-              overflow: 'hidden',
-              objectFit: 'cover',
-              opacity: (loadingBar > 0 || deepRunning) ? 1 : 0,
-              transition: 'opacity 0.3s',
-              animation: (loadingBar > 0 || deepRunning) ? 'egyptianSpin 3s linear infinite' : 'none',
-            }}
-          />
 <div style={{ textAlign: 'right' }}>
             <div className="header-price" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 26, ...goldText, letterSpacing: 1 }}>
               {loading ? '———' : fmtPrice(price?.price)}
