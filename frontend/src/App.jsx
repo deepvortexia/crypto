@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 
@@ -7,7 +7,7 @@ function ScrollToTop() {
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
   return null
 }
-import About from './pages/About'
+const About = lazy(() => import('./pages/About'))
 import { TrendingUp, TrendingDown, AlertTriangle, Zap, Lock } from 'lucide-react'
 import { fetchMarketTensions, pingHealth } from './api/client'
 import {
@@ -891,7 +891,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     <ScrollToTop />
     <Routes>
       <Route path="/dashboard" element={<Navigate to="/" replace />} />
-      <Route path="/about" element={<About />} />
+      <Route path="/about" element={<Suspense fallback={null}><About /></Suspense>} />
       <Route path="/" element={
     <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
 

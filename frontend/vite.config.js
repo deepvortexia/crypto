@@ -19,7 +19,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ['react', 'react-dom'],
-          charts: ['chart.js', 'react-chartjs-2'],
+          router: ['react-router-dom'],
+          supabase: ['@supabase/supabase-js'],
+          icons: ['lucide-react'],
         },
       },
     },
