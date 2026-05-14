@@ -543,7 +543,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [credits,     setCredits]     = useState(2)
   const [pricingOpen, setPricingOpen] = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
-  const [countdown,   setCountdown]   = useState(REFRESH_MS / 1000)
+  // countdown removed — replaced by egyptian-dial spinner
   const [resetIn,     setResetIn]     = useState('')
   const [tensions,    setTensions]    = useState(null)
   const [priceLoaded, setPriceLoaded] = useState(false)
@@ -617,7 +617,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setLoadingBar(90)
     setLoading(false)
     setLastAt(new Date())
-    setCountdown(REFRESH_MS / 1000)
+    // countdown reset removed
     setLoadingBar(100)
     setTimeout(() => setLoadingBar(0), 400)
   }, [])
@@ -648,10 +648,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   }, [loadAll])
 
 
-  useEffect(() => {
-    const tick = setInterval(() => setCountdown(c => Math.max(0, c - 1)), 1000)
-    return () => clearInterval(tick)
-  }, [])
 
   useEffect(() => {
     const calcResetIn = () => {
@@ -879,25 +875,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   return (
     <>
-    {loadingBar > 0 && (
-      <>
-        <div style={{
-          position: 'fixed', top: 0, left: 0, zIndex: 9999,
-          height: 3, width: loadingBar + '%',
-          background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
-          transition: 'width 0.4s ease',
-          boxShadow: '0 0 10px #f59e0b'
-        }} />
-        <div style={{
-          position: 'fixed', top: 6, left: '50%', transform: 'translateX(-50%)',
-          zIndex: 9999, color: '#f59e0b', fontSize: 11,
-          fontFamily: '"Share Tech Mono", monospace',
-          letterSpacing: '0.15em', opacity: 0.9
-        }}>
-          LOADING {loadingBar}%
-        </div>
-      </>
-    )}
     <ScrollToTop />
     <Routes>
       <Route path="/dashboard" element={<Navigate to="/" replace />} />
@@ -1043,12 +1020,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* live ticker */}
         <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          {lastAt && (
-            <div className="hide-mobile" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.text, letterSpacing: '0.2em', textAlign: 'right' }}>
-              <div>REFRESHES IN {countdown}s</div>
-              <div style={{ opacity: 0.5 }}>{lastAt.toLocaleTimeString()}</div>
-            </div>
-          )}
+          <img
+            src="/egyptian-dial.webp"
+            alt=""
+            style={{
+              width: 48, height: 48, objectFit: 'contain',
+              opacity: (loadingBar > 0 || deepRunning) ? 1 : 0,
+              transition: 'opacity 0.3s',
+              animation: (loadingBar > 0 || deepRunning) ? 'egyptianSpin 3s linear infinite' : 'none',
+            }}
+          />
 <div style={{ textAlign: 'right' }}>
             <div className="header-price" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 26, ...goldText, letterSpacing: 1 }}>
               {loading ? '———' : fmtPrice(price?.price)}
@@ -1898,6 +1879,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       )}
 
       <style>{`
+        @keyframes egyptianSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
         @keyframes shimmer     { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes textPulse   { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
         @keyframes rotateDash  { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
