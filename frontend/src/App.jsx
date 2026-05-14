@@ -1261,7 +1261,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 <IndCard
                   label={<>MACD<Tooltip text="MACD above signal line = bullish momentum"/></>}
                   value={macd ? fmtNum(macd.macd, 1) : '—'}
-                  sub={macd ? (macd.macd > 0 ? 'Bullish' : 'Bearish') : ''}
+                  sub={macd ? (macd.histogram > 0 ? 'Bullish' : 'Bearish') : ''}
                   barName="macd" barRaw={macd?.macd}
                 />
                 <IndCard
