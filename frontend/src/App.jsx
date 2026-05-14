@@ -9,7 +9,7 @@ function ScrollToTop() {
 }
 import About from './pages/About'
 import { TrendingUp, TrendingDown, AlertTriangle, Zap, Lock } from 'lucide-react'
-import { fetchMarketTensions } from './api/client'
+import { fetchMarketTensions, pingHealth } from './api/client'
 import {
   fetchSentiment,
   fetchNewsSentiment,
@@ -641,7 +641,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   }, [user, loadAll])
 
   useEffect(() => {
-    loadAll()
+    // Wake the server with a lightweight ping before the heavy data fetch
+    pingHealth().catch(() => {}).finally(() => loadAll())
     const id = setInterval(loadAll, REFRESH_MS)
     return () => clearInterval(id)
   }, [loadAll])

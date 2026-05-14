@@ -1,3 +1,4 @@
+import concurrent.futures
 import json
 import logging
 from datetime import datetime, timedelta, timezone
@@ -51,9 +52,42 @@ class BTCEnsemble:
         return lstm_ok or xgb_ok
 
     def predict(self, horizon_key: str, hourly_df: pd.DataFrame, daily_df: pd.DataFrame, current_price: float) -> dict:
-        lstm_pred = self.lstm.predict(hourly_df, horizon_key)
-        xgb_pred = self.xgb.predict(hourly_df if HORIZON_HOURS[horizon_key] <= 24 else daily_df, horizon_key)
-        prophet_pred = self.prophet.predict(horizon_key)
+        df_for_xgb = hourly_df if HORIZON_HOURS[horizon_key] <= 24 else daily_df
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            lstm_future    = executor.submit(self.lstm.predict,    hourly_df,  horizon_key)
+            xgb_future     = executor.submit(self.xgb.predict,     df_for_xgb, horizon_key)
+            prophet_future = executor.submit(self.prophet.predict,             horizon_key)
+
+            done, not_done = concurrent.futures.wait(
+                [lstm_future, xgb_future, prophet_future], timeout=25
+            )
+
+        lstm_pred = xgb_pred = prophet_pred = None
+
+        if lstm_future in done:
+            try:
+                lstm_pred = lstm_future.result()
+            except Exception as exc:
+                logger.warning(f"[Ensemble] LSTM failed for {horizon_key}: {exc}")
+        else:
+            logger.warning(f"[Ensemble] LSTM timed out for {horizon_key}")
+
+        if xgb_future in done:
+            try:
+                xgb_pred = xgb_future.result()
+            except Exception as exc:
+                logger.warning(f"[Ensemble] XGBoost failed for {horizon_key}: {exc}")
+        else:
+            logger.warning(f"[Ensemble] XGBoost timed out for {horizon_key}")
+
+        if prophet_future in done:
+            try:
+                prophet_pred = prophet_future.result()
+            except Exception as exc:
+                logger.warning(f"[Ensemble] Prophet failed for {horizon_key}: {exc}")
+        else:
+            logger.warning(f"[Ensemble] Prophet timed out for {horizon_key}")
 
         preds = {"lstm": lstm_pred, "xgboost": xgb_pred, "prophet": prophet_pred}
         valid = {k: v for k, v in preds.items() if v is not None and v > 0}

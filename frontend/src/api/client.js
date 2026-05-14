@@ -166,6 +166,10 @@ function _calcBollinger(closes, period = 20) {
 
 // --- Public API ---
 
+export async function pingHealth() {
+  return get(`${BACKEND_URL}/health`, { timeout: 5000, retries: 0 })
+}
+
 export async function fetchLivePrice() {
   try {
     const ticker = await get(`${BINANCE}/ticker/24hr?symbol=BTCUSDT`, {
