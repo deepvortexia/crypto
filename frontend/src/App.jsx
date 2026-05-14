@@ -1024,7 +1024,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             src="/egyptian-dial.webp"
             alt=""
             style={{
-              width: 48, height: 48, objectFit: 'contain',
+              display: 'block',
+              width: 48, height: 48,
+              borderRadius: '50%',
+              objectFit: 'cover',
               opacity: (loadingBar > 0 || deepRunning) ? 1 : 0,
               transition: 'opacity 0.3s',
               animation: (loadingBar > 0 || deepRunning) ? 'egyptianSpin 3s linear infinite' : 'none',
