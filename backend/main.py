@@ -79,7 +79,8 @@ _price_cache: TTLCache = TTLCache(maxsize=1, ttl=60)           # 1 min
 _indicators_cache: TTLCache = TTLCache(maxsize=1, ttl=300)     # 5 min
 _sentiment_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)     # 30 min
 _onchain_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)       # 30 min
-_predict_cache: TTLCache = TTLCache(maxsize=10, ttl=3600)      # 1 h per horizon
+_predict_cache_1h:   TTLCache = TTLCache(maxsize=1, ttl=300)   # 5 min for 1h
+_predict_cache_long: TTLCache = TTLCache(maxsize=9, ttl=3600)  # 1 h for 4h–1month
 _news_cache: TTLCache = TTLCache(maxsize=1, ttl=1800)          # 30 min
 _tensions_cache: TTLCache = TTLCache(maxsize=1, ttl=60)        # 1 min
 _ohlc_cache: TTLCache = TTLCache(maxsize=1, ttl=600)           # 10 min
@@ -279,8 +280,9 @@ async def get_prediction(
         raise HTTPException(503, detail="Models are not trained yet. Training will begin shortly.")
 
     cache_key = f"pred_{horizon}"
-    if cache_key in _predict_cache:
-        return _predict_cache[cache_key]
+    _pred_cache = _predict_cache_1h if horizon == "1h" else _predict_cache_long
+    if cache_key in _pred_cache:
+        return _pred_cache[cache_key]
 
     try:
         async def _get_price():
@@ -301,7 +303,7 @@ async def get_prediction(
         if "error" in result:
             raise HTTPException(503, detail=result["error"])
 
-        _predict_cache[cache_key] = result
+        _pred_cache[cache_key] = result
 
         # Also check if any outstanding predictions can now be resolved
         asyncio.create_task(_resolve_predictions(current_price))

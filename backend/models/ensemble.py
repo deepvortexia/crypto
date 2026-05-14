@@ -17,11 +17,23 @@ logger = logging.getLogger(__name__)
 HORIZONS = ["1h", "4h", "8h", "12h", "24h", "1week", "1month"]
 HORIZON_HOURS = {"1h": 1, "4h": 4, "8h": 8, "12h": 12, "24h": 24, "1week": 168, "1month": 720}
 
-# Default weights: [lstm, xgboost, prophet]
+# Default weights: [lstm, xgboost, prophet] — fallback when a model is missing
 DEFAULT_WEIGHTS = {"1h": [0.50, 0.45, 0.05], "4h": [0.45, 0.40, 0.15],
                    "8h": [0.40, 0.40, 0.20], "12h": [0.35, 0.40, 0.25],
                    "24h": [0.35, 0.35, 0.30], "1week": [0.25, 0.40, 0.35],
                    "1month": [0.25, 0.35, 0.40]}
+
+# Per-horizon blend weights (lstm, xgboost, prophet).
+# Prophet weighted higher at longer horizons — it captures weekly/monthly seasonality.
+# XGB weighted higher at short horizons — momentum features dominate near-term.
+# 8h / 12h not defined here — they fall through to the legacy blend path.
+HORIZON_WEIGHTS = {
+    "1h":     {"lstm": 0.20, "xgboost": 0.60, "prophet": 0.20},
+    "4h":     {"lstm": 0.30, "xgboost": 0.50, "prophet": 0.20},
+    "24h":    {"lstm": 0.35, "xgboost": 0.40, "prophet": 0.25},
+    "1week":  {"lstm": 0.30, "xgboost": 0.25, "prophet": 0.45},
+    "1month": {"lstm": 0.20, "xgboost": 0.15, "prophet": 0.65},
+}
 
 
 class BTCEnsemble:
@@ -52,7 +64,7 @@ class BTCEnsemble:
         return lstm_ok or xgb_ok
 
     def predict(self, horizon_key: str, hourly_df: pd.DataFrame, daily_df: pd.DataFrame, current_price: float) -> dict:
-        df_for_xgb = hourly_df if HORIZON_HOURS[horizon_key] <= 24 else daily_df
+        df_for_xgb = hourly_df  # always hourly, matches training
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             lstm_future    = executor.submit(self.lstm.predict,    hourly_df,  horizon_key)
@@ -95,16 +107,30 @@ class BTCEnsemble:
         if not valid:
             return {"error": "No models ready", "horizon": horizon_key}
 
-        # Primary blend: 60% XGBoost + 40% LSTM when both available
-        if "xgboost" in valid and "lstm" in valid:
+        hw = HORIZON_WEIGHTS.get(horizon_key)
+        if "xgboost" in valid and "lstm" in valid and hw:
+            if "prophet" in valid:
+                ensemble_price = (valid["lstm"]    * hw["lstm"] +
+                                  valid["xgboost"] * hw["xgboost"] +
+                                  valid["prophet"] * hw["prophet"])
+                weights_used = dict(hw)
+            else:
+                total = hw["lstm"] + hw["xgboost"]
+                w_l = hw["lstm"] / total
+                w_x = hw["xgboost"] / total
+                ensemble_price = valid["lstm"] * w_l + valid["xgboost"] * w_x
+                weights_used = {"lstm": round(w_l, 3), "xgboost": round(w_x, 3), "prophet": 0}
+        elif "xgboost" in valid and "lstm" in valid:
+            # 8h / 12h — no HORIZON_WEIGHTS entry, use legacy blend
             xgb_lstm_blend = valid["xgboost"] * 0.60 + valid["lstm"] * 0.40
-            # Combine with Prophet if available (80% XGB+LSTM blend, 20% Prophet)
             if "prophet" in valid:
                 ensemble_price = xgb_lstm_blend * 0.80 + valid["prophet"] * 0.20
+                weights_used = {"lstm": 0.32, "xgboost": 0.48, "prophet": 0.20}
             else:
                 ensemble_price = xgb_lstm_blend
+                weights_used = {"lstm": 0.40, "xgboost": 0.60, "prophet": 0}
         else:
-            # Fallback to original weighted average
+            # Single-model fallback
             w = self.weights.get(horizon_key, DEFAULT_WEIGHTS.get(horizon_key, [1/3, 1/3, 1/3]))
             model_order = ["lstm", "xgboost", "prophet"]
             weighted_sum = 0.0
@@ -115,13 +141,6 @@ class BTCEnsemble:
                     weight_total += w[i]
             ensemble_price = weighted_sum / weight_total if weight_total > 0 else current_price
             weights_used = {name: w[i] for i, name in enumerate(model_order)}
-
-        # Set actual weights used for primary blend
-        if "xgboost" in valid and "lstm" in valid:
-            if "prophet" in valid:
-                weights_used = {"lstm": 0.32, "xgboost": 0.48, "prophet": 0.20}
-            else:
-                weights_used = {"lstm": 0.40, "xgboost": 0.60, "prophet": 0}
 
         change_pct = (ensemble_price - current_price) / current_price * 100
 
