@@ -1887,7 +1887,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               {/* Egyptian dial + progress while running */}
               {deepRunning && (
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:20 }}>
-                  <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, borderRadius:12, animation:'dialGlow 2s ease-in-out infinite' }} />
+                  <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, animation:'dialGlow 2s ease-in-out infinite', background:'transparent', mixBlendMode:'lighten' }} />
                   <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
                   </div>
