@@ -887,8 +887,8 @@ async def get_whales():
                 "buyVol":  round(buy_vol,  2),
                 "sellVol": round(sell_vol, 2),
                 "signal": (
-                    "Whales buying"  if buy_ratio > 55
-                    else "Whales selling" if buy_ratio < 45
+                    "Bullish" if buy_ratio > 55
+                    else "Bearish" if buy_ratio <= 45
                     else "Neutral"
                 ),
             }
