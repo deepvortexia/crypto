@@ -1890,7 +1890,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
             {/* analysis area — two column */}
             {deepHorizon && (
-            <div style={{ display:'flex', flex:1, minHeight:0, overflow:'hidden' }}>
+            <div className="deep-analysis-area" style={{ display:'flex', flex:1, minHeight:0, overflow:'hidden' }}>
 
               {/* LEFT: log lines */}
               <div className="deep-log-col" style={{
@@ -1969,6 +1969,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 </>)}
               </div>
             </div>
+            )}
+
+            {/* Scroll hint — mobile only, sticky at bottom while results shown */}
+            {deepResult && (
+              <div className="deep-scroll-hint" style={{ display:'none', position:'sticky', bottom:0, pointerEvents:'none' }}>
+                <div style={{ height:28, background:'linear-gradient(transparent, rgba(10,10,10,0.96))' }} />
+                <div style={{ background:'rgba(10,10,10,0.96)', textAlign:'center', paddingBottom:6 }}>
+                  <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:10, color:'#f59e0b', letterSpacing:'0.15em' }}>↓ scroll</span>
+                </div>
+              </div>
             )}
 
             {/* footer */}
@@ -2170,13 +2180,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           /* Deep Analysis modal: single column on mobile */
           .deep-modal-box    { width: 95vw !important; max-width: 95vw !important;
                                height: 85vh !important; max-height: 85vh !important;
-                               border-radius: 10px !important; }
+                               border-radius: 10px !important; overflow-y: auto !important; }
           .deep-log-col      { display: none !important; }
-          .deep-right-col    { width: 100% !important; flex: 1 !important; padding: 16px !important; }
+          .deep-analysis-area { flex: none !important; overflow: visible !important; }
+          .deep-right-col    { width: 100% !important; flex: none !important; height: auto !important;
+                               overflow: visible !important; padding: 16px !important; }
           .deep-dial-img     { width: 220px !important; height: 220px !important; }
           .deep-price        { font-size: 32px !important; }
           .deep-badges       { flex-direction: column !important; align-items: center !important; gap: 10px !important; }
           .deep-analysis-text { font-size: 11px !important; }
+          .deep-scroll-hint  { display: block !important; }
           .deep-footer       { flex-direction: column !important; padding: 10px 16px !important; gap: 8px !important; }
           .deep-footer-btn   { width: 100% !important; text-align: center !important; min-height: 44px !important; }
           /* Horizon selector: 2 cols on mobile */
