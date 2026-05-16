@@ -504,16 +504,15 @@ const ANALYSIS_MSGS = [
   "Running ensemble forecast...",
 ]
 const DEEP_MSGS = [
-  "Analyse du mempool...",
-  "Calibration des modèles LSTM...",
-  "Lecture des signaux on-chain...",
-  "Vérification des baleines...",
-  "Synchronisation des données...",
-  "Calcul des indicateurs clés...",
-  "Analyse du carnet d'ordres...",
-  "Évaluation des niveaux critiques...",
-  "Traitement du sentiment de marché...",
-  "Exécution du modèle de consensus...",
+  "Connecting to mempool...",
+  "Fetching live BTC price...",
+  "Calibrating LSTM models...",
+  "Reading on-chain signals...",
+  "Analyzing order book...",
+  "Processing whale activity...",
+  "Running ensemble models...",
+  "Generating AI analysis...",
+  "Finalizing predictions...",
 ]
 
 const PRED_HORIZONS = ['1h', '4h', '8h', '12h', '24h', '1week', '1month']
@@ -555,6 +554,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepRunning,   setDeepRunning]   = useState(false)
   const [deepHorizon,   setDeepHorizon]   = useState(null)
   const [deepMsgIdx,    setDeepMsgIdx]    = useState(0)
+  const [deepProgress,  setDeepProgress]  = useState(0)
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [loading,     setLoading]     = useState(true)
   const [refreshing,  setRefreshing]  = useState(false)
@@ -726,6 +726,17 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     const id = setInterval(() => setDeepMsgIdx(i => (i + 1) % DEEP_MSGS.length), 2000)
     return () => clearInterval(id)
   }, [deepRunning])
+
+  useEffect(() => {
+    if (!deepRunning) return
+    setDeepProgress(0)
+    const id = setInterval(() => setDeepProgress(p => Math.min(p + 1, 99)), 300)
+    return () => clearInterval(id)
+  }, [deepRunning])
+
+  useEffect(() => {
+    if (deepResult) setDeepProgress(100)
+  }, [deepResult])
 
   // Simulate load progress during initial load only
   useEffect(() => {
@@ -1873,12 +1884,23 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             {deepHorizon && (
             <div style={{ display:'flex', flexDirection:'column', flex:1, minHeight:0 }}>
 
-              {/* Egyptian dial spinner while running */}
+              {/* Egyptian dial + progress while running */}
               {deepRunning && (
-                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:16 }}>
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:20 }}>
                   <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, borderRadius:12, animation:'dialGlow 2s ease-in-out infinite' }} />
                   <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
+                  </div>
+                  {/* Progress bar */}
+                  <div style={{ width:'100%', maxWidth:340 }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
+                      <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.gold, letterSpacing:'0.15em' }}>ANALYZING...</span>
+                      <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.gold }}>{deepProgress}%</span>
+                    </div>
+                    <div style={{ position:'relative', height:5, background:'#1a1a1a', borderRadius:3, overflow:'hidden' }}>
+                      <div style={{ position:'absolute', top:0, left:0, height:'100%', width:`${deepProgress}%`, background:'#f59e0b', borderRadius:3, transition:'width 0.28s linear', boxShadow:'0 0 8px #f59e0b, 0 0 20px #f59e0b88' }} />
+                      <div style={{ position:'absolute', top:0, height:'100%', width:'25%', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent)', animation:'scanLine 1.5s linear infinite' }} />
+                    </div>
                   </div>
                 </div>
               )}
