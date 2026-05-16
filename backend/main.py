@@ -559,6 +559,12 @@ async def create_credit_pack_checkout(body: CreditPurchaseRequest, user: dict = 
             }).execute()
 
         frontend_url = os.getenv("FRONTEND_URL", "https://predictalpha.app")
+        checkout_metadata = {
+            "type":    "credit_pack",
+            "user_id": user["id"],
+            "pack":    body.pack,
+            "credits": str(pack["credits"]),
+        }
         session = stripe.checkout.Session.create(
             customer=customer_id,
             payment_method_types=["card"],
@@ -566,13 +572,9 @@ async def create_credit_pack_checkout(body: CreditPurchaseRequest, user: dict = 
             mode="payment",
             success_url=f"{frontend_url}/dashboard?credits_success=true&pack={body.pack}",
             cancel_url=f"{frontend_url}/dashboard?credits_canceled=true",
-            metadata={
-                "type":      "credit_pack",
-                "user_id":   user["id"],
-                "pack":      body.pack,
-                "credits":   str(pack["credits"]),
-            },
+            metadata=checkout_metadata,
         )
+        logger.info(f"[credits/purchase] Created checkout session {session.id} for user {user['id']} pack={body.pack} metadata={checkout_metadata}")
         return {"url": session.url, "credits": pack["credits"], "dollars": pack["dollars"]}
     except stripe.StripeError as e:
         logger.error(f"Stripe credit-pack checkout error: {e}")
@@ -588,12 +590,18 @@ async def stripe_webhook(request: Request):
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
     except ValueError:
+        logger.error("[webhook] Invalid payload received")
         raise HTTPException(400, "Invalid payload")
     except stripe.SignatureVerificationError:
+        logger.error("[webhook] Invalid signature — check STRIPE_WEBHOOK_SECRET matches the endpoint")
         raise HTTPException(400, "Invalid signature")
 
     event_type = event["type"]
+    event_id   = event.get("id", "?")
     data = event["data"]["object"]
+
+    # Log every webhook event so we can confirm Stripe is reaching us
+    logger.info(f"[webhook] Received event {event_type} (id={event_id})")
 
     def unix_to_iso(ts: int) -> str:
         return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
@@ -629,28 +637,45 @@ async def stripe_webhook(request: Request):
     elif event_type == "checkout.session.completed":
         # Credit-pack one-time payments. Subscription checkouts are handled
         # by customer.subscription.created above and ignored here.
-        metadata = data.get("metadata") or {}
-        if metadata.get("type") == "credit_pack" and data.get("payment_status") == "paid":
+        metadata       = data.get("metadata") or {}
+        payment_status = data.get("payment_status")
+        session_mode   = data.get("mode")
+        session_id     = data.get("id", "?")
+
+        logger.info(
+            f"[webhook] checkout.session.completed — id={session_id} mode={session_mode} "
+            f"payment_status={payment_status} metadata={metadata}"
+        )
+
+        if metadata.get("type") != "credit_pack":
+            logger.info(f"[webhook] Skipping session {session_id} — metadata.type is '{metadata.get('type')}', not 'credit_pack'")
+        elif payment_status != "paid":
+            logger.warning(f"[webhook] Credit pack session {session_id} not paid yet (payment_status={payment_status}) — skipping")
+        else:
             target_user_id = metadata.get("user_id")
             try:
                 credits = int(metadata.get("credits", "0"))
             except (TypeError, ValueError):
                 credits = 0
             if not target_user_id or credits <= 0:
-                logger.warning(f"Credit-pack webhook missing user_id/credits: {metadata}")
+                logger.error(f"[webhook] Credit-pack session {session_id} has bad metadata: user_id={target_user_id!r} credits={credits}")
             else:
                 # Pick daily_limit so the row is seeded correctly if it doesn't exist yet
                 daily_lim = PRO_DAILY_LIMIT if _is_pro(target_user_id) else FREE_DAILY_LIMIT
+                logger.info(f"[webhook] Granting +{credits} credits to user {target_user_id} (daily_lim={daily_lim})")
                 try:
                     rpc = supabase.rpc(
                         "add_bonus_credits",
                         {"p_user_id": target_user_id, "p_amount": credits, "p_daily_limit": daily_lim},
                     ).execute()
-                    logger.info(f"Credit pack delivered: +{credits} to {target_user_id} (now {rpc.data})")
+                    logger.info(f"[webhook] ✓ Credit pack delivered: +{credits} to {target_user_id} — new balance: {rpc.data}")
                 except Exception as e:
                     # Stripe will retry on non-2xx; raise so we don't lose the grant
-                    logger.error(f"add_bonus_credits RPC failed for {target_user_id}: {e}")
+                    logger.error(f"[webhook] ✗ add_bonus_credits RPC failed for {target_user_id}: {e!r}", exc_info=True)
                     raise HTTPException(500, "Failed to grant credits — Stripe will retry")
+    else:
+        # Catch-all log so we can see what events Stripe sends that we don't handle
+        logger.info(f"[webhook] Unhandled event type: {event_type}")
 
     return {"status": "ok"}
 
