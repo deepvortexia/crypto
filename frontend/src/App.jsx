@@ -738,6 +738,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     if (deepResult) setDeepProgress(100)
   }, [deepResult])
 
+  useEffect(() => {
+    document.body.style.overflow = deepOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [deepOpen])
+
   // Simulate load progress during initial load only
   useEffect(() => {
     if (!loading) {
@@ -1840,7 +1845,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
       {deepOpen && (
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 200,
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          overflow: 'hidden', zIndex: 9999,
           background: 'rgba(0,0,0,0.88)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backdropFilter: 'blur(6px)',
@@ -1853,7 +1859,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             width: '90vw', maxWidth: 1000,
             height: '85vh',
             display: 'flex', flexDirection: 'column',
-            overflow: 'hidden',
+            overflowY: 'auto',
           }}>
             {/* header */}
             <div style={{
@@ -2167,7 +2173,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                                border-radius: 10px !important; }
           .deep-log-col      { display: none !important; }
           .deep-right-col    { width: 100% !important; flex: 1 !important; padding: 16px !important; }
-          .deep-dial-img     { width: 160px !important; height: 160px !important; }
+          .deep-dial-img     { width: 220px !important; height: 220px !important; }
           .deep-price        { font-size: 32px !important; }
           .deep-badges       { flex-direction: column !important; align-items: center !important; gap: 10px !important; }
           .deep-analysis-text { font-size: 11px !important; }
