@@ -173,7 +173,7 @@ class BTCEnsemble:
             "horizon": horizon_key,
             "current_price": round(current_price, 2),
             "predicted_price": round(ensemble_price, 2),
-            "change_pct": round(change_pct, 3),
+            "change_pct": round(change_pct, 4),
             "direction": "up" if change_pct >= 0 else "down",
             "confidence": self._confidence_score(list(valid.values())),
             "model_predictions": {

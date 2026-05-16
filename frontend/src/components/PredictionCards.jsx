@@ -135,7 +135,7 @@ function PredCard({ horizon }) {
       <div className="flex items-center gap-1.5 mb-3">
         {isUp ? <ArrowUp /> : <ArrowDown />}
         <span className={`font-mono text-sm tabular-nums ${isUp ? 'text-neon-green' : 'text-neon-red'}`}>
-          {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
+          {changePct >= 0 ? '+' : ''}{Math.abs(changePct) < 0.01 && changePct !== 0 ? changePct.toFixed(3) : changePct.toFixed(2)}%
         </span>
         <span className={isUp ? 'badge-up ml-auto' : 'badge-down ml-auto'}>
           {isUp ? 'UP' : 'DOWN'}

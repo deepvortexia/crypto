@@ -123,16 +123,19 @@ class BTCProphetModel:
                 return cached[0]
 
             horizon_h = HORIZON_HOURS[horizon_key]
-            if horizon_h <= 24:
+            if horizon_h < 24:
+                # Sub-24h: hourly model captures intraday seasonality
                 if self.model_hourly is None:
                     return None
                 future = self.model_hourly.make_future_dataframe(periods=horizon_h, freq="h")
                 forecast = self.model_hourly.predict(future)
                 forecast_price = float(forecast.iloc[-1]["yhat"])
             else:
+                # 24h+: daily model avoids the artifact where T+24h ≈ T in the hourly
+                # model (same time of day triggers same daily-seasonality component).
                 if self.model_daily is None:
                     return None
-                horizon_days = horizon_h // 24
+                horizon_days = max(1, round(horizon_h / 24))
                 future = self.model_daily.make_future_dataframe(periods=horizon_days, freq="D")
                 forecast = self.model_daily.predict(future)
                 forecast_price = float(forecast.iloc[-1]["yhat"])
