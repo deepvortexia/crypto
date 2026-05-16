@@ -877,8 +877,8 @@ async def get_whales():
             items = resp.json().get("data", [])
         if items:
             item = items[0]  # [timestamp, sellVol, buyVol]
-            sell_vol = float(item[1])
-            buy_vol  = float(item[2])
+            buy_vol  = float(item[1])
+            sell_vol = float(item[2])
             total = buy_vol + sell_vol
             buy_ratio  = buy_vol  / total * 100 if total > 0 else 50
             sell_ratio = 100 - buy_ratio
