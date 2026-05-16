@@ -28,6 +28,7 @@ import {
   fetchDeepAnalysisRemaining,
   consumeDeepAnalysisCredit,
   createCheckoutSession,
+  purchaseCreditsPack,
 } from './api/client'
 
 // ── tokens ───────────────────────────────────────────────────────────────────
@@ -568,7 +569,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [user,        setUser]        = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [isPro,       setIsPro]       = useState(false)
-  const [credits,     setCredits]     = useState(2)
+  const [creditInfo,  setCreditInfo]  = useState({ daily_remaining: 0, bonus_remaining: 0, total_remaining: 0, is_pro: false, daily_limit: 2 })
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false)
+  const [buyingPack,  setBuyingPack]  = useState(null)
   const [pricingOpen, setPricingOpen] = useState(false)
   const [lastAt,      setLastAt]      = useState(null)
   const [liveCountdown, setLiveCountdown] = useState(60)
@@ -582,13 +585,47 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
-  // Handle Stripe redirect — strip ?success=true so the app loads cleanly
+  // Handle Stripe redirect — strip success params and refresh credits if a pack was purchased
+  const [creditsJustPurchased, setCreditsJustPurchased] = useState(null)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('success') === 'true') {
       window.history.replaceState({}, '', '/')
     }
+    if (urlParams.get('credits_success') === 'true') {
+      setCreditsJustPurchased(urlParams.get('pack') || 'pack')
+      window.history.replaceState({}, '', '/')
+    }
+    if (urlParams.get('credits_canceled') === 'true') {
+      window.history.replaceState({}, '', '/')
+    }
   }, [])
+
+  // Poll credits after a successful purchase — the webhook may take a few seconds
+  useEffect(() => {
+    if (!creditsJustPurchased || !user) return
+    let attempts = 0
+    const tick = async () => {
+      attempts += 1
+      const c = await fetchDeepAnalysisRemaining()
+      if (c) {
+        setCreditInfo({
+          daily_remaining: c.daily_remaining ?? 0,
+          bonus_remaining: c.bonus_remaining ?? 0,
+          total_remaining: c.total_remaining ?? 0,
+          is_pro:          !!c.is_pro,
+          daily_limit:     c.daily_limit ?? 2,
+        })
+        if (c.bonus_remaining > 0 || attempts >= 6) {
+          setCreditsJustPurchased(null)
+          return
+        }
+      }
+      if (attempts < 6) setTimeout(tick, 2000)
+      else setCreditsJustPurchased(null)
+    }
+    tick()
+  }, [creditsJustPurchased, user])
 
   // Supabase auth session
   useEffect(() => {
@@ -674,12 +711,18 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         setIsPro(sub.status === 'active')
       })
       fetchDeepAnalysisRemaining().then(c => {
-        if (c !== null) setCredits(c.is_pro ? 999 : (c.remaining ?? 2))
+        if (c !== null) setCreditInfo({
+          daily_remaining: c.daily_remaining ?? 0,
+          bonus_remaining: c.bonus_remaining ?? 0,
+          total_remaining: c.total_remaining ?? ((c.daily_remaining ?? 0) + (c.bonus_remaining ?? 0)),
+          is_pro:          !!c.is_pro,
+          daily_limit:     c.daily_limit ?? 2,
+        })
       })
       if (!prevUserRef.current) loadAll()
     } else {
       setIsPro(false)
-      setCredits(0)
+      setCreditInfo({ daily_remaining: 0, bonus_remaining: 0, total_remaining: 0, is_pro: false, daily_limit: 2 })
     }
     prevUserRef.current = user
   }, [user, loadAll])
@@ -905,14 +948,25 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       const res = await apiPromise
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
+        if (res.status === 402) {
+          setDeepOpen(false); setDeepRunning(false); setDeepLogs([]); setDeepResult(null)
+          setCreditInfo(prev => ({ ...prev, daily_remaining: 0, bonus_remaining: 0, total_remaining: 0 }))
+          setBuyCreditsOpen(true)
+          return
+        }
         if (res.status === 429) {
           setDeepOpen(false); setDeepRunning(false); setDeepLogs([]); setDeepResult(null)
-          setPricingOpen(true)
+          setBuyCreditsOpen(true)
           return
         }
         throw new Error(data?.detail?.message || 'Analysis failed')
       }
-      setCredits(data.remaining)
+      setCreditInfo(prev => ({
+        ...prev,
+        daily_remaining: data.daily_remaining ?? prev.daily_remaining,
+        bonus_remaining: data.bonus_remaining ?? prev.bonus_remaining,
+        total_remaining: data.total_remaining ?? ((data.daily_remaining ?? 0) + (data.bonus_remaining ?? 0)),
+      }))
       setDeepResult({
         score: data.score,
         direction: data.direction,
@@ -930,11 +984,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   const isLoggedIn = () => !!user
   const canAccessPremium = () => !!user && isPro
-  const canDeepAnalysis = () => isPro || credits > 0
+  const canDeepAnalysis = () => creditInfo.total_remaining > 0
 
   const handleDeepClick = () => {
     if (!user) { setAuthOpen(true); return }
-    if (!canDeepAnalysis()) { setPricingOpen(true); return }
+    if (!canDeepAnalysis()) { setBuyCreditsOpen(true); return }
     setDeepOpen(true)
   }
 
@@ -946,6 +1000,19 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     } catch (err) {
       console.error('Checkout error:', err)
       alert('Failed to start checkout: ' + err.message)
+    }
+  }
+
+  const handleBuyPack = async (pack) => {
+    if (!user) { setAuthOpen(true); return }
+    setBuyingPack(pack)
+    try {
+      const { url } = await purchaseCreditsPack(pack)
+      window.location.href = url
+    } catch (err) {
+      console.error('Credit pack checkout error:', err)
+      alert('Failed to start checkout: ' + err.message)
+      setBuyingPack(null)
     }
   }
 
@@ -1226,31 +1293,79 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           )}
         </div>
         <div style={{textAlign:'center',padding:'16px 0'}}>
-          <button className="deep-btn" onClick={handleDeepClick}
-          style={{
-            fontFamily:'"Orbitron",sans-serif',
-            fontSize:10,
-            letterSpacing:'0.35em',
-            padding:'11px 28px',
-            background:'linear-gradient(135deg, #f59e0b 0%, #fbbf24 25%, #d97706 50%, #f59e0b 75%, #fbbf24 100%)',
-            backgroundSize:'200% 200%',
-            animation:'gradientShift 3s ease infinite, buttonGlow 2s ease-in-out infinite',
-            border:'2px solid rgba(251,191,36,0.6)',
-            borderRadius:14,
-            color:'#000',
-            cursor:'pointer',
-            boxShadow:'0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)',
-            transition:'all 0.3s ease',
-            fontWeight:800,
-            textShadow:'0 1px 0 rgba(255,255,255,0.3)',
-            position:'relative',
-            overflow:'hidden'
-          }}
-          onMouseEnter={e => { e.target.style.boxShadow='0 0 50px #f59e0b99, 0 0 100px #f59e0b55'; e.target.style.transform='scale(1.05)'; e.target.style.borderColor='#fbbf24' }}
-          onMouseLeave={e => { e.target.style.boxShadow='0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)'; e.target.style.transform='scale(1)'; e.target.style.borderColor='rgba(251,191,36,0.6)' }}
-        >
-            DEEP ANALYSIS
-          </button>
+          {(() => {
+            const outOfCredits = !!user && creditInfo.total_remaining === 0
+            return (
+              <>
+                <button className="deep-btn" onClick={handleDeepClick}
+                disabled={outOfCredits}
+                style={{
+                  fontFamily:'"Orbitron",sans-serif',
+                  fontSize:10,
+                  letterSpacing:'0.35em',
+                  padding:'11px 28px',
+                  background: outOfCredits
+                    ? 'linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)'
+                    : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 25%, #d97706 50%, #f59e0b 75%, #fbbf24 100%)',
+                  backgroundSize:'200% 200%',
+                  animation: outOfCredits ? 'none' : 'gradientShift 3s ease infinite, buttonGlow 2s ease-in-out infinite',
+                  border: outOfCredits ? '2px solid #444' : '2px solid rgba(251,191,36,0.6)',
+                  borderRadius:14,
+                  color: outOfCredits ? '#6b7280' : '#000',
+                  cursor: outOfCredits ? 'not-allowed' : 'pointer',
+                  boxShadow: outOfCredits ? 'none' : '0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)',
+                  transition:'all 0.3s ease',
+                  fontWeight:800,
+                  textShadow: outOfCredits ? 'none' : '0 1px 0 rgba(255,255,255,0.3)',
+                  position:'relative',
+                  overflow:'hidden',
+                  opacity: outOfCredits ? 0.7 : 1,
+                }}
+                onMouseEnter={e => { if (!outOfCredits) { e.target.style.boxShadow='0 0 50px #f59e0b99, 0 0 100px #f59e0b55'; e.target.style.transform='scale(1.05)'; e.target.style.borderColor='#fbbf24' } }}
+                onMouseLeave={e => { if (!outOfCredits) { e.target.style.boxShadow='0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)'; e.target.style.transform='scale(1)'; e.target.style.borderColor='rgba(251,191,36,0.6)' } }}
+              >
+                  DEEP ANALYSIS
+                </button>
+
+                {/* Credits badge */}
+                {user && (
+                  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    {outOfCredits ? (
+                      <>
+                        <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize: 11, color: '#ef4444', letterSpacing:'0.1em' }}>
+                          No credits remaining — buy more or wait until midnight UTC
+                        </div>
+                        <button onClick={() => setBuyCreditsOpen(true)} style={{
+                          marginTop: 4,
+                          fontFamily:'"Share Tech Mono",monospace', fontSize: 11, letterSpacing:'0.15em',
+                          background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none',
+                          borderRadius: 6, color: '#000', cursor: 'pointer',
+                          padding: '8px 18px', textTransform: 'uppercase', fontWeight: 700,
+                        }}>⚡ Buy Credits</button>
+                      </>
+                    ) : (
+                      <button onClick={() => setBuyCreditsOpen(true)} style={{
+                        fontFamily:'"Share Tech Mono",monospace', fontSize: 12, letterSpacing:'0.12em',
+                        background: 'none', border: `1px solid #f59e0b55`,
+                        borderRadius: 6, color: '#f59e0b', cursor: 'pointer',
+                        padding: '6px 14px',
+                      }}>
+                        ⚡ {creditInfo.total_remaining}/{creditInfo.daily_limit} credits
+                        {creditInfo.bonus_remaining > 0 && (
+                          <span style={{ color: '#fbbf24', marginLeft: 6 }}>(+{creditInfo.bonus_remaining} bonus)</span>
+                        )}
+                      </button>
+                    )}
+                    {!creditInfo.is_pro && (
+                      <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize: 9, color: '#6b7280', letterSpacing:'0.15em', marginTop: 2 }}>
+                        FREE TIER · Upgrade to PRO for 20/day
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )
+          })()}
         </div>
 
         <div style={{textAlign:'center',padding:'12px 0',borderBottom:'1px solid #1a1a1a'}}>
@@ -2082,12 +2197,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 </div>
               )}
 
-              {user && !isPro && credits > 0 && (
+              {user && !isPro && creditInfo.total_remaining > 0 && (
                 <div style={{ marginTop: 16, textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
-                  <span style={{ color: G.gold }}>{credits}</span> {credits !== 1 ? 'analyses' : 'analyse'} remaining today
+                  <span style={{ color: G.gold }}>{creditInfo.total_remaining}</span> {creditInfo.total_remaining !== 1 ? 'analyses' : 'analyse'} remaining today
                 </div>
               )}
-              {user && !isPro && credits === 0 && (
+              {user && !isPro && creditInfo.total_remaining === 0 && (
                 <div style={{ marginTop: 16, textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text }}>
                   <span style={{ color: G.red }}>0</span> analyses remaining today
                   <div style={{ marginTop: 4, fontSize: 10, color: '#6b7280' }}>Resets in {resetIn}</div>
@@ -2103,6 +2218,95 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               }}>
                 Maybe Later
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Buy Credits Modal ── */}
+      {buyCreditsOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, overflow: 'hidden',
+        }} onClick={() => { if (!buyingPack) setBuyCreditsOpen(false) }}>
+          <div onClick={e => e.stopPropagation()} className="buy-credits-modal" style={{
+            background: G.card, border: `1px solid ${G.gold}55`, borderRadius: 12,
+            boxShadow: `0 0 40px ${G.goldGlow}`,
+            width: '92vw', maxWidth: 720, maxHeight: '90vh', overflowY: 'auto',
+          }}>
+            {/* Header */}
+            <div style={{ padding: '18px 24px', borderBottom: `1px solid ${G.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.25em', color: G.gold }}>
+                BUY DEEP ANALYSIS CREDITS
+              </span>
+              <button onClick={() => { if (!buyingPack) setBuyCreditsOpen(false) }} disabled={!!buyingPack}
+                style={{ background: 'none', border: 'none', color: G.text, cursor: buyingPack ? 'not-allowed' : 'pointer', fontSize: 18 }}>✕</button>
+            </div>
+
+            {/* Subhead */}
+            <div style={{ padding: '14px 24px 6px', textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: '#9ca3af', letterSpacing: '0.1em' }}>
+              {creditInfo.is_pro
+                ? `PRO TIER · ${creditInfo.daily_limit}/day included + bonus credits never expire`
+                : `FREE TIER · ${creditInfo.daily_limit}/day · Bonus credits never expire`}
+            </div>
+
+            {/* Pack grid */}
+            <div className="buy-credits-grid" style={{ padding: '18px 24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+              {[
+                { pack: '10',  credits:  10, dollars: '2.99',  badge: null },
+                { pack: '50',  credits:  50, dollars: '9.99',  badge: 'BEST VALUE' },
+                { pack: '200', credits: 200, dollars: '29.99', badge: null },
+              ].map(p => {
+                const busy = buyingPack === p.pack
+                return (
+                  <div key={p.pack} style={{
+                    position: 'relative',
+                    border: p.badge ? `2px solid ${G.gold}` : `1px solid ${G.gold}55`,
+                    borderRadius: 10, padding: '18px 12px',
+                    textAlign: 'center', background: p.badge ? '#1a1410' : '#1a1a1a',
+                    boxShadow: p.badge ? `0 0 20px ${G.goldGlow}` : 'none',
+                  }}>
+                    {p.badge && (
+                      <div style={{
+                        position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
+                        background: G.gold, color: '#000', fontFamily: '"Orbitron",sans-serif', fontSize: 9,
+                        letterSpacing: '0.2em', padding: '3px 10px', borderRadius: 4, fontWeight: 700,
+                      }}>{p.badge}</div>
+                    )}
+                    <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 28, color: G.gold, lineHeight: 1 }}>
+                      {p.credits}
+                    </div>
+                    <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#9ca3af', letterSpacing: '0.15em', marginTop: 2 }}>
+                      CREDITS
+                    </div>
+                    <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 20, color: G.text, marginTop: 14 }}>
+                      ${p.dollars}
+                    </div>
+                    <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, color: '#6b7280', marginTop: 2 }}>
+                      ${(parseFloat(p.dollars) / p.credits).toFixed(3)}/credit
+                    </div>
+                    <button onClick={() => handleBuyPack(p.pack)} disabled={!!buyingPack}
+                      style={{
+                        marginTop: 14, width: '100%',
+                        fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
+                        background: busy ? '#3a3a3a' : 'linear-gradient(135deg, #f59e0b, #d97706)',
+                        border: 'none', borderRadius: 6,
+                        color: busy ? '#9ca3af' : '#000', cursor: buyingPack ? 'not-allowed' : 'pointer',
+                        padding: '10px 12px', textTransform: 'uppercase', fontWeight: 700,
+                        opacity: buyingPack && !busy ? 0.5 : 1,
+                      }}>
+                      {busy ? 'LOADING…' : 'BUY NOW'}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Footer note */}
+            <div style={{ padding: '8px 24px 18px', textAlign: 'center', fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#6b7280', letterSpacing: '0.1em' }}>
+              Bonus credits never expire · Daily credits reset every midnight UTC · Secured by Stripe
             </div>
           </div>
         </div>
@@ -2194,6 +2398,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .deep-footer-btn   { width: 100% !important; text-align: center !important; min-height: 44px !important; }
           /* Horizon selector: 2 cols on mobile */
           .deep-horizon-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          /* Buy Credits modal: stack packs vertically on mobile */
+          .buy-credits-grid  { grid-template-columns: 1fr !important; }
           /* Pricing modal: scrollable, fits screen */
           .pricing-modal-box { max-height: 90vh !important; max-width: 95vw !important; overflow-y: auto !important;
                                width: 95% !important; border-radius: 12px !important;

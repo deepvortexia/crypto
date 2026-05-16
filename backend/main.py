@@ -13,6 +13,8 @@ import httpx
 
 import jwt
 import stripe
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from cachetools import TTLCache
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Path, Request
@@ -34,6 +36,17 @@ logger = logging.getLogger(__name__)
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PRICE_ID = os.getenv("STRIPE_PRICE_ID")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+# Credit-pack one-time prices (set these in Railway env vars)
+CREDIT_PACKS = {
+    "10":  {"price_id": os.getenv("STRIPE_CREDIT_10_PRICE_ID",  ""), "credits":  10, "dollars": 2.99},
+    "50":  {"price_id": os.getenv("STRIPE_CREDIT_50_PRICE_ID",  ""), "credits":  50, "dollars": 9.99},
+    "200": {"price_id": os.getenv("STRIPE_CREDIT_200_PRICE_ID", ""), "credits": 200, "dollars": 29.99},
+}
+
+# Daily limits
+FREE_DAILY_LIMIT = 2
+PRO_DAILY_LIMIT  = 20
 
 # ── Supabase setup ───────────────────────────────────────────────────────────
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -184,9 +197,33 @@ async def lifespan(app: FastAPI):
     retrainer.start_scheduler(retrain_interval_hours=RETRAIN_INTERVAL_HOURS)
     # market-tensions pre-warm removed — regenerated on demand with 60s TTL
 
+    # Daily credit reset backstop — lazy reset in the RPCs is the primary path
+    credits_scheduler = AsyncIOScheduler(timezone="UTC")
+    credits_scheduler.add_job(
+        _reset_daily_credits_job,
+        trigger=CronTrigger(hour=0, minute=0, timezone="UTC"),
+        id="reset_daily_credits",
+        replace_existing=True,
+    )
+    credits_scheduler.start()
+    logger.info("Credit reset scheduler started — runs daily at 00:00 UTC")
+
     yield
 
+    credits_scheduler.shutdown(wait=False)
     retrainer.stop_scheduler()
+
+
+async def _reset_daily_credits_job() -> None:
+    """Backstop: reset every user_credits row's daily counter at 00:00 UTC."""
+    try:
+        rpc = supabase.rpc(
+            "reset_all_daily_credits",
+            {"p_free_limit": FREE_DAILY_LIMIT, "p_pro_limit": PRO_DAILY_LIMIT},
+        ).execute()
+        logger.info(f"Daily credit reset complete — {rpc.data} rows updated")
+    except Exception as e:
+        logger.error(f"Daily credit reset job failed: {e}")
 
 
 app = FastAPI(
@@ -491,6 +528,57 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
         raise HTTPException(400, str(e))
 
 
+class CreditPurchaseRequest(BaseModel):
+    pack: str  # "10" | "50" | "200"
+
+
+@app.post("/api/credits/purchase")
+async def create_credit_pack_checkout(body: CreditPurchaseRequest, user: dict = Depends(get_current_user)):
+    """Create a one-time Stripe Checkout session for a credit pack."""
+    if not stripe.api_key:
+        raise HTTPException(500, "Stripe not configured")
+
+    pack = CREDIT_PACKS.get(body.pack)
+    if pack is None:
+        raise HTTPException(400, f"Unknown pack '{body.pack}'. Valid: 10, 50, 200")
+    if not pack["price_id"]:
+        raise HTTPException(500, f"STRIPE_CREDIT_{body.pack}_PRICE_ID not configured")
+
+    try:
+        # Reuse the Stripe customer from subscriptions table if one exists
+        existing = supabase.table("subscriptions").select("stripe_customer_id").eq("user_id", user["id"]).execute()
+        if existing.data and existing.data[0].get("stripe_customer_id"):
+            customer_id = existing.data[0]["stripe_customer_id"]
+        else:
+            customer = stripe.Customer.create(email=user["email"], metadata={"supabase_user_id": user["id"]})
+            customer_id = customer.id
+            supabase.table("subscriptions").upsert({
+                "user_id":            user["id"],
+                "stripe_customer_id": customer_id,
+                "status":             "inactive",
+            }).execute()
+
+        frontend_url = os.getenv("FRONTEND_URL", "https://predictalpha.app")
+        session = stripe.checkout.Session.create(
+            customer=customer_id,
+            payment_method_types=["card"],
+            line_items=[{"price": pack["price_id"], "quantity": 1}],
+            mode="payment",
+            success_url=f"{frontend_url}/dashboard?credits_success=true&pack={body.pack}",
+            cancel_url=f"{frontend_url}/dashboard?credits_canceled=true",
+            metadata={
+                "type":      "credit_pack",
+                "user_id":   user["id"],
+                "pack":      body.pack,
+                "credits":   str(pack["credits"]),
+            },
+        )
+        return {"url": session.url, "credits": pack["credits"], "dollars": pack["dollars"]}
+    except stripe.StripeError as e:
+        logger.error(f"Stripe credit-pack checkout error: {e}")
+        raise HTTPException(400, str(e))
+
+
 @app.post("/api/webhook")
 async def stripe_webhook(request: Request):
     """Handle Stripe webhook events."""
@@ -538,6 +626,32 @@ async def stripe_webhook(request: Request):
         }).eq("stripe_customer_id", data["customer"]).execute()
         logger.info(f"Subscription deleted for customer {data['customer']}")
 
+    elif event_type == "checkout.session.completed":
+        # Credit-pack one-time payments. Subscription checkouts are handled
+        # by customer.subscription.created above and ignored here.
+        metadata = data.get("metadata") or {}
+        if metadata.get("type") == "credit_pack" and data.get("payment_status") == "paid":
+            target_user_id = metadata.get("user_id")
+            try:
+                credits = int(metadata.get("credits", "0"))
+            except (TypeError, ValueError):
+                credits = 0
+            if not target_user_id or credits <= 0:
+                logger.warning(f"Credit-pack webhook missing user_id/credits: {metadata}")
+            else:
+                # Pick daily_limit so the row is seeded correctly if it doesn't exist yet
+                daily_lim = PRO_DAILY_LIMIT if _is_pro(target_user_id) else FREE_DAILY_LIMIT
+                try:
+                    rpc = supabase.rpc(
+                        "add_bonus_credits",
+                        {"p_user_id": target_user_id, "p_amount": credits, "p_daily_limit": daily_lim},
+                    ).execute()
+                    logger.info(f"Credit pack delivered: +{credits} to {target_user_id} (now {rpc.data})")
+                except Exception as e:
+                    # Stripe will retry on non-2xx; raise so we don't lose the grant
+                    logger.error(f"add_bonus_credits RPC failed for {target_user_id}: {e}")
+                    raise HTTPException(500, "Failed to grant credits — Stripe will retry")
+
     return {"status": "ok"}
 
 
@@ -580,39 +694,86 @@ def _is_pro(user_id: str) -> bool:
 @app.get("/api/deep-analysis/remaining")
 @limiter.limit("30/minute")
 async def get_deep_analysis_remaining(request: Request, user: dict = Depends(get_current_user)):
-    """Return how many Deep Analysis uses the user has left today."""
-    user_id = user["id"]
-    if _is_pro(user_id):
-        return {"remaining": 999, "limit": DEEP_ANALYSIS_DAILY_LIMIT, "is_pro": True}
+    """Return the user's current credit balance and tier info."""
+    user_id   = user["id"]
+    is_pro    = _is_pro(user_id)
+    daily_lim = PRO_DAILY_LIMIT if is_pro else FREE_DAILY_LIMIT
 
-    today = datetime.now(timezone.utc).date().isoformat()
-    row = supabase.table("deep_analysis_usage").select("count").eq("user_id", user_id).eq("use_date", today).execute()
-    used = row.data[0]["count"] if row.data else 0
-    return {"remaining": max(0, DEEP_ANALYSIS_DAILY_LIMIT - used), "limit": DEEP_ANALYSIS_DAILY_LIMIT, "is_pro": False}
+    try:
+        rpc = supabase.rpc("get_credits", {"p_user_id": user_id, "p_daily_limit": daily_lim}).execute()
+        data = rpc.data or {}
+        daily_remaining = int(data.get("daily_remaining", daily_lim))
+        bonus_remaining = int(data.get("bonus_remaining", 0))
+    except Exception as e:
+        logger.warning(f"get_credits RPC failed for {user_id}: {e} — falling back to allow")
+        # Fail-open: assume the user has their full daily limit if Supabase is down
+        daily_remaining = daily_lim
+        bonus_remaining = 0
+
+    return {
+        "daily_remaining": daily_remaining,
+        "bonus_remaining": bonus_remaining,
+        "total_remaining": daily_remaining + bonus_remaining,
+        "is_pro":          is_pro,
+        "daily_limit":     daily_lim,
+    }
+
+
+def _consume_credit(user_id: str, is_pro: bool) -> dict:
+    """Call the consume_credit RPC and normalize the response shape."""
+    daily_lim = PRO_DAILY_LIMIT if is_pro else FREE_DAILY_LIMIT
+    try:
+        rpc = supabase.rpc("consume_credit", {"p_user_id": user_id, "p_daily_limit": daily_lim}).execute()
+        data = rpc.data or {}
+    except Exception as e:
+        logger.error(f"consume_credit RPC failed for {user_id}: {e} — failing open")
+        # Fail-open so a Supabase outage doesn't block paid users
+        return {"allowed": True, "daily_remaining": daily_lim - 1, "bonus_remaining": 0, "daily_limit": daily_lim}
+
+    return {
+        "allowed":         bool(data.get("allowed", False)),
+        "daily_remaining": int(data.get("daily_remaining", 0)),
+        "bonus_remaining": int(data.get("bonus_remaining", 0)),
+        "daily_limit":     daily_lim,
+    }
+
+
+def _refund_credit(user_id: str, is_pro: bool) -> None:
+    """Refund one credit after a downstream failure. Best-effort, never raises."""
+    daily_lim = PRO_DAILY_LIMIT if is_pro else FREE_DAILY_LIMIT
+    try:
+        supabase.rpc("refund_credit", {"p_user_id": user_id, "p_daily_limit": daily_lim}).execute()
+        logger.info(f"Refunded 1 credit to {user_id} after analyze failure")
+    except Exception as e:
+        logger.error(f"refund_credit RPC failed for {user_id}: {e}")
 
 
 @app.post("/api/deep-analysis/use")
 @limiter.limit("5/minute")
 async def use_deep_analysis(request: Request, user: dict = Depends(get_current_user)):
-    """Atomically consume one Deep Analysis credit. Returns 429 if daily limit reached."""
+    """Legacy: consume one credit via the new RPC. Kept for backward compatibility."""
     user_id = user["id"]
-    if _is_pro(user_id):
-        return {"allowed": True, "remaining": 999, "is_pro": True}
+    is_pro  = _is_pro(user_id)
+    res     = _consume_credit(user_id, is_pro)
 
-    try:
-        result = supabase.rpc("try_use_deep_analysis", {"p_user_id": user_id, "p_limit": DEEP_ANALYSIS_DAILY_LIMIT}).execute()
-        count = result.data
-    except Exception as e:
-        logger.error(f"deep_analysis RPC failed: {e}")
-        raise HTTPException(503, "Credit check temporarily unavailable")
-
-    if count == -1:
+    if not res["allowed"]:
         raise HTTPException(
-            status_code=429,
-            detail={"message": f"Daily limit of {DEEP_ANALYSIS_DAILY_LIMIT} reached. Upgrade to PRO for unlimited access.", "remaining": 0},
+            status_code=402,
+            detail={
+                "error":   "no_credits",
+                "message": "No credits remaining. Buy a credit pack or wait until midnight UTC.",
+                "daily_remaining": 0,
+                "bonus_remaining": 0,
+            },
         )
 
-    return {"allowed": True, "remaining": DEEP_ANALYSIS_DAILY_LIMIT - count, "is_pro": False}
+    return {
+        "allowed":         True,
+        "daily_remaining": res["daily_remaining"],
+        "bonus_remaining": res["bonus_remaining"],
+        "total_remaining": res["daily_remaining"] + res["bonus_remaining"],
+        "is_pro":          is_pro,
+    }
 
 
 # ── Deep Analysis / Analyze ───────────────────────────────────────────────────
@@ -635,27 +796,20 @@ async def deep_analysis_analyze(
 ):
     """Consume one credit, fetch live price, call Claude Haiku, return structured analysis."""
     user_id = user["id"]
-    is_pro = _is_pro(user_id)
-    count = None
-    today = None
+    is_pro  = _is_pro(user_id)
 
-    if is_pro:
-        remaining = 999
-    else:
-        try:
-            rpc_result = supabase.rpc("try_use_deep_analysis", {"p_user_id": user_id, "p_limit": DEEP_ANALYSIS_DAILY_LIMIT}).execute()
-            count = rpc_result.data
-        except Exception as e:
-            logger.error(f"deep_analysis RPC failed: {e}")
-            raise HTTPException(503, "Credit check temporarily unavailable")
-
-        if count == -1:
-            raise HTTPException(
-                status_code=429,
-                detail={"message": f"Daily limit of {DEEP_ANALYSIS_DAILY_LIMIT} reached. Upgrade to PRO for unlimited access.", "remaining": 0},
-            )
-        today = datetime.now(timezone.utc).date().isoformat()
-        remaining = DEEP_ANALYSIS_DAILY_LIMIT - count
+    # ── Atomically consume one credit (daily first, then bonus) ─────────────
+    credit_state = _consume_credit(user_id, is_pro)
+    if not credit_state["allowed"]:
+        raise HTTPException(
+            status_code=402,
+            detail={
+                "error":   "no_credits",
+                "message": "No credits remaining. Buy a credit pack or wait until midnight UTC.",
+                "daily_remaining": 0,
+                "bonus_remaining": 0,
+            },
+        )
 
     if not _ANTHROPIC_API_KEY:
         raise HTTPException(503, "ANTHROPIC_API_KEY not configured")
@@ -807,22 +961,20 @@ Respond with ONLY valid JSON, no markdown, no extra text:
 
     except Exception as exc:
         logger.warning(f"Haiku deep analysis call failed ({exc!r})")
-        if not is_pro and count is not None and today is not None:
-            try:
-                supabase.table("deep_analysis_usage").update({"count": count - 1}).eq("user_id", user_id).eq("use_date", today).execute()
-                logger.info(f"Credit rolled back for user {user_id} (count restored to {count - 1})")
-            except Exception as rollback_exc:
-                logger.error(f"Credit rollback failed for user {user_id}: {rollback_exc}")
+        _refund_credit(user_id, is_pro)
         raise HTTPException(502, "AI analysis temporarily unavailable")
 
     return {
-        "allowed": True,
-        "remaining": remaining,
-        "current_price": current_price,
-        "analysis": analysis,
-        "direction": direction,
-        "score": score,
-        "recommendation": recommendation,
+        "allowed":         True,
+        "daily_remaining": credit_state["daily_remaining"],
+        "bonus_remaining": credit_state["bonus_remaining"],
+        "total_remaining": credit_state["daily_remaining"] + credit_state["bonus_remaining"],
+        "is_pro":          is_pro,
+        "current_price":   current_price,
+        "analysis":        analysis,
+        "direction":       direction,
+        "score":           score,
+        "recommendation":  recommendation,
     }
 
 

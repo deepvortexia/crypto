@@ -435,10 +435,26 @@ export async function consumeDeepAnalysisCredit() {
   const res = await fetch(`${BACKEND_URL}/api/deep-analysis/use`, { method: 'POST', headers })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const msg = data?.detail?.message || 'Daily limit reached'
-    throw Object.assign(new Error(msg), { status: res.status })
+    const detail = data?.detail || {}
+    const msg = detail.message || 'No credits remaining'
+    throw Object.assign(new Error(msg), { status: res.status, code: detail.error })
   }
   return data
+}
+
+export async function purchaseCreditsPack(pack) {
+  const headers = { ...(await getAuthHeaders()), 'Content-Type': 'application/json' }
+  const res = await fetch(`${BACKEND_URL}/api/credits/purchase`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ pack: String(pack) }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const msg = data?.detail || data?.message || 'Failed to start checkout'
+    throw Object.assign(new Error(typeof msg === 'string' ? msg : 'Failed to start checkout'), { status: res.status })
+  }
+  return data  // { url, credits, dollars }
 }
 
 export async function fetchUserCredits() {
