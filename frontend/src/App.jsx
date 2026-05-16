@@ -503,6 +503,18 @@ const ANALYSIS_MSGS = [
   "Processing sentiment data...",
   "Running ensemble forecast...",
 ]
+const DEEP_MSGS = [
+  "Analyse du mempool...",
+  "Calibration des modèles LSTM...",
+  "Lecture des signaux on-chain...",
+  "Vérification des baleines...",
+  "Synchronisation des données...",
+  "Calcul des indicateurs clés...",
+  "Analyse du carnet d'ordres...",
+  "Évaluation des niveaux critiques...",
+  "Traitement du sentiment de marché...",
+  "Exécution du modèle de consensus...",
+]
 
 const PRED_HORIZONS = ['1h', '4h', '8h', '12h', '24h', '1week', '1month']
 const REFRESH_MS    = 60_000
@@ -542,6 +554,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [deepResult,    setDeepResult]    = useState(null)
   const [deepRunning,   setDeepRunning]   = useState(false)
   const [deepHorizon,   setDeepHorizon]   = useState(null)
+  const [deepMsgIdx,    setDeepMsgIdx]    = useState(0)
   const [menuOpen,    setMenuOpen]    = useState(false)
   const [loading,     setLoading]     = useState(true)
   const [refreshing,  setRefreshing]  = useState(false)
@@ -707,6 +720,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       setMsgIdx(0)
     }
   }, [loading, deepRunning, refreshing])
+
+  useEffect(() => {
+    if (!deepRunning) { setDeepMsgIdx(0); return }
+    const id = setInterval(() => setDeepMsgIdx(i => (i + 1) % DEEP_MSGS.length), 2000)
+    return () => clearInterval(id)
+  }, [deepRunning])
 
   // Simulate load progress during initial load only
   useEffect(() => {
@@ -1850,34 +1869,45 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               </div>
             )}
 
-            {/* log stream */}
+            {/* analysis area */}
             {deepHorizon && (
-            <div style={{ display:'flex', flexDirection:'column', overflow:'hidden' }}>
-              <div style={{
-                maxHeight:'180px', overflowY:'auto', padding: '20px 24px',
-                fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text,
-              }}>
-                {deepLogs.map((line, i) => (
-                  <div key={i} style={{ marginBottom: 7, color: i === deepLogs.length - 1 && deepRunning ? G.gold : G.text }}>
-                    <span style={{ color: `${G.gold}66`, marginRight: 10 }}>[{String(i + 1).padStart(2, '0')}]</span>
-                    {line}
-                  </div>
-                ))}
-                {deepRunning && (
-                  <div style={{position:'relative',overflow:'hidden',height:3,background:'#1a1a1a',margin:'8px 0',borderRadius:2}}>
-                    <div style={{position:'absolute',top:0,height:'100%',width:'30%',background:'linear-gradient(90deg,transparent,#f59e0b,transparent)',animation:'scanLine 1.5s linear infinite'}}/>
-                  </div>
-                )}
-              </div>
+            <div style={{ display:'flex', flexDirection:'column', flex:1, minHeight:0 }}>
 
+              {/* Egyptian dial spinner while running */}
+              {deepRunning && (
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:16 }}>
+                  <img src="/egyptian-dial.webp" alt="" style={{ width:108, height:108, animation:'egyptianSpin 2s linear infinite' }} />
+                  <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
+                    {DEEP_MSGS[deepMsgIdx]}
+                  </div>
+                </div>
+              )}
+
+              {/* Compact log summary once done */}
+              {!deepRunning && deepLogs.length > 0 && (
+                <div style={{
+                  maxHeight:'110px', overflowY:'auto', padding:'12px 24px',
+                  fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:`${G.text}77`,
+                  borderBottom:`1px solid ${G.border}`,
+                }}>
+                  {deepLogs.map((line, i) => (
+                    <div key={i} style={{ marginBottom:4 }}>
+                      <span style={{ color:`${G.gold}44`, marginRight:8 }}>[{String(i+1).padStart(2,'0')}]</span>
+                      {line}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Results — scrollable with visible indicator */}
               {deepResult && (
-                <div style={{textAlign:'center',padding:20,borderTop:`1px solid ${G.border}`}}>
+                <div className="deep-results-scroll" style={{ overflowY:'auto', flex:1, padding:'20px 24px', textAlign:'center' }}>
                   <div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
                   <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:36,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
                     ${deepResult?.current_price?.toLocaleString()}
                   </div>
                   <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:20}}>CURRENT BTC PRICE</div>
-                  <div className="deep-result-badges" style={{display:'flex',gap:12,justifyContent:'center',marginBottom:12}}>
+                  <div style={{display:'flex',gap:12,justifyContent:'center',marginBottom:12}}>
                     <div style={{border:`1px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,borderRadius:8,padding:'8px 20px',color:deepResult.score>50?'#10b981':'#ef4444',fontFamily:'"Orbitron",sans-serif',fontSize:12}}>
                       {deepResult.direction?.toUpperCase()}
                     </div>
@@ -2031,8 +2061,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes buttonGlow  { 0%,100%{box-shadow:0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)} 50%{box-shadow:0 0 45px #f59e0b88, 0 0 90px #f59e0b44, inset 0 1px 0 rgba(255,255,255,0.4)} }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
         @keyframes authSuccessPulse { 0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.4)} 50%{box-shadow:0 0 40px rgba(245,158,11,0.7)} }
-        @keyframes introScan  { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
-        @keyframes introScanH { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
+        @keyframes introScan    { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
+        @keyframes introScanH   { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
+        @keyframes egyptianSpin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        .deep-results-scroll::-webkit-scrollbar { width:4px }
+        .deep-results-scroll::-webkit-scrollbar-track { background:#0d0d0d }
+        .deep-results-scroll::-webkit-scrollbar-thumb { background:#f59e0b88; border-radius:2px }
 
         /* ── Desktop base ── */
         * { box-sizing: border-box; }
