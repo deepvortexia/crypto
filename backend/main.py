@@ -283,8 +283,7 @@ async def get_indicators():
 
     try:
         hourly_df, daily_df = await _get_dataframes()
-        snapshot = get_indicator_snapshot(compute_indicators(hourly_df))
-        snapshot["ema"] = get_indicator_snapshot(compute_indicators(daily_df))["ema"]
+        snapshot = get_indicator_snapshot(compute_indicators(daily_df))
         _indicators_cache["indicators"] = snapshot
         return snapshot
     except Exception as exc:
@@ -1171,12 +1170,9 @@ async def get_market_tensions(request: Request):
         # Indicators: _indicators_cache (5-min TTL) — same as /api/indicators
         if "indicators" in _indicators_cache:
             indicators_data = _indicators_cache["indicators"]
-            daily_ema = indicators_data["ema"]
         else:
-            (hourly_df, daily_df) = await _get_dataframes()
-            indicators_data = get_indicator_snapshot(compute_indicators(hourly_df))
-            daily_ema = get_indicator_snapshot(compute_indicators(daily_df))["ema"]
-            indicators_data = {**indicators_data, "ema": daily_ema}
+            _hourly_df, daily_df = await _get_dataframes()
+            indicators_data = get_indicator_snapshot(compute_indicators(daily_df))
             _indicators_cache["indicators"] = indicators_data
 
         # Remaining live data (no dedicated UI cache)
@@ -1199,9 +1195,9 @@ async def get_market_tensions(request: Request):
         macd_cross      = indicators_data["macd"]["crossover"]
         bb_pct          = indicators_data["bollinger_bands"]["pct_b"]
         bb_bw           = indicators_data["bollinger_bands"]["bandwidth"]
-        ema50           = daily_ema["ema50"]
-        ema200          = daily_ema["ema200"]
-        ema_trend       = daily_ema["trend"]
+        ema50           = indicators_data["ema"]["ema50"]
+        ema200          = indicators_data["ema"]["ema200"]
+        ema_trend       = indicators_data["ema"]["trend"]
         obv_trend       = indicators_data["obv"]["trend"]
         atr             = indicators_data["atr"]["value"]
         atr_pct         = indicators_data["atr"]["pct_of_price"]
