@@ -1095,8 +1095,16 @@ async def get_market_tensions(request: Request):
             _get_dataframes(),
         )
 
-        indicators_data = get_indicator_snapshot(compute_indicators(hourly_df))
-        daily_ema = get_indicator_snapshot(compute_indicators(daily_df))["ema"]
+        # Use the same cached indicators the UI cards display, so AI sees identical numbers.
+        # Only recompute if the indicators cache is cold, and populate it so UI stays in sync.
+        if "indicators" in _indicators_cache:
+            indicators_data = _indicators_cache["indicators"]
+            daily_ema = indicators_data["ema"]
+        else:
+            indicators_data = get_indicator_snapshot(compute_indicators(hourly_df))
+            daily_ema = get_indicator_snapshot(compute_indicators(daily_df))["ema"]
+            indicators_data = {**indicators_data, "ema": daily_ema}
+            _indicators_cache["indicators"] = indicators_data
 
         total_btc_sent = onchain_data.get("total_btc_sent", 0) or 0
 
