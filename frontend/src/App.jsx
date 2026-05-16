@@ -1887,7 +1887,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               {/* Egyptian dial + progress while running */}
               {deepRunning && (
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:20 }}>
-                  <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, animation:'dialGlow 2s ease-in-out infinite', background:'transparent', mixBlendMode:'lighten' }} />
+                  <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, animation:'dialGlow 2s ease-in-out infinite' }} />
                   <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
                   </div>
@@ -2107,7 +2107,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes authSuccessPulse { 0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.4)} 50%{box-shadow:0 0 40px rgba(245,158,11,0.7)} }
         @keyframes introScan    { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
         @keyframes introScanH   { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
-        @keyframes dialGlow { 0%,100%{box-shadow:0 0 20px #f59e0b55,0 0 40px #f59e0b22} 50%{box-shadow:0 0 55px #f59e0bcc,0 0 110px #f59e0b66,0 0 160px #f59e0b33} }
+        @keyframes dialGlow { 0%,100%{filter:drop-shadow(0 0 10px #f59e0b66) drop-shadow(0 0 20px #f59e0b22)} 50%{filter:drop-shadow(0 0 28px #f59e0bcc) drop-shadow(0 0 55px #f59e0b77)} }
         @keyframes badgeGlowBull { 0%,100%{box-shadow:0 0 8px #10b981,0 0 20px #10b98144} 50%{box-shadow:0 0 18px #10b981,0 0 40px #10b98177} }
         @keyframes badgeGlowBear { 0%,100%{box-shadow:0 0 8px #ef4444,0 0 20px #ef444444} 50%{box-shadow:0 0 18px #ef4444,0 0 40px #ef444477} }
         .deep-results-scroll::-webkit-scrollbar { width:4px }
