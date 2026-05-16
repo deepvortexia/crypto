@@ -191,21 +191,22 @@ class BTCEnsemble:
 
     def _confidence_score(self, horizon_key: str, model_values: list[float]) -> float:
         """Confidence = backtested direction accuracy over last 30 resolved predictions.
-        Falls back to inter-model agreement (capped at 0.70) when history is thin."""
+        Falls back to inter-model agreement when history is thin.
+        Hard clamped to [0.55, 0.75] until sufficient prediction history exists."""
         resolved = [
             p for p in self._predictions
             if p["horizon"] == horizon_key and p["direction_correct"] is not None
         ][-30:]
         if len(resolved) >= 5:
-            return round(float(np.mean([p["direction_correct"] for p in resolved])), 3)
-        # Fallback: coefficient-of-variation agreement score, capped conservatively
-        if len(model_values) < 2:
-            return 0.60
-        std = float(np.std(model_values))
-        mean = float(np.mean(model_values))
-        cv = std / mean if mean else 1.0
-        raw = 1.0 - cv * 5
-        return round(min(0.70, max(0.50, raw)), 3)
+            raw = float(np.mean([p["direction_correct"] for p in resolved]))
+        elif len(model_values) < 2:
+            raw = 0.60
+        else:
+            std = float(np.std(model_values))
+            mean = float(np.mean(model_values))
+            cv = std / mean if mean else 1.0
+            raw = 1.0 - cv * 5
+        return round(min(0.75, max(0.55, raw)), 3)
 
     def _store_prediction(self, pred: dict):
         entry = {
