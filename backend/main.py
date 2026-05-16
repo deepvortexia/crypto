@@ -1132,6 +1132,11 @@ async def get_market_tensions(request: Request):
             if long_short is not None else "unavailable"
         )
 
+        # Explicitly compute price-vs-EMA positions so Claude doesn't have to infer
+        # them from ema_trend (which compares EMA50 vs EMA200, not price vs EMA50).
+        price_vs_ema50  = ("above" if ema50  and btc_price > ema50  else "below") if ema50  else "N/A"
+        price_vs_ema200 = ("above" if ema200 and btc_price > ema200 else "below") if ema200 else "N/A"
+
         prompt = f"""You are a professional crypto trading analyst. Analyze the exact live market data below and identify 2 to 4 distinct trading setups or tensions currently present in the Bitcoin market.
 
 Use ONLY these exact numbers, no estimates.
@@ -1144,9 +1149,9 @@ MACD Signal:        {macd_signal}
 MACD Histogram:     {macd_hist} ({macd_cross} crossover)
 Bollinger %B:       {bb_pct}
 Bollinger Bandwidth:{bb_bw}
-EMA50:              ${ema50}
-EMA200:             ${ema200}
-EMA Trend:          {ema_trend}
+EMA50:              ${ema50} (price is {price_vs_ema50} EMA50)
+EMA200:             ${ema200} (price is {price_vs_ema200} EMA200)
+EMA Cross Trend:    {ema_trend} (EMA50 vs EMA200 relationship)
 OBV Trend:          {obv_trend}
 ATR:                ${atr} ({atr_pct}% of price)
 Fear & Greed:       {fear_greed} ({fg_class})
