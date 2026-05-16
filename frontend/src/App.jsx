@@ -1848,8 +1848,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             border: `1px solid ${G.gold}55`,
             borderRadius: 12,
             boxShadow: `0 0 40px ${G.goldGlow}`,
-            width: '95%', minWidth: 700, maxWidth: 860,
-            minHeight: 600, maxHeight: '92vh',
+            width: '90vw', maxWidth: 1000,
+            height: '85vh',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
           }}>
@@ -1880,19 +1880,42 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               </div>
             )}
 
-            {/* analysis area */}
+            {/* analysis area — two column */}
             {deepHorizon && (
-            <div style={{ display:'flex', flexDirection:'column', flex:1, minHeight:0 }}>
+            <div style={{ display:'flex', flex:1, minHeight:0, overflow:'hidden' }}>
 
-              {/* Egyptian dial + progress while running */}
-              {deepRunning && (
-                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:20 }}>
+              {/* LEFT: log lines */}
+              <div style={{
+                width:'40%', borderRight:`1px solid ${G.border}`,
+                padding:'16px 18px', display:'flex', flexDirection:'column',
+                gap:3, overflow:'hidden',
+              }}>
+                <div style={{ fontFamily:'"Orbitron",sans-serif', fontSize:9, letterSpacing:'0.25em', color:`${G.gold}55`, marginBottom:10 }}>
+                  ANALYSIS LOG
+                </div>
+                {deepLogs.map((line, i) => (
+                  <div key={i} style={{
+                    fontFamily:'"Share Tech Mono",monospace', fontSize:11, lineHeight:1.45,
+                    color: i === deepLogs.length - 1 && deepRunning ? G.gold : `${G.gold}44`,
+                  }}>
+                    <span style={{ marginRight:8 }}>[{String(i+1).padStart(2,'0')}]</span>
+                    {line}
+                  </div>
+                ))}
+              </div>
+
+              {/* RIGHT: dial+progress while running, results when done */}
+              <div style={{
+                flex:1, display:'flex', flexDirection:'column',
+                alignItems:'center', justifyContent:'center',
+                padding:'24px 28px', overflow:'hidden',
+              }}>
+                {deepRunning && (<>
                   <img src="/egyptian-dial.webp" alt="" style={{ width:260, height:260, opacity:0.78, animation:'dialGlow 2s ease-in-out infinite' }} />
-                  <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
+                  <div style={{ marginTop:16, fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
                   </div>
-                  {/* Progress bar */}
-                  <div style={{ width:'100%', maxWidth:340 }}>
+                  <div style={{ width:'100%', maxWidth:320, marginTop:20 }}>
                     <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
                       <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.gold, letterSpacing:'0.15em' }}>ANALYZING...</span>
                       <span style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:G.gold }}>{deepProgress}%</span>
@@ -1902,65 +1925,41 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                       <div style={{ position:'absolute', top:0, height:'100%', width:'25%', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent)', animation:'scanLine 1.5s linear infinite' }} />
                     </div>
                   </div>
-                </div>
-              )}
+                </>)}
 
-              {/* Log lines — all visible, no scroll */}
-              {!deepRunning && deepLogs.length > 0 && (
-                <div style={{
-                  display:'flex', flexDirection:'column', gap:4, padding:'12px 24px',
-                  fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:`${G.text}77`,
-                  borderBottom:`1px solid ${G.border}`,
-                }}>
-                  {deepLogs.map((line, i) => (
-                    <div key={i}>
-                      <span style={{ color:`${G.gold}44`, marginRight:8 }}>[{String(i+1).padStart(2,'0')}]</span>
-                      {line}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Results — scrollable with visible indicator */}
-              {deepResult && (
-                <div className="deep-results-scroll" style={{ overflowY:'auto', flex:1, padding:'24px 32px', textAlign:'center' }}>
-                  <div style={{fontSize:11,color:'#6b7280',marginBottom:8,letterSpacing:'0.2em'}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
-                  <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:64,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
+                {deepResult && (<>
+                  <div style={{ fontSize:11, color:'#6b7280', marginBottom:6, letterSpacing:'0.2em' }}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
+                  <div style={{ fontFamily:'"Orbitron",sans-serif', fontSize:48, color:'#f59e0b', animation:'goldPulse 2s ease-in-out infinite', marginBottom:4, lineHeight:1 }}>
                     ${deepResult?.current_price?.toLocaleString()}
                   </div>
-                  <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:28}}>CURRENT BTC PRICE</div>
-                  <div style={{display:'flex',gap:14,justifyContent:'center',marginBottom:24}}>
+                  <div style={{ fontSize:11, color:'#6b7280', letterSpacing:'0.2em', marginBottom:18 }}>CURRENT BTC PRICE</div>
+                  <div style={{ display:'flex', gap:12, justifyContent:'center', marginBottom:18 }}>
                     <div style={{
                       border:`2px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,
-                      borderRadius:10,padding:'10px 28px',
+                      borderRadius:10, padding:'8px 22px',
                       color:deepResult.score>50?'#10b981':'#ef4444',
-                      fontFamily:'"Orbitron",sans-serif',fontSize:14,letterSpacing:'0.15em',
+                      fontFamily:'"Orbitron",sans-serif', fontSize:13, letterSpacing:'0.15em',
                       animation:deepResult.score>50?'badgeGlowBull 2s ease-in-out infinite':'badgeGlowBear 2s ease-in-out infinite',
                     }}>
                       {deepResult.direction?.toUpperCase()}
                     </div>
-                    <div style={{border:'2px solid #f59e0b',borderRadius:10,padding:'10px 28px',color:'#f59e0b',fontFamily:'"Orbitron",sans-serif',fontSize:14,letterSpacing:'0.15em'}}>
+                    <div style={{ border:'2px solid #f59e0b', borderRadius:10, padding:'8px 22px', color:'#f59e0b', fontFamily:'"Orbitron",sans-serif', fontSize:13, letterSpacing:'0.15em' }}>
                       {deepResult.score}% CONFIDENCE
                     </div>
                   </div>
                   {(deepResult.analysis || deepResult.recommendation) && (
                     <div style={{
-                      textAlign:'left',
-                      background:'#0d0d0d',
-                      border:'1px solid #f59e0b33',
-                      borderRadius:8,
-                      padding:'16px 20px',
-                      fontFamily:'"Share Tech Mono",monospace',
-                      fontSize:12,
-                      color:'#d1d5db',
-                      lineHeight:1.7,
-                      whiteSpace:'pre-wrap',
+                      width:'100%', textAlign:'left',
+                      background:'#0d0d0d', border:'1px solid #f59e0b33', borderRadius:8,
+                      padding:'12px 16px', fontFamily:'"Share Tech Mono",monospace',
+                      fontSize:11, color:'#d1d5db', lineHeight:1.6, whiteSpace:'pre-wrap',
+                      overflow:'hidden',
                     }}>
                       {deepResult.analysis || deepResult.recommendation}
                     </div>
                   )}
-                </div>
-              )}
+                </>)}
+              </div>
             </div>
             )}
 
