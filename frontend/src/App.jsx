@@ -1210,12 +1210,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           }} />
         )}
         {menuOpen && (
-          <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:999,padding:'12px 0'}}>
-            {/* Close button */}
-            <button onClick={() => setMenuOpen(false)} style={{position:'absolute',top:10,right:14,background:'none',border:'none',color:'#f59e0b',fontSize:28,lineHeight:1,cursor:'pointer',padding:'8px',minWidth:44,minHeight:44,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+          <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:999,padding:'0'}}>
+            {/* Close button row — full-width flex so it can't overlap content below */}
+            <div style={{display:'flex',justifyContent:'flex-end',padding:'6px 8px 0'}}>
+              <button onClick={() => setMenuOpen(false)} style={{background:'none',border:'none',color:'#f59e0b',fontSize:28,lineHeight:1,cursor:'pointer',padding:'8px',minWidth:44,minHeight:44,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+            </div>
             {/* User section for mobile */}
             {authLoading ? null : user ? (
-              <div style={{padding:'16px 20px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
+              <div style={{padding:'8px 20px 16px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
                 {/* identity row */}
                 <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
                   {user.user_metadata?.avatar_url ? (
@@ -1237,7 +1239,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 <button onClick={() => { handleLogout(); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:10,letterSpacing:'0.15em',color:G.text,background:'none',border:'1px solid #333',borderRadius:6,padding:'11px 16px',cursor:'pointer',textTransform:'uppercase',minHeight:44}}>LOGOUT</button>
               </div>
             ) : (
-              <div style={{padding:'12px 20px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
+              <div style={{padding:'4px 20px 16px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
                 <button onClick={() => { setAuthTab('login'); setAuthOpen(true); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.15em',color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}44`,borderRadius:6,padding:'13px 16px',cursor:'pointer',textTransform:'uppercase',minHeight:48}}>LOGIN</button>
               </div>
             )}
