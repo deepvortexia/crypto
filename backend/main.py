@@ -73,6 +73,52 @@ CORS_ORIGINS = [
 RETRAIN_INTERVAL_HOURS = int(os.getenv("MODEL_RETRAIN_INTERVAL_HOURS", "24"))
 
 HorizonKey = Literal["1h", "4h", "8h", "12h", "24h", "1week", "1month"]
+_HORIZON_ORDER = ["1h", "4h", "8h", "12h", "24h", "1week", "1month"]
+
+
+def _get_cached_prediction(horizon: str) -> dict | None:
+    cache_key = f"pred_{horizon}"
+    cache = _predict_cache_1h if horizon == "1h" else _predict_cache_long
+    return cache.get(cache_key)
+
+
+def _apply_temporal_coherence(horizon: str, prediction: dict) -> dict:
+    """Blend a prediction toward its neighbors when it contradicts both adjacent horizons.
+
+    Rule: if the shorter *and* longer horizon cached predictions both point in
+    the opposite direction to this one, the direction flip is likely a model
+    artefact rather than a genuine signal.  We apply a weighted blend
+    (40 % own / 30 % each neighbor) to smooth it out.
+    """
+    try:
+        idx = _HORIZON_ORDER.index(horizon)
+    except ValueError:
+        return prediction
+
+    prev_pred = _get_cached_prediction(_HORIZON_ORDER[idx - 1]) if idx > 0 else None
+    next_pred = _get_cached_prediction(_HORIZON_ORDER[idx + 1]) if idx < len(_HORIZON_ORDER) - 1 else None
+
+    if not (prev_pred and next_pred):
+        return prediction  # can only validate when both neighbors are cached
+
+    prev_chg = prev_pred.get("change_pct") or 0
+    next_chg = next_pred.get("change_pct") or 0
+    curr_chg = prediction.get("change_pct") or 0
+
+    incoherent = (prev_chg > 0 and next_chg > 0 and curr_chg < 0) or \
+                 (prev_chg < 0 and next_chg < 0 and curr_chg > 0)
+    if not incoherent:
+        return prediction
+
+    blended = curr_chg * 0.40 + prev_chg * 0.30 + next_chg * 0.30
+    current_price = prediction["current_price"]
+    result = dict(prediction)
+    result["change_pct"] = round(blended, 4)
+    result["predicted_price"] = round(current_price * (1 + blended / 100), 2)
+    result["direction"] = "up" if blended >= 0 else "down"
+    result["coherence_adjusted"] = True
+    logger.info(f"[coherence] {horizon} adjusted {curr_chg:.4f}% → {blended:.4f}% (prev={prev_chg}, next={next_chg})")
+    return result
 
 # ── In-memory TTL caches ─────────────────────────────────────────────────────
 _price_cache: TTLCache = TTLCache(maxsize=1, ttl=60)           # 1 min
@@ -305,6 +351,7 @@ async def get_prediction(
         if "error" in result:
             raise HTTPException(503, detail=result["error"])
 
+        result = _apply_temporal_coherence(horizon, result)
         _pred_cache[cache_key] = result
 
         # Also check if any outstanding predictions can now be resolved
@@ -629,6 +676,14 @@ async def deep_analysis_analyze(
     else:
         ema_trend = "N/A"
 
+    ls_ratio = body.long_short_ratio
+    if ls_ratio is not None:
+        ls_long_pct = round(ls_ratio / (1 + ls_ratio) * 100, 1)
+        ls_short_pct = round(100 - ls_long_pct, 1)
+        ls_display = f"{ls_ratio} ({ls_long_pct}% long / {ls_short_pct}% short)"
+    else:
+        ls_display = "N/A"
+
     prompt = f"""You are a professional Bitcoin trading analyst. Analyze the following market snapshot and provide a structured assessment.
 
 Market Snapshot:
@@ -640,7 +695,7 @@ Market Snapshot:
 - EMA200: {_fmt(body.ema200, ' USD')}
 - EMA Trend: {ema_trend}
 - Funding Rate: {_fmt(body.funding_rate, '%')}
-- Long/Short Ratio: {_fmt(body.long_short_ratio)}
+- Long/Short Ratio: {ls_display}
 
 Respond with ONLY valid JSON, no markdown, no extra text:
 {{

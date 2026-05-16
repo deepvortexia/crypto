@@ -175,7 +175,7 @@ class BTCEnsemble:
             "predicted_price": round(ensemble_price, 2),
             "change_pct": round(change_pct, 4),
             "direction": "up" if change_pct >= 0 else "down",
-            "confidence": self._confidence_score(list(valid.values())),
+            "confidence": self._confidence_score(horizon_key, list(valid.values())),
             "model_predictions": {
                 "lstm": round(lstm_pred, 2) if lstm_pred else None,
                 "xgboost": round(xgb_pred, 2) if xgb_pred else None,
@@ -189,17 +189,23 @@ class BTCEnsemble:
         self._store_prediction(result)
         return result
 
-    def _confidence_score(self, values: list[float]) -> float:
-        if len(values) < 2:
-            return 0.75
-        std = float(np.std(values))
-        mean = float(np.mean(values))
+    def _confidence_score(self, horizon_key: str, model_values: list[float]) -> float:
+        """Confidence = backtested direction accuracy over last 30 resolved predictions.
+        Falls back to inter-model agreement (capped at 0.70) when history is thin."""
+        resolved = [
+            p for p in self._predictions
+            if p["horizon"] == horizon_key and p["direction_correct"] is not None
+        ][-30:]
+        if len(resolved) >= 5:
+            return round(float(np.mean([p["direction_correct"] for p in resolved])), 3)
+        # Fallback: coefficient-of-variation agreement score, capped conservatively
+        if len(model_values) < 2:
+            return 0.60
+        std = float(np.std(model_values))
+        mean = float(np.mean(model_values))
         cv = std / mean if mean else 1.0
-        # Lower CV = higher agreement = higher confidence
-        # Map to 50-99% range
-        raw_confidence = 1.0 - cv * 5
-        confidence = min(0.99, max(0.50, raw_confidence))
-        return round(confidence, 3)
+        raw = 1.0 - cv * 5
+        return round(min(0.70, max(0.50, raw)), 3)
 
     def _store_prediction(self, pred: dict):
         entry = {

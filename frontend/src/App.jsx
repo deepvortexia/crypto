@@ -113,14 +113,14 @@ function StatCard({ label, value, sub, valueColor, icon }) {
   )
 }
 
-const HORIZON_CONFIDENCE = { '4h': 92, '8h': 88, '12h': 84, '24h': 78, '1week': 65, '1month': 51 }
-
 function PredCard({ horizon, horizonKey, data, loading }) {
   const gold = G.gold
   // Derive direction from change_pct (single source of truth — never trust the string field alone)
   const up = data != null ? (data.change_pct ?? 0) >= 0 : false
   const dirColor = up ? G.green : G.red
-  const conf = data ? (HORIZON_CONFIDENCE[horizonKey] ?? (data.confidence != null ? Math.round(data.confidence > 1 ? data.confidence : data.confidence * 100) : 75)) : 0
+  const conf = data
+    ? (data.confidence != null ? Math.round(data.confidence > 1 ? data.confidence : data.confidence * 100) : 60)
+    : 0
 
   return (
     <div style={{
