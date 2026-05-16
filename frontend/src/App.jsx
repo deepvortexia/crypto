@@ -1231,7 +1231,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           onMouseEnter={e => { e.target.style.boxShadow='0 0 50px #f59e0b99, 0 0 100px #f59e0b55'; e.target.style.transform='scale(1.05)'; e.target.style.borderColor='#fbbf24' }}
           onMouseLeave={e => { e.target.style.boxShadow='0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)'; e.target.style.transform='scale(1)'; e.target.style.borderColor='rgba(251,191,36,0.6)' }}
         >
-            ANALYSE PROFONDE
+            DEEP ANALYSIS
           </button>
         </div>
 
@@ -1849,7 +1849,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
               <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.25em', color: G.gold }}>
-                ANALYSE PROFONDE
+                DEEP ANALYSIS
               </span>
               {!deepRunning && (
                 <button onClick={() => { setDeepOpen(false); setDeepHorizon(null) }}
@@ -1860,7 +1860,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             {/* horizon selector */}
             {!deepHorizon && (
               <div style={{textAlign:'center',padding:20}}>
-                <div style={{fontFamily:'"Orbitron",sans-serif',color:'#f59e0b',marginBottom:20}}>CHOISIR L'HORIZON</div>
+                <div style={{fontFamily:'"Orbitron",sans-serif',color:'#f59e0b',marginBottom:20}}>SELECT HORIZON</div>
                 <div className="deep-horizon-grid" style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
                   {['4h','8h','12h','24h','1week','1month'].map(h=>(
                     <button key={h} onClick={()=>{setDeepHorizon(h);runDeepAnalysis(h)}} style={{fontFamily:'"Orbitron",sans-serif',padding:'14px',background:'#1a1a1a',border:'1px solid #f59e0b',borderRadius:8,color:'#f59e0b',cursor:'pointer',fontSize:13,letterSpacing:'0.2em'}}>{h.toUpperCase()}</button>
@@ -1902,11 +1902,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               {/* Results — scrollable with visible indicator */}
               {deepResult && (
                 <div className="deep-results-scroll" style={{ overflowY:'auto', flex:1, padding:'24px 32px', textAlign:'center' }}>
-                  <div style={{fontSize:11,color:'#6b7280',marginBottom:8,letterSpacing:'0.2em'}}>PRÉDIT EN {deepHorizon?.toUpperCase()}</div>
+                  <div style={{fontSize:11,color:'#6b7280',marginBottom:8,letterSpacing:'0.2em'}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
                   <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:64,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
                     ${deepResult?.current_price?.toLocaleString()}
                   </div>
-                  <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:28}}>PRIX BTC ACTUEL</div>
+                  <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:28}}>CURRENT BTC PRICE</div>
                   <div style={{display:'flex',gap:14,justifyContent:'center',marginBottom:24}}>
                     <div style={{
                       border:`2px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,
@@ -1915,10 +1915,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                       fontFamily:'"Orbitron",sans-serif',fontSize:14,letterSpacing:'0.15em',
                       animation:deepResult.score>50?'badgeGlowBull 2s ease-in-out infinite':'badgeGlowBear 2s ease-in-out infinite',
                     }}>
-                      {deepResult.direction?.toLowerCase()==='bullish'?'HAUSSIER':deepResult.direction?.toLowerCase()==='bearish'?'BAISSIER':deepResult.direction?.toUpperCase()}
+                      {deepResult.direction?.toUpperCase()}
                     </div>
                     <div style={{border:'2px solid #f59e0b',borderRadius:10,padding:'10px 28px',color:'#f59e0b',fontFamily:'"Orbitron",sans-serif',fontSize:14,letterSpacing:'0.15em'}}>
-                      {deepResult.score}% CONFIANCE
+                      {deepResult.score}% CONFIDENCE
                     </div>
                   </div>
                   {(deepResult.analysis || deepResult.recommendation) && (
@@ -1949,12 +1949,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                   background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 6,
                   color: G.gold, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
-                }}>RELANCER</button>
+                }}>RE-RUN</button>
                 <button onClick={() => { setDeepOpen(false); setDeepHorizon(null) }} style={{
                   fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                   background: 'none', border: `1px solid ${G.border}`, borderRadius: 6,
                   color: G.text, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
-                }}>FERMER</button>
+                }}>CLOSE</button>
               </div>
             )}
           </div>
