@@ -1837,8 +1837,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             border: `1px solid ${G.gold}55`,
             borderRadius: 12,
             boxShadow: `0 0 40px ${G.goldGlow}`,
-            width: '95%', maxWidth: 680,
-            maxHeight: '90vh',
+            width: '95%', minWidth: 700, maxWidth: 860,
+            minHeight: 600, maxHeight: '92vh',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
           }}>
@@ -1849,7 +1849,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
               <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.25em', color: G.gold }}>
-                DEEP ANALYSIS
+                ANALYSE PROFONDE
               </span>
               {!deepRunning && (
                 <button onClick={() => { setDeepOpen(false); setDeepHorizon(null) }}
@@ -1860,7 +1860,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             {/* horizon selector */}
             {!deepHorizon && (
               <div style={{textAlign:'center',padding:20}}>
-                <div style={{fontFamily:'"Orbitron",sans-serif',color:'#f59e0b',marginBottom:20}}>SELECT HORIZON</div>
+                <div style={{fontFamily:'"Orbitron",sans-serif',color:'#f59e0b',marginBottom:20}}>CHOISIR L'HORIZON</div>
                 <div className="deep-horizon-grid" style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}}>
                   {['4h','8h','12h','24h','1week','1month'].map(h=>(
                     <button key={h} onClick={()=>{setDeepHorizon(h);runDeepAnalysis(h)}} style={{fontFamily:'"Orbitron",sans-serif',padding:'14px',background:'#1a1a1a',border:'1px solid #f59e0b',borderRadius:8,color:'#f59e0b',cursor:'pointer',fontSize:13,letterSpacing:'0.2em'}}>{h.toUpperCase()}</button>
@@ -1876,7 +1876,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               {/* Egyptian dial spinner while running */}
               {deepRunning && (
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:16 }}>
-                  <img src="/egyptian-dial.webp" alt="" style={{ width:108, height:108, animation:'egyptianSpin 2s linear infinite' }} />
+                  <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, animation:'egyptianSpin 2s linear infinite' }} />
                   <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
                   </div>
@@ -1901,20 +1901,42 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
               {/* Results — scrollable with visible indicator */}
               {deepResult && (
-                <div className="deep-results-scroll" style={{ overflowY:'auto', flex:1, padding:'20px 24px', textAlign:'center' }}>
-                  <div style={{fontSize:11,color:'#6b7280',marginBottom:8}}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
-                  <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:36,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
+                <div className="deep-results-scroll" style={{ overflowY:'auto', flex:1, padding:'24px 32px', textAlign:'center' }}>
+                  <div style={{fontSize:11,color:'#6b7280',marginBottom:8,letterSpacing:'0.2em'}}>PRÉDIT EN {deepHorizon?.toUpperCase()}</div>
+                  <div style={{fontFamily:'"Orbitron",sans-serif',fontSize:64,color:'#f59e0b',animation:'goldPulse 2s ease-in-out infinite',marginBottom:4,lineHeight:1}}>
                     ${deepResult?.current_price?.toLocaleString()}
                   </div>
-                  <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:20}}>CURRENT BTC PRICE</div>
-                  <div style={{display:'flex',gap:12,justifyContent:'center',marginBottom:12}}>
-                    <div style={{border:`1px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,borderRadius:8,padding:'8px 20px',color:deepResult.score>50?'#10b981':'#ef4444',fontFamily:'"Orbitron",sans-serif',fontSize:12}}>
-                      {deepResult.direction?.toUpperCase()}
+                  <div style={{fontSize:11,color:'#6b7280',letterSpacing:'0.2em',marginBottom:28}}>PRIX BTC ACTUEL</div>
+                  <div style={{display:'flex',gap:14,justifyContent:'center',marginBottom:24}}>
+                    <div style={{
+                      border:`2px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,
+                      borderRadius:10,padding:'10px 28px',
+                      color:deepResult.score>50?'#10b981':'#ef4444',
+                      fontFamily:'"Orbitron",sans-serif',fontSize:14,letterSpacing:'0.15em',
+                      animation:deepResult.score>50?'badgeGlowBull 2s ease-in-out infinite':'badgeGlowBear 2s ease-in-out infinite',
+                    }}>
+                      {deepResult.direction?.toLowerCase()==='bullish'?'HAUSSIER':deepResult.direction?.toLowerCase()==='bearish'?'BAISSIER':deepResult.direction?.toUpperCase()}
                     </div>
-                    <div style={{border:'1px solid #f59e0b',borderRadius:8,padding:'8px 20px',color:'#f59e0b',fontFamily:'"Orbitron",sans-serif',fontSize:12}}>
-                      {deepResult.score}% CONFIDENCE
+                    <div style={{border:'2px solid #f59e0b',borderRadius:10,padding:'10px 28px',color:'#f59e0b',fontFamily:'"Orbitron",sans-serif',fontSize:14,letterSpacing:'0.15em'}}>
+                      {deepResult.score}% CONFIANCE
                     </div>
                   </div>
+                  {(deepResult.analysis || deepResult.recommendation) && (
+                    <div style={{
+                      textAlign:'left',
+                      background:'#0d0d0d',
+                      border:'1px solid #f59e0b33',
+                      borderRadius:8,
+                      padding:'16px 20px',
+                      fontFamily:'"Share Tech Mono",monospace',
+                      fontSize:12,
+                      color:'#d1d5db',
+                      lineHeight:1.7,
+                      whiteSpace:'pre-wrap',
+                    }}>
+                      {deepResult.analysis || deepResult.recommendation}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1927,12 +1949,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                   background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 6,
                   color: G.gold, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
-                }}>Re-run</button>
+                }}>RELANCER</button>
                 <button onClick={() => { setDeepOpen(false); setDeepHorizon(null) }} style={{
                   fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                   background: 'none', border: `1px solid ${G.border}`, borderRadius: 6,
                   color: G.text, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
-                }}>Close</button>
+                }}>FERMER</button>
               </div>
             )}
           </div>
@@ -2063,7 +2085,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes authSuccessPulse { 0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.4)} 50%{box-shadow:0 0 40px rgba(245,158,11,0.7)} }
         @keyframes introScan    { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
         @keyframes introScanH   { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
-        @keyframes egyptianSpin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        @keyframes egyptianSpin  { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        @keyframes badgeGlowBull { 0%,100%{box-shadow:0 0 8px #10b981,0 0 20px #10b98144} 50%{box-shadow:0 0 18px #10b981,0 0 40px #10b98177} }
+        @keyframes badgeGlowBear { 0%,100%{box-shadow:0 0 8px #ef4444,0 0 20px #ef444444} 50%{box-shadow:0 0 18px #ef4444,0 0 40px #ef444477} }
         .deep-results-scroll::-webkit-scrollbar { width:4px }
         .deep-results-scroll::-webkit-scrollbar-track { background:#0d0d0d }
         .deep-results-scroll::-webkit-scrollbar-thumb { background:#f59e0b88; border-radius:2px }
