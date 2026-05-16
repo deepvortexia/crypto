@@ -671,31 +671,98 @@ async def deep_analysis_analyze(
     def _fmt(v, unit=""):
         return f"{v}{unit}" if v is not None else "N/A"
 
-    if body.ema50 is not None and body.ema200 is not None:
-        ema_trend = "Golden Cross (bullish)" if body.ema50 > body.ema200 else "Death Cross (bearish)"
+    # ── Pull every value from caches or live fetches — never leave N/A if avoidable ──
+
+    # Indicators: prefer body (sent by frontend), fall back to indicators cache
+    _ind = _indicators_cache.get("indicators", {})
+    _ema = _ind.get("ema", {})
+    rsi_val         = body.rsi            if body.rsi            is not None else _ind.get("rsi", {}).get("value")
+    macd_hist_val   = body.macd_histogram if body.macd_histogram is not None else _ind.get("macd", {}).get("histogram")
+    ema50_val       = body.ema50          if body.ema50          is not None else _ema.get("ema50")
+    ema200_val      = body.ema200         if body.ema200         is not None else _ema.get("ema200")
+    macd_signal_val = _ind.get("macd", {}).get("signal")
+    macd_cross_val  = _ind.get("macd", {}).get("crossover", "N/A")
+    rsi_signal_val  = _ind.get("rsi", {}).get("signal", "N/A")
+    bb_pct_val      = _ind.get("bollinger_bands", {}).get("pct_b")
+    bb_bw_val       = _ind.get("bollinger_bands", {}).get("bandwidth")
+
+    # Fear & Greed: sentiment cache or live fetch
+    try:
+        if "sentiment" in _sentiment_cache:
+            _fg = _sentiment_cache["sentiment"]
+        else:
+            _fg = await fetch_fear_greed()
+            _sentiment_cache["sentiment"] = _fg
+        fear_greed_val = _fg.get("value")
+        fg_class_val   = _fg.get("classification", "Neutral")
+    except Exception:
+        fear_greed_val, fg_class_val = None, "N/A"
+
+    # Funding rate: body or live fetch
+    if body.funding_rate is not None:
+        funding_rate_val = body.funding_rate
+    else:
+        try:
+            _fr = await _fetch_funding_rate()
+            funding_rate_val = _fr.get("rate_pct")
+        except Exception:
+            funding_rate_val = None
+
+    # Long/short: body or live fetch
+    if body.long_short_ratio is not None:
+        ls_ratio_val = body.long_short_ratio
+    else:
+        try:
+            _ls = await _fetch_long_short_ratio()
+            ls_ratio_val = _ls.get("ratio")
+        except Exception:
+            ls_ratio_val = None
+
+    # Mempool from onchain
+    try:
+        _onchain = await fetch_onchain()
+        mempool_val = _onchain.get("mempool_size")
+    except Exception:
+        mempool_val = None
+
+    # Derived display strings
+    if ema50_val is not None and ema200_val is not None:
+        ema_trend = "Golden Cross (bullish)" if ema50_val > ema200_val else "Death Cross (bearish)"
     else:
         ema_trend = "N/A"
 
-    ls_ratio = body.long_short_ratio
-    if ls_ratio is not None:
-        ls_long_pct = round(ls_ratio / (1 + ls_ratio) * 100, 1)
+    if ls_ratio_val is not None:
+        ls_long_pct  = round(ls_ratio_val / (1 + ls_ratio_val) * 100, 1)
         ls_short_pct = round(100 - ls_long_pct, 1)
-        ls_display = f"{ls_ratio} ({ls_long_pct}% long / {ls_short_pct}% short)"
+        ls_display   = f"{ls_ratio_val} ({ls_long_pct}% long / {ls_short_pct}% short)"
     else:
         ls_display = "N/A"
+
+    funding_display = f"{funding_rate_val:+.4f}%" if funding_rate_val is not None else "N/A"
+    fg_display      = f"{fear_greed_val} ({fg_class_val})" if fear_greed_val is not None else "N/A"
+
+    logger.info(
+        f"[deep-analysis] prompt — price=${current_price:,.0f} rsi={rsi_val} "
+        f"macd_hist={macd_hist_val} fg={fear_greed_val} funding={funding_rate_val} ls={ls_ratio_val}"
+    )
 
     prompt = f"""You are a professional Bitcoin trading analyst. Analyze the following market snapshot and provide a structured assessment.
 
 Market Snapshot:
 - Current BTC Price: ${current_price:,.2f}
 - Horizon: {body.horizon}
-- RSI (14): {_fmt(body.rsi)}
-- MACD Histogram: {_fmt(body.macd_histogram)}
-- EMA50: {_fmt(body.ema50, ' USD')}
-- EMA200: {_fmt(body.ema200, ' USD')}
+- RSI (14): {_fmt(rsi_val)} ({rsi_signal_val})
+- MACD Histogram: {_fmt(macd_hist_val)} ({macd_cross_val} crossover)
+- MACD Signal Line: {_fmt(macd_signal_val)}
+- Bollinger %B: {_fmt(bb_pct_val)}
+- Bollinger Bandwidth: {_fmt(bb_bw_val)}
+- EMA50: {_fmt(ema50_val, ' USD')}
+- EMA200: {_fmt(ema200_val, ' USD')}
 - EMA Trend: {ema_trend}
-- Funding Rate: {_fmt(body.funding_rate, '%')}
+- Fear & Greed Index: {fg_display}
+- Funding Rate: {funding_display}
 - Long/Short Ratio: {ls_display}
+- Mempool Size: {_fmt(mempool_val, ' pending txs')}
 
 Respond with ONLY valid JSON, no markdown, no extra text:
 {{
