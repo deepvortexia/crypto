@@ -1231,7 +1231,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           onMouseEnter={e => { e.target.style.boxShadow='0 0 50px #f59e0b99, 0 0 100px #f59e0b55'; e.target.style.transform='scale(1.05)'; e.target.style.borderColor='#fbbf24' }}
           onMouseLeave={e => { e.target.style.boxShadow='0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)'; e.target.style.transform='scale(1)'; e.target.style.borderColor='rgba(251,191,36,0.6)' }}
         >
-            DEEP ANALYSIS
+            ANALYSE PROFONDE
           </button>
         </div>
 
@@ -1876,7 +1876,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               {/* Egyptian dial spinner while running */}
               {deepRunning && (
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:16 }}>
-                  <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, animation:'egyptianSpin 2s linear infinite' }} />
+                  <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, borderRadius:12, animation:'dialGlow 2s ease-in-out infinite' }} />
                   <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
                   </div>
@@ -2085,7 +2085,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes authSuccessPulse { 0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.4)} 50%{box-shadow:0 0 40px rgba(245,158,11,0.7)} }
         @keyframes introScan    { 0%{left:-2px;opacity:1} 100%{left:100vw;opacity:0} }
         @keyframes introScanH   { 0%{top:-2px;opacity:1}  100%{top:100vh;opacity:0}  }
-        @keyframes egyptianSpin  { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+        @keyframes dialGlow { 0%,100%{box-shadow:0 0 20px #f59e0b55,0 0 40px #f59e0b22} 50%{box-shadow:0 0 55px #f59e0bcc,0 0 110px #f59e0b66,0 0 160px #f59e0b33} }
         @keyframes badgeGlowBull { 0%,100%{box-shadow:0 0 8px #10b981,0 0 20px #10b98144} 50%{box-shadow:0 0 18px #10b981,0 0 40px #10b98177} }
         @keyframes badgeGlowBear { 0%,100%{box-shadow:0 0 8px #ef4444,0 0 20px #ef444444} 50%{box-shadow:0 0 18px #ef4444,0 0 40px #ef444477} }
         .deep-results-scroll::-webkit-scrollbar { width:4px }
