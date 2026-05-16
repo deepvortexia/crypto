@@ -1885,7 +1885,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <div style={{ display:'flex', flex:1, minHeight:0, overflow:'hidden' }}>
 
               {/* LEFT: log lines */}
-              <div style={{
+              <div className="deep-log-col" style={{
                 width:'40%', borderRight:`1px solid ${G.border}`,
                 padding:'16px 18px', display:'flex', flexDirection:'column',
                 gap:3, overflow:'hidden',
@@ -1905,13 +1905,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               </div>
 
               {/* RIGHT: dial+progress while running, results when done */}
-              <div style={{
+              <div className="deep-right-col" style={{
                 flex:1, display:'flex', flexDirection:'column',
                 alignItems:'center', justifyContent:'center',
                 padding:'24px 28px', overflow:'hidden',
               }}>
                 {deepRunning && (<>
-                  <img src="/egyptian-dial.webp" alt="" style={{ width:260, height:260, opacity:0.78, animation:'dialGlow 2s ease-in-out infinite' }} />
+                  <img src="/egyptian-dial.webp" alt="" className="deep-dial-img" style={{ width:260, height:260, objectFit:'contain', display:'block', opacity:0.78, animation:'dialGlow 2s ease-in-out infinite' }} />
                   <div style={{ marginTop:16, fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
                   </div>
@@ -1929,11 +1929,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
                 {deepResult && (<>
                   <div style={{ fontSize:11, color:'#6b7280', marginBottom:6, letterSpacing:'0.2em' }}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
-                  <div style={{ fontFamily:'"Orbitron",sans-serif', fontSize:48, color:'#f59e0b', animation:'goldPulse 2s ease-in-out infinite', marginBottom:4, lineHeight:1 }}>
+                  <div className="deep-price" style={{ fontFamily:'"Orbitron",sans-serif', fontSize:48, color:'#f59e0b', animation:'goldPulse 2s ease-in-out infinite', marginBottom:4, lineHeight:1 }}>
                     ${deepResult?.current_price?.toLocaleString()}
                   </div>
                   <div style={{ fontSize:11, color:'#6b7280', letterSpacing:'0.2em', marginBottom:18 }}>CURRENT BTC PRICE</div>
-                  <div style={{ display:'flex', gap:12, justifyContent:'center', marginBottom:18 }}>
+                  <div className="deep-badges" style={{ display:'flex', gap:12, justifyContent:'center', marginBottom:18 }}>
                     <div style={{
                       border:`2px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,
                       borderRadius:10, padding:'8px 22px',
@@ -1948,7 +1948,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     </div>
                   </div>
                   {(deepResult.analysis || deepResult.recommendation) && (
-                    <div style={{
+                    <div className="deep-analysis-text" style={{
                       width:'100%', textAlign:'left',
                       background:'#0d0d0d', border:'1px solid #f59e0b33', borderRadius:8,
                       padding:'12px 16px', fontFamily:'"Share Tech Mono",monospace',
@@ -1965,13 +1965,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
             {/* footer */}
             {!deepRunning && deepHorizon && (
-              <div style={{ padding: '12px 24px', borderTop: `1px solid ${G.border}`, display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button onClick={() => { setDeepHorizon(null); setDeepLogs([]); setDeepResult(null) }} style={{
+              <div className="deep-footer" style={{ padding: '12px 24px', borderTop: `1px solid ${G.border}`, display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <button className="deep-footer-btn" onClick={() => { setDeepHorizon(null); setDeepLogs([]); setDeepResult(null) }} style={{
                   fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                   background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 6,
                   color: G.gold, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
                 }}>RE-RUN</button>
-                <button onClick={() => { setDeepOpen(false); setDeepHorizon(null) }} style={{
+                <button className="deep-footer-btn" onClick={() => { setDeepOpen(false); setDeepHorizon(null) }} style={{
                   fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                   background: 'none', border: `1px solid ${G.border}`, borderRadius: 6,
                   color: G.text, cursor: 'pointer', padding: '8px 18px', textTransform: 'uppercase',
@@ -2159,14 +2159,20 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .pred-direction { font-size: 10px !important; }
           .pred-pct       { font-size: 11px !important; }
           .pred-conf      { font-size: 10px !important; }
-          /* Deep Analysis modal: full-screen on mobile */
-          .deep-modal-box { width: 100% !important; max-width: 100% !important;
-                            height: 100% !important; max-height: 100% !important;
-                            border-radius: 0 !important; }
+          /* Deep Analysis modal: single column on mobile */
+          .deep-modal-box    { width: 95vw !important; max-width: 95vw !important;
+                               height: 85vh !important; max-height: 85vh !important;
+                               border-radius: 10px !important; }
+          .deep-log-col      { display: none !important; }
+          .deep-right-col    { width: 100% !important; flex: 1 !important; padding: 16px !important; }
+          .deep-dial-img     { width: 160px !important; height: 160px !important; }
+          .deep-price        { font-size: 32px !important; }
+          .deep-badges       { flex-direction: column !important; align-items: center !important; gap: 10px !important; }
+          .deep-analysis-text { font-size: 11px !important; }
+          .deep-footer       { flex-direction: column !important; padding: 10px 16px !important; gap: 8px !important; }
+          .deep-footer-btn   { width: 100% !important; text-align: center !important; min-height: 44px !important; }
           /* Horizon selector: 2 cols on mobile */
           .deep-horizon-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          /* Result badges: wrap if needed */
-          .deep-result-badges { flex-wrap: wrap !important; justify-content: center !important; }
           /* Pricing modal: scrollable, fits screen */
           .pricing-modal-box { max-height: 90vh !important; max-width: 95vw !important; overflow-y: auto !important;
                                width: 95% !important; border-radius: 12px !important;
