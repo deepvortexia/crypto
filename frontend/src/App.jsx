@@ -1128,7 +1128,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         )}
 
         {/* hamburger — mobile only */}
-        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:28,lineHeight:1,padding:'10px',minWidth:44,minHeight:44,display:'none'}}>☰</button>
+        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:34,lineHeight:1,padding:'10px',minWidth:48,minHeight:48,display:'none'}}>☰</button>
 
         {/* mobile dropdown */}
         {menuOpen && (
@@ -1139,6 +1139,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         )}
         {menuOpen && (
           <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:999,padding:'12px 0'}}>
+            {/* Close button */}
+            <button onClick={() => setMenuOpen(false)} style={{position:'absolute',top:10,right:14,background:'none',border:'none',color:'#f59e0b',fontSize:28,lineHeight:1,cursor:'pointer',padding:'8px',minWidth:44,minHeight:44,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
             {/* User section for mobile */}
             {authLoading ? null : user ? (
               <div style={{padding:'16px 20px',borderBottom:`1px solid #2a1f00`,marginBottom:8}}>
