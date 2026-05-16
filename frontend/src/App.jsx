@@ -1887,7 +1887,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               {/* Egyptian dial + progress while running */}
               {deepRunning && (
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, padding:'32px 24px', gap:20 }}>
-                  <img src="/egyptian-dial.webp" alt="" style={{ width:200, height:200, animation:'dialGlow 2s ease-in-out infinite' }} />
+                  <img src="/egyptian-dial.webp" alt="" style={{ width:260, height:260, opacity:0.78, animation:'dialGlow 2s ease-in-out infinite' }} />
                   <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
                   </div>
@@ -1905,15 +1905,15 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 </div>
               )}
 
-              {/* Compact log summary once done */}
+              {/* Log lines — all visible, no scroll */}
               {!deepRunning && deepLogs.length > 0 && (
                 <div style={{
-                  maxHeight:'110px', overflowY:'auto', padding:'12px 24px',
+                  display:'flex', flexDirection:'column', gap:4, padding:'12px 24px',
                   fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:`${G.text}77`,
                   borderBottom:`1px solid ${G.border}`,
                 }}>
                   {deepLogs.map((line, i) => (
-                    <div key={i} style={{ marginBottom:4 }}>
+                    <div key={i}>
                       <span style={{ color:`${G.gold}44`, marginRight:8 }}>[{String(i+1).padStart(2,'0')}]</span>
                       {line}
                     </div>
