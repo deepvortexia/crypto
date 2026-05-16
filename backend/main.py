@@ -1086,25 +1086,38 @@ async def get_market_tensions(request: Request):
         raise HTTPException(503, "ANTHROPIC_API_KEY not configured")
 
     try:
-        price_data, fg_data, onchain_data, funding, ls_ratio, (hourly_df, daily_df) = await asyncio.gather(
-            fetch_live_price(),
-            fetch_fear_greed(),
-            fetch_onchain(),
-            _fetch_funding_rate(),
-            _fetch_long_short_ratio(),
-            _get_dataframes(),
-        )
+        # ── Use the exact same cached data the UI cards read from ──────────────
+        # Price: _price_cache (1-min TTL) — same as /api/price/live
+        if "price" in _price_cache:
+            price_data = _price_cache["price"]
+        else:
+            price_data = await fetch_live_price()
+            _price_cache["price"] = price_data
 
-        # Use the same cached indicators the UI cards display, so AI sees identical numbers.
-        # Only recompute if the indicators cache is cold, and populate it so UI stays in sync.
+        # Fear & Greed: _sentiment_cache (30-min TTL) — same as /api/sentiment
+        if "sentiment" in _sentiment_cache:
+            fg_data = _sentiment_cache["sentiment"]
+        else:
+            fg_data = await fetch_fear_greed()
+            _sentiment_cache["sentiment"] = fg_data
+
+        # Indicators: _indicators_cache (5-min TTL) — same as /api/indicators
         if "indicators" in _indicators_cache:
             indicators_data = _indicators_cache["indicators"]
             daily_ema = indicators_data["ema"]
         else:
+            (hourly_df, daily_df) = await _get_dataframes()
             indicators_data = get_indicator_snapshot(compute_indicators(hourly_df))
             daily_ema = get_indicator_snapshot(compute_indicators(daily_df))["ema"]
             indicators_data = {**indicators_data, "ema": daily_ema}
             _indicators_cache["indicators"] = indicators_data
+
+        # Remaining live data (no dedicated UI cache)
+        onchain_data, funding, ls_ratio = await asyncio.gather(
+            fetch_onchain(),
+            _fetch_funding_rate(),
+            _fetch_long_short_ratio(),
+        )
 
         total_btc_sent = onchain_data.get("total_btc_sent", 0) or 0
 
@@ -1185,6 +1198,11 @@ Type definitions:
 - squeeze: volatility compression about to expand (Bollinger squeeze, funding extremes, coil)
 
 Return only the 2-4 most significant setups."""
+
+        logger.info(
+            f"[tensions] prompt values — price=${btc_price:,.0f} fg={fear_greed} "
+            f"macd={macd} ema50={ema50} ema200={ema200} rsi={rsi}"
+        )
 
         try:
             async with httpx.AsyncClient(timeout=20.0) as client:
