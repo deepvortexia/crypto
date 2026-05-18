@@ -327,11 +327,10 @@ export async function fetchOrderBook() {
 export async function fetchMempool() {
   try {
     const [stats, fees] = await Promise.all([
-      get('https://mempool.space/api/mempool', { timeout: 10000, retries: 2 }),
-      get('https://mempool.space/api/v1/fees/recommended', { timeout: 10000, retries: 2 })
+      get('https://mempool.space/api/mempool', { timeout: 5000, retries: 0, fallback: null }),
+      get('https://mempool.space/api/v1/fees/recommended', { timeout: 5000, retries: 0, fallback: null })
     ])
-
-    // DEBUG: Print raw mempool.space responses
+    if (!stats || !fees) return null
     return {
       count: stats.count,
       vsize: stats.vsize,
@@ -340,16 +339,8 @@ export async function fetchMempool() {
       hourFee: fees.hourFee,
       signal: fees.fastestFee >= 50 ? 'Network congested 🔥' : fees.fastestFee >= 20 ? 'Moderate congestion' : fees.fastestFee >= 5 ? 'Normal activity' : 'Network quiet'
     }
-  } catch (err) {
-    console.error('[fetchMempool] Failed:', err.message)
-    return {
-      count: null,
-      vsize: null,
-      fastestFee: null,
-      halfHourFee: null,
-      hourFee: null,
-      signal: 'Unknown'
-    }
+  } catch {
+    return null
   }
 }
 

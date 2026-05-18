@@ -657,7 +657,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     const currentPrice = p.status === 'fulfilled' ? p.value?.price : null
     const predPromises = otherHorizons.map(h => fetchPrediction(h))
 
-    const [s, ind, oc, fr, ls, oi, wh, mp, ob, kl, liq, ns, mt] = await Promise.allSettled([
+    // Mempool fired independently — non-blocking, fail-silent
+    fetchMempool().then(v => { if (v) setMempool(v) }).catch(() => {})
+
+    const [s, ind, oc, fr, ls, oi, wh, ob, kl, liq, ns, mt] = await Promise.allSettled([
       fetchSentiment(),
       fetchIndicators(),
       fetchOnchain(),
@@ -665,7 +668,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       fetchLongShortRatio(),
       fetchOpenInterest(),
       fetchWhales(),
-      fetchMempool(),
       fetchOrderBook(),
       currentPrice ? fetchKeyLevels(currentPrice) : Promise.resolve(null),
       fetchLiquidations(),
@@ -679,7 +681,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     if (ls.status  === 'fulfilled' && ls.value)   setLongShort(ls.value)
     if (oi.status  === 'fulfilled' && oi.value)   setOpenInterest(oi.value)
     if (wh.status  === 'fulfilled' && wh.value)   setWhales(wh.value)
-    if (mp.status  === 'fulfilled' && mp.value)   setMempool(mp.value)
     if (ob.status  === 'fulfilled' && ob.value)   setOrderBook(ob.value)
     if (kl.status  === 'fulfilled' && kl.value)   setKeyLevels(kl.value)
     if (liq.status === 'fulfilled' && liq.value)  setLiquidations(liq.value)
@@ -814,16 +815,16 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       setRefreshing(true)
       setTimeout(() => setRefreshing(false), 1000)
       setLiveCountdown(60)
-      const [fr, ls, oi, ob, liq, mp] = await Promise.allSettled([
+      fetchMempool().then(v => { if (v) setMempool(v) }).catch(() => {})
+      const [fr, ls, oi, ob, liq] = await Promise.allSettled([
         fetchFundingRate(), fetchLongShortRatio(), fetchOpenInterest(),
-        fetchOrderBook(), fetchLiquidations(), fetchMempool(),
+        fetchOrderBook(), fetchLiquidations(),
       ])
       if (fr.status  === 'fulfilled' && fr.value)  setFundingRate(fr.value)
       if (ls.status  === 'fulfilled' && ls.value)  setLongShort(ls.value)
       if (oi.status  === 'fulfilled' && oi.value)  setOpenInterest(oi.value)
       if (ob.status  === 'fulfilled' && ob.value)  setOrderBook(ob.value)
       if (liq.status === 'fulfilled' && liq.value) setLiquidations(liq.value)
-      if (mp.status  === 'fulfilled' && mp.value)  setMempool(mp.value)
     }, 60_000)
     return () => clearInterval(id)
   }, [])
