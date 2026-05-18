@@ -1303,65 +1303,50 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 <button className="deep-btn" onClick={handleDeepClick}
                 disabled={outOfCredits}
                 style={{
-                  fontFamily:'"Orbitron",sans-serif',
-                  fontSize:10,
-                  letterSpacing:'0.35em',
-                  padding:'11px 28px',
-                  background: outOfCredits
-                    ? 'linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)'
-                    : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 25%, #d97706 50%, #f59e0b 75%, #fbbf24 100%)',
-                  backgroundSize:'200% 200%',
-                  animation: outOfCredits ? 'none' : 'gradientShift 3s ease infinite, buttonGlow 2s ease-in-out infinite',
-                  border: outOfCredits ? '2px solid #444' : '2px solid rgba(251,191,36,0.6)',
-                  borderRadius:14,
-                  color: outOfCredits ? '#6b7280' : '#000',
+                  fontFamily: '"Share Tech Mono",monospace',
+                  fontSize: 11,
+                  letterSpacing: '0.25em',
+                  padding: '14px 32px',
+                  background: outOfCredits ? 'rgba(30,30,30,0.9)' : 'rgba(10,10,10,0.9)',
+                  border: outOfCredits ? '1px solid #444' : '1px solid #f59e0b',
+                  borderRadius: 8,
+                  color: outOfCredits ? '#6b7280' : '#f59e0b',
                   cursor: outOfCredits ? 'not-allowed' : 'pointer',
-                  boxShadow: outOfCredits ? 'none' : '0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)',
-                  transition:'all 0.3s ease',
-                  fontWeight:800,
-                  textShadow: outOfCredits ? 'none' : '0 1px 0 rgba(255,255,255,0.3)',
-                  position:'relative',
-                  overflow:'hidden',
-                  opacity: outOfCredits ? 0.7 : 1,
+                  boxShadow: outOfCredits ? 'none' : '0 0 12px rgba(245,158,11,0.4)',
+                  transition: 'box-shadow 0.2s ease',
+                  display: 'inline-flex', alignItems: 'center', gap: 10,
+                  textTransform: 'uppercase',
+                  opacity: outOfCredits ? 0.6 : 1,
                 }}
-                onMouseEnter={e => { if (!outOfCredits) { e.target.style.boxShadow='0 0 50px #f59e0b99, 0 0 100px #f59e0b55'; e.target.style.transform='scale(1.05)'; e.target.style.borderColor='#fbbf24' } }}
-                onMouseLeave={e => { if (!outOfCredits) { e.target.style.boxShadow='0 0 30px #f59e0b66, 0 0 60px #f59e0b33, inset 0 1px 0 rgba(255,255,255,0.3)'; e.target.style.transform='scale(1)'; e.target.style.borderColor='rgba(251,191,36,0.6)' } }}
+                onMouseEnter={e => { if (!outOfCredits) e.currentTarget.style.boxShadow = '0 0 24px rgba(245,158,11,0.7)' }}
+                onMouseLeave={e => { if (!outOfCredits) e.currentTarget.style.boxShadow = '0 0 12px rgba(245,158,11,0.4)' }}
               >
+                  <img src="/logoegyptfinal.webp" alt="" style={{ height: 22, width: 'auto', objectFit: 'contain', opacity: outOfCredits ? 0.4 : 1 }} />
                   DEEP ANALYSIS
                 </button>
 
-                {/* Credits badge */}
+                {/* Credits line */}
                 {user && (
                   <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     {outOfCredits ? (
                       <>
-                        <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize: 11, color: '#ef4444', letterSpacing:'0.1em' }}>
+                        <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: '#ef4444', letterSpacing: '0.1em' }}>
                           No credits remaining — buy more or wait until midnight UTC
                         </div>
                         <button onClick={() => setBuyCreditsOpen(true)} style={{
                           marginTop: 4,
-                          fontFamily:'"Share Tech Mono",monospace', fontSize: 11, letterSpacing:'0.15em',
+                          fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.15em',
                           background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none',
                           borderRadius: 6, color: '#000', cursor: 'pointer',
                           padding: '8px 18px', textTransform: 'uppercase', fontWeight: 700,
-                        }}>⚡ Buy Credits</button>
+                        }}>Buy Credits</button>
                       </>
                     ) : (
-                      <button onClick={() => setBuyCreditsOpen(true)} style={{
-                        fontFamily:'"Share Tech Mono",monospace', fontSize: 12, letterSpacing:'0.12em',
-                        background: 'none', border: `1px solid #f59e0b55`,
-                        borderRadius: 6, color: '#f59e0b', cursor: 'pointer',
-                        padding: '6px 14px',
-                      }}>
-                        ⚡ {creditInfo.total_remaining}/{creditInfo.daily_limit} credits
-                        {creditInfo.bonus_remaining > 0 && (
-                          <span style={{ color: '#fbbf24', marginLeft: 6 }}>(+{creditInfo.bonus_remaining} bonus)</span>
-                        )}
-                      </button>
-                    )}
-                    {!creditInfo.is_pro && (
-                      <div style={{ fontFamily:'"Share Tech Mono",monospace', fontSize: 9, color: '#6b7280', letterSpacing:'0.15em', marginTop: 2 }}>
-                        FREE TIER · Upgrade to PRO for 20/day
+                      <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: '#f59e0b88', letterSpacing: '0.1em' }}>
+                        {creditInfo.is_pro
+                          ? `${creditInfo.daily_remaining} / ${creditInfo.daily_limit} daily credits${creditInfo.bonus_remaining > 0 ? ` (+${creditInfo.bonus_remaining} bonus)` : ''}`
+                          : `${creditInfo.daily_remaining} / ${creditInfo.daily_limit} free credits today${creditInfo.bonus_remaining > 0 ? ` (+${creditInfo.bonus_remaining} bonus)` : ''}`
+                        }
                       </div>
                     )}
                   </div>
