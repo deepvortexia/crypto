@@ -1211,7 +1211,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           }} />
         )}
         {menuOpen && (
-          <div style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:999,padding:'0'}}>
+          <div className="mobile-dropdown" style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:999,padding:'0'}}>
             {/* Close button row — full-width flex so it can't overlap content below */}
             <div style={{display:'flex',justifyContent:'flex-end',padding:'6px 8px 0'}}>
               <button onClick={() => setMenuOpen(false)} style={{background:'none',border:'none',color:'#f59e0b',fontSize:28,lineHeight:1,cursor:'pointer',padding:'8px',minWidth:44,minHeight:44,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
@@ -2391,11 +2391,18 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         /* ── Tablet portrait: 769px – 1024px ── */
         @media (min-width: 769px) and (max-width: 1024px) {
           .main-pad     { padding: 20px !important; }
-          .header-inner { padding: 0 20px !important; }
+          .header-inner { padding: 0 16px !important; flex-direction: row !important;
+                          justify-content: space-between !important; align-items: center !important;
+                          flex-wrap: nowrap !important; }
+          .header-right { position: static !important; gap: 8px !important; }
           .grid-4       { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
           .grid-3       { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
           .grid-6       { grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
           .navbar-brand { font-size: 18px !important; }
+          .hide-mobile  { display: none !important; }
+          .show-mobile  { display: flex !important; align-items: center !important; }
+          .mobile-dropdown { width: 320px !important; left: auto !important; right: 0 !important;
+                             border-bottom-left-radius: 8px !important; border-left: 1px solid #2a1f00 !important; }
         }
 
         /* ── Mobile + large phone: ≤768px ── */

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const G = {
@@ -87,12 +88,13 @@ const FAQ_ITEMS = [
 ]
 
 export default function About() {
+  const [menuOpen, setMenuOpen] = useState(false)
   return (
     <div style={{ background: G.bg, minHeight: '100vh', color: G.bright, fontFamily: mono, position: 'relative', zIndex: 1 }}>
 
       {/* ── Navbar ── */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 50,
+        position: 'sticky', top: 0, zIndex: 50, overflow: 'visible',
         background: 'rgba(10,10,10,0.9)',
         backdropFilter: 'blur(14px)',
         borderBottom: `1px solid ${G.border}`,
@@ -104,14 +106,27 @@ export default function About() {
           <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" style={{ height: 46, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: orb, fontSize: 18, letterSpacing: '0.15em', color: G.gold, opacity: 0.9 }}>PREDICT ALPHA</span>
         </Link>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <Link to="/" style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.2em', color: G.text, textDecoration: 'none', textTransform: 'uppercase' }}>
-            Dashboard
-          </Link>
-          <Link to="/about" style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', textShadow: `0 0 8px ${G.goldGlow}` }}>
-            Learn
-          </Link>
+        {/* desktop nav links */}
+        <nav className="about-nav" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <Link to="/" style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.2em', color: G.text, textDecoration: 'none', textTransform: 'uppercase' }}>Dashboard</Link>
+          <Link to="/about" style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', textShadow: `0 0 8px ${G.goldGlow}` }}>Learn</Link>
         </nav>
+        {/* burger — tablet and mobile */}
+        <button className="about-burger" onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', fontSize: 34, lineHeight: 1, padding: '10px', minWidth: 48, minHeight: 48, display: 'none' }}>☰</button>
+        {/* backdrop */}
+        {menuOpen && (
+          <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 998 }} />
+        )}
+        {/* dropdown */}
+        {menuOpen && (
+          <div className="about-dropdown" style={{ position: 'absolute', top: 68, left: 'auto', right: 0, background: 'rgba(10,10,10,0.97)', borderBottom: `1px solid #2a1f00`, borderLeft: `1px solid #2a1f00`, borderBottomLeftRadius: 8, zIndex: 999, padding: '8px 0 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 8px 0' }}>
+              <button onClick={() => setMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#f59e0b', fontSize: 28, lineHeight: 1, cursor: 'pointer', padding: '8px', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+            </div>
+            <Link to="/" onClick={() => setMenuOpen(false)} style={{ display: 'block', fontFamily: mono, fontSize: 13, letterSpacing: '0.2em', color: G.text, textDecoration: 'none', padding: '12px 24px', textTransform: 'uppercase' }}>Dashboard</Link>
+            <Link to="/about" onClick={() => setMenuOpen(false)} style={{ display: 'block', fontFamily: mono, fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', padding: '12px 24px', textTransform: 'uppercase', textShadow: `0 0 8px ${G.goldGlow}` }}>Learn</Link>
+          </div>
+        )}
       </header>
 
       <main className="about-main" style={{ maxWidth: 960, margin: '0 auto', padding: '60px 24px 80px' }}>
@@ -483,6 +498,20 @@ export default function About() {
       </footer>
 
       <style>{`
+        /* burger visible at tablet and mobile */
+        @media (max-width: 1024px) {
+          .about-nav    { display: none !important; }
+          .about-burger { display: flex !important; align-items: center !important; }
+        }
+        /* tablet: constrained dropdown */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .about-dropdown { width: 280px !important; }
+        }
+        /* mobile: full-width dropdown */
+        @media (max-width: 768px) {
+          .about-dropdown { width: 100% !important; left: 0 !important; right: 0 !important;
+                            border-left: none !important; border-bottom-left-radius: 0 !important; }
+        }
         @media (max-width: 768px) {
           .about-main {
             padding: 32px 16px 48px !important;
