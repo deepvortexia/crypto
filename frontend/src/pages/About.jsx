@@ -501,7 +501,7 @@ export default function About() {
         /* burger visible at tablet and mobile */
         @media (max-width: 1024px) {
           .about-nav    { display: none !important; }
-          .about-burger { display: flex !important; align-items: center !important; }
+          .about-burger { display: flex !important; align-items: center !important; order: 3 !important; }
         }
         /* tablet: constrained dropdown */
         @media (min-width: 769px) and (max-width: 1024px) {

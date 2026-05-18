@@ -2400,7 +2400,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .grid-6       { grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
           .navbar-brand { font-size: 18px !important; }
           .hide-mobile  { display: none !important; }
-          .show-mobile  { display: flex !important; align-items: center !important; }
+          .show-mobile  { display: flex !important; align-items: center !important; order: 3 !important; }
+          .header-right { order: 2 !important; }
           .mobile-dropdown { width: 320px !important; left: auto !important; right: 0 !important;
                              border-bottom-left-radius: 8px !important; border-left: 1px solid #2a1f00 !important; }
         }
@@ -2423,7 +2424,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .header-right { position: static !important; gap: 8px !important; }
           .header-price { font-size: 20px !important; }
           .hide-mobile  { display: none !important; }
-          .show-mobile  { display: flex !important; align-items: center !important; }
+          .show-mobile  { display: flex !important; align-items: center !important; order: 3 !important; }
+          .header-right { order: 2 !important; }
           .navbar-brand { font-size: 14px !important; white-space: nowrap !important; }
           .ai-title     { font-size: 13px !important; }
           .ai-banner    { font-size: 11px !important; letter-spacing: 0.1em !important; }
