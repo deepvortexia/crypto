@@ -2016,9 +2016,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               borderBottom: `1px solid ${G.border}`,
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
-              <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.25em', color: G.gold }}>
-                DEEP ANALYSIS
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.25em', color: G.gold }}>
+                  DEEP ANALYSIS
+                </span>
+                <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#f59e0b88', letterSpacing: '0.1em' }}>
+                  {creditInfo.daily_remaining} / {creditInfo.daily_limit} credits{creditInfo.bonus_remaining > 0 ? ` (+${creditInfo.bonus_remaining} bonus)` : ''}
+                </span>
+              </div>
               {!deepRunning && (
                 <button onClick={() => { setDeepOpen(false); setDeepHorizon(null) }}
                   style={{ background: 'none', border: 'none', color: G.text, cursor: 'pointer', fontSize: 18 }}>✕</button>
