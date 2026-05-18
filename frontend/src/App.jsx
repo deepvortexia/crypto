@@ -1470,25 +1470,63 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           {/* RSI & MACD: locked for non-logged-in, visible for free */}
           <div style={{ position: 'relative', marginTop: 16 }}>
             <div style={{ filter: user ? 'none' : 'blur(5px)', pointerEvents: user ? 'auto' : 'none' }}>
-              <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+              <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
                 <IndCard
                   label={<>RSI (14)<Tooltip text="Below 30 oversold buy signal — above 70 overbought sell signal"/></>}
                   value={rsi != null ? fmtNum(rsi, 1) : '—'}
                   sub={rsi == null ? '' : rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral'}
                   barName="rsi" barRaw={rsi}
                 />
-                <IndCard
-                  label={<>MACD<Tooltip text="MACD above signal line = bullish momentum"/></>}
-                  value={macd ? fmtNum(macd.macd, 1) : '—'}
-                  sub={macd ? (macd.histogram > 0 ? 'Bullish' : 'Bearish') : ''}
-                  barName="macd" barRaw={macd?.macd}
-                />
-                <IndCard
-                  label={<>MACD Signal<Tooltip text="MACD above signal line = bullish momentum"/></>}
-                  value={macd ? fmtNum(macd.signal, 1) : '—'}
-                  sub={macd ? `Hist: ${fmtNum(macd.histogram, 1)}` : ''}
-                  barName="macdSig" barRaw={macd?.histogram}
-                />
+                {/* Unified MACD card */}
+                <div className="ind-card" style={{ ...cardStyle, padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.1em', color: '#9ca3af', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', marginBottom: 10 }}>
+                    MACD<Tooltip text="MACD above signal line = bullish momentum"/>
+                  </span>
+                  <div style={{ borderTop: `1px solid ${G.border}`, marginBottom: 10 }} />
+                  {/* Row 1: MACD Line */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: '#6b7280', letterSpacing: '0.05em' }}>MACD LINE</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 14, color: G.gold, textShadow: `0 0 8px ${G.goldGlow}` }}>
+                        {macd ? fmtNum(macd.macd, 1) : '—'}
+                      </span>
+                      {macd && (
+                        <span style={{
+                          fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.1em',
+                          color: macd.macd >= 0 ? G.green : G.red,
+                          background: macd.macd >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                          border: `1px solid ${macd.macd >= 0 ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                          borderRadius: 3, padding: '2px 6px',
+                        }}>{macd.macd >= 0 ? 'BULLISH' : 'BEARISH'}</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Row 2: Signal Line */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: '#6b7280', letterSpacing: '0.05em' }}>SIGNAL LINE</span>
+                    <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 14, color: G.gold, textShadow: `0 0 8px ${G.goldGlow}` }}>
+                      {macd ? fmtNum(macd.signal, 1) : '—'}
+                    </span>
+                  </div>
+                  {/* Row 3: Histogram */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, color: '#6b7280', letterSpacing: '0.05em' }}>HISTOGRAM</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 14, color: macd ? (macd.histogram >= 0 ? G.green : G.red) : G.gold, textShadow: macd ? `0 0 8px ${macd.histogram >= 0 ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'}` : undefined }}>
+                        {macd ? fmtNum(macd.histogram, 1) : '—'}
+                      </span>
+                      {macd && (
+                        <span style={{
+                          fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.1em',
+                          color: macd.histogram >= 0 ? G.green : G.red,
+                          background: macd.histogram >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+                          border: `1px solid ${macd.histogram >= 0 ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+                          borderRadius: 3, padding: '2px 6px',
+                        }}>{macd.histogram >= 0 ? `+${fmtNum(macd.histogram, 1)}` : fmtNum(macd.histogram, 1)}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             {!user && (
