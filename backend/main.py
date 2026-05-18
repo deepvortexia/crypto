@@ -691,6 +691,16 @@ async def stripe_webhook(request: Request):
             if not target_user_id or credits <= 0:
                 logger.error(f"[webhook] Credit-pack session {session_id} has bad metadata: user_id={target_user_id!r} credits={credits}")
             else:
+                # ── Idempotency guard: skip if this session was already processed ──
+                try:
+                    supabase.table("processed_webhook_sessions").insert(
+                        {"session_id": session_id}
+                    ).execute()
+                except Exception:
+                    # Unique-key violation → already processed; safe to ignore replay
+                    logger.warning(f"[webhook] Duplicate session {session_id} — already processed, skipping credit grant")
+                    return {"status": "ok"}
+
                 # Pick daily_limit so the row is seeded correctly if it doesn't exist yet
                 daily_lim = PRO_DAILY_LIMIT if _is_pro(target_user_id) else FREE_DAILY_LIMIT
                 logger.info(f"[webhook] Granting +{credits} credits to user {target_user_id} (daily_lim={daily_lim})")
