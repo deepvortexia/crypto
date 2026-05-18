@@ -654,6 +654,17 @@ async def stripe_webhook(request: Request):
         }).eq("stripe_customer_id", data["customer"]).execute()
         logger.info(f"Subscription deleted for customer {data['customer']}")
 
+    elif event_type == "invoice.payment_failed":
+        customer_id = data.get("customer", "?")
+        attempt     = data.get("attempt_count", "?")
+        next_attempt = data.get("next_payment_attempt")
+        next_str = unix_to_iso(next_payment_attempt) if next_attempt else "no further retries scheduled"
+        logger.warning(
+            f"[webhook] Payment failed for customer {customer_id} "
+            f"(attempt {attempt}) — PRO access retained during retry window. "
+            f"Next attempt: {next_str}"
+        )
+
     elif event_type == "checkout.session.completed":
         # Credit-pack one-time payments. Subscription checkouts are handled
         # by customer.subscription.created above and ignored here.
@@ -729,7 +740,7 @@ def _is_pro(user_id: str) -> bool:
             return result
     try:
         sub = supabase.table("subscriptions").select("status").eq("user_id", user_id).execute()
-        result = bool(sub.data and sub.data[0].get("status") == "active")
+        result = bool(sub.data and sub.data[0].get("status") in ("active", "past_due"))
     except Exception:
         result = False
     _pro_cache[user_id] = (result, now)
