@@ -956,7 +956,12 @@ Market Snapshot:
 - Long/Short Ratio: {ls_display}
 - Mempool: {mempool_display}
 
-STRICT RULES: Reference only the exact values provided above. Never invent specific numbers, transaction counts, or data not present in this snapshot. Describe mempool conditions using only the status label given.
+STRICT RULES:
+- Reference only the exact values provided above. Never invent specific numbers, transaction counts, or data not present in this snapshot.
+- The Mempool label is ground truth. Never override it with inferred data.
+- If Mempool is "Low network activity" or "Network quiet": FORBIDDEN to use "elevated", "high", "congested", or "increased network pressure". You must say "low" or "quiet" or omit mempool entirely.
+- If Mempool is "Normal network activity": describe as normal or moderate only.
+- If Mempool is "Elevated network activity" or "High network activity": only then may you mention elevated or high congestion.
 
 Respond with ONLY valid JSON, no markdown, no extra text:
 {{
