@@ -10,12 +10,13 @@ import sys
 import uuid
 from datetime import datetime, timezone, timedelta
 
+import httpx
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
 load_dotenv()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 if not SUPABASE_URL or not SUPABASE_KEY:
@@ -32,6 +33,13 @@ FAIL = "FAIL"
 
 results: list[tuple[str, str]] = []
 
+# Auth Admin API headers (service-role key required)
+_AUTH_HEADERS = {
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "apikey": SUPABASE_KEY,
+    "Content-Type": "application/json",
+}
+
 
 def log(status: str, name: str, detail: str = ""):
     tag = f"  {status}  {name}"
@@ -41,13 +49,40 @@ def log(status: str, name: str, detail: str = ""):
     results.append((status, name))
 
 
-# ── helpers ──────────────────────────────────────────────────────────────────
+# ── Auth Admin helpers ────────────────────────────────────────────────────────
 
-def make_user_id() -> str:
-    """Generate a valid UUID for a synthetic test user (no auth.users row needed
-    because the service-role key bypasses RLS and the RPC upserts the row)."""
-    return str(uuid.uuid4())
+def create_auth_user() -> str:
+    """Create a real user in auth.users via the Supabase Admin API.
+    Returns the UUID assigned by Supabase. Raises on failure."""
+    email = f"test-credits-{uuid.uuid4().hex[:16]}@test.internal"
+    resp = httpx.post(
+        f"{SUPABASE_URL}/auth/v1/admin/users",
+        headers=_AUTH_HEADERS,
+        json={
+            "email": email,
+            "email_confirm": True,
+            "password": f"Pwd-{uuid.uuid4().hex}",
+        },
+        timeout=10,
+    )
+    resp.raise_for_status()
+    return resp.json()["id"]
 
+
+def delete_auth_user(uid: str):
+    """Delete a user from auth.users via the Admin API.
+    The FK ON DELETE CASCADE removes the user_credits row automatically."""
+    try:
+        httpx.delete(
+            f"{SUPABASE_URL}/auth/v1/admin/users/{uid}",
+            headers=_AUTH_HEADERS,
+            timeout=10,
+        )
+    except Exception:
+        pass  # best-effort cleanup
+
+
+# ── Supabase RPC helpers ──────────────────────────────────────────────────────
 
 def consume(user_id: str, daily_limit: int) -> dict:
     r = sb.rpc("consume_credit", {"p_user_id": user_id, "p_daily_limit": daily_limit}).execute()
@@ -74,26 +109,25 @@ def reset_all(free_limit: int = FREE_LIMIT, pro_limit: int = PRO_LIMIT) -> int:
 
 
 def set_reset_at_to_past(user_id: str):
-    """Force daily_reset_at to yesterday so the lazy reset triggers on next RPC."""
+    """Force daily_reset_at to 25h ago so the lazy reset triggers on next RPC."""
     past = (datetime.now(timezone.utc) - timedelta(hours=25)).isoformat()
-    sb.table("user_credits").update({
-        "daily_reset_at": past
-    }).eq("user_id", user_id).execute()
-
-
-def delete_user(user_id: str):
-    sb.table("user_credits").delete().eq("user_id", user_id).execute()
+    sb.table("user_credits").update({"daily_reset_at": past}).eq("user_id", user_id).execute()
 
 
 def next_midnight_utc() -> datetime:
     now = datetime.now(timezone.utc)
-    return (now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1))
+    return now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
 
 
 # ── TEST 1: New FREE user ─────────────────────────────────────────────────────
 
 def test_new_free_user():
-    uid = make_user_id()
+    uid = None
+    try:
+        uid = create_auth_user()
+    except Exception as e:
+        log(FAIL, "T1 new-free: create auth user", str(e))
+        return
     try:
         data = get_credits(uid, FREE_LIMIT)
         daily = data.get("daily_remaining")
@@ -107,7 +141,6 @@ def test_new_free_user():
             log(FAIL, "T1 new-free: bonus_remaining", f"expected 0, got {bonus}")
             return
 
-        # reset_at should be the next midnight UTC (within a 70-second window to allow clock skew)
         expected = next_midnight_utc()
         try:
             reset_dt = datetime.fromisoformat(reset_str.replace("Z", "+00:00"))
@@ -121,15 +154,20 @@ def test_new_free_user():
 
         log(PASS, "T1 new-free: daily=2, bonus=0, reset=next midnight UTC")
     finally:
-        delete_user(uid)
+        if uid:
+            delete_auth_user(uid)
 
 
 # ── TEST 2: FREE user consumes — 2 succeed, 3rd fails ────────────────────────
 
 def test_free_consumes():
-    uid = make_user_id()
+    uid = None
     try:
-        # First consume
+        uid = create_auth_user()
+    except Exception as e:
+        log(FAIL, "T2 free-consume: create auth user", str(e))
+        return
+    try:
         r1 = consume(uid, FREE_LIMIT)
         if not r1.get("allowed"):
             log(FAIL, "T2 free-consume: 1st consume should be allowed", str(r1))
@@ -138,7 +176,6 @@ def test_free_consumes():
             log(FAIL, "T2 free-consume: after 1st, daily_remaining", f"expected 1, got {r1.get('daily_remaining')}")
             return
 
-        # Second consume
         r2 = consume(uid, FREE_LIMIT)
         if not r2.get("allowed"):
             log(FAIL, "T2 free-consume: 2nd consume should be allowed", str(r2))
@@ -147,7 +184,6 @@ def test_free_consumes():
             log(FAIL, "T2 free-consume: after 2nd, daily_remaining", f"expected 0, got {r2.get('daily_remaining')}")
             return
 
-        # Third consume — must be blocked
         r3 = consume(uid, FREE_LIMIT)
         if r3.get("allowed"):
             log(FAIL, "T2 free-consume: 3rd consume should be blocked", str(r3))
@@ -155,25 +191,28 @@ def test_free_consumes():
 
         log(PASS, "T2 free-consume: 2 succeed, 3rd blocked (allowed=false)")
     finally:
-        delete_user(uid)
+        if uid:
+            delete_auth_user(uid)
 
 
 # ── TEST 3: Bonus credits consumed after daily hits 0 ────────────────────────
 
 def test_bonus_credits():
-    uid = make_user_id()
+    uid = None
     try:
-        # Drain daily credits
+        uid = create_auth_user()
+    except Exception as e:
+        log(FAIL, "T3 bonus: create auth user", str(e))
+        return
+    try:
         consume(uid, FREE_LIMIT)
         consume(uid, FREE_LIMIT)
 
-        # Add 10 bonus
         b = add_bonus(uid, 10, FREE_LIMIT)
         if b.get("bonus_remaining") != 10:
             log(FAIL, "T3 bonus: after add_bonus, bonus_remaining", f"expected 10, got {b.get('bonus_remaining')}")
             return
 
-        # Next consume should use bonus (daily=0, bonus=10)
         r = consume(uid, FREE_LIMIT)
         if not r.get("allowed"):
             log(FAIL, "T3 bonus: consume from bonus should be allowed", str(r))
@@ -187,13 +226,19 @@ def test_bonus_credits():
 
         log(PASS, "T3 bonus: bonus consumed after daily=0, daily stays 0")
     finally:
-        delete_user(uid)
+        if uid:
+            delete_auth_user(uid)
 
 
 # ── TEST 4: PRO user — 20 succeed, 21st fails ────────────────────────────────
 
 def test_pro_user():
-    uid = make_user_id()
+    uid = None
+    try:
+        uid = create_auth_user()
+    except Exception as e:
+        log(FAIL, "T4 pro: create auth user", str(e))
+        return
     try:
         for i in range(1, PRO_LIMIT + 1):
             r = consume(uid, PRO_LIMIT)
@@ -202,10 +247,10 @@ def test_pro_user():
                 return
             expected_remaining = PRO_LIMIT - i
             if r.get("daily_remaining") != expected_remaining:
-                log(FAIL, f"T4 pro: after consume #{i}, daily_remaining", f"expected {expected_remaining}, got {r.get('daily_remaining')}")
+                log(FAIL, f"T4 pro: after consume #{i}, daily_remaining",
+                    f"expected {expected_remaining}, got {r.get('daily_remaining')}")
                 return
 
-        # 21st must fail
         r21 = consume(uid, PRO_LIMIT)
         if r21.get("allowed"):
             log(FAIL, "T4 pro: 21st consume should be blocked", str(r21))
@@ -213,15 +258,20 @@ def test_pro_user():
 
         log(PASS, f"T4 pro: all {PRO_LIMIT} daily credits consumed, 21st blocked")
     finally:
-        delete_user(uid)
+        if uid:
+            delete_auth_user(uid)
 
 
 # ── TEST 5: Midnight reset — lazy reset via get_credits ──────────────────────
 
 def test_lazy_reset():
-    uid = make_user_id()
+    uid = None
     try:
-        # Use up daily credits
+        uid = create_auth_user()
+    except Exception as e:
+        log(FAIL, "T5 lazy-reset: create auth user", str(e))
+        return
+    try:
         consume(uid, FREE_LIMIT)
         consume(uid, FREE_LIMIT)
 
@@ -230,16 +280,14 @@ def test_lazy_reset():
             log(FAIL, "T5 lazy-reset: setup — expected daily=0", str(check))
             return
 
-        # Force reset_at into the past
         set_reset_at_to_past(uid)
 
-        # get_credits should now lazy-reset
         after = get_credits(uid, FREE_LIMIT)
         if after.get("daily_remaining") != FREE_LIMIT:
-            log(FAIL, "T5 lazy-reset: expected daily back to 2 after lazy reset", f"got {after.get('daily_remaining')}")
+            log(FAIL, "T5 lazy-reset: expected daily back to 2 after lazy reset",
+                f"got {after.get('daily_remaining')}")
             return
 
-        # reset_at should now be tomorrow again
         reset_str = after.get("daily_reset_at", "")
         try:
             reset_dt = datetime.fromisoformat(reset_str.replace("Z", "+00:00"))
@@ -254,16 +302,23 @@ def test_lazy_reset():
 
         log(PASS, "T5 lazy-reset: daily reset to 2 after past reset_at, new reset_at=next midnight")
     finally:
-        delete_user(uid)
+        if uid:
+            delete_auth_user(uid)
 
 
 # ── TEST 6: Cron reset — reset_all_daily_credits ─────────────────────────────
 
 def test_cron_reset():
-    free_uid = make_user_id()
-    pro_uid  = make_user_id()
+    free_uid = pro_uid = None
     try:
-        # Create a FREE row (drain it)
+        try:
+            free_uid = create_auth_user()
+            pro_uid  = create_auth_user()
+        except Exception as e:
+            log(FAIL, "T6 cron: create auth users", str(e))
+            return
+
+        # Drain FREE user
         consume(free_uid, FREE_LIMIT)
         consume(free_uid, FREE_LIMIT)
         before_free = get_credits(free_uid, FREE_LIMIT)
@@ -271,10 +326,8 @@ def test_cron_reset():
             log(FAIL, "T6 cron: setup free user to 0", str(before_free))
             return
 
-        # Create a row that will be treated as PRO by inserting via consume
-        consume(pro_uid, PRO_LIMIT)  # seeds with PRO_LIMIT
-
-        # Mark the pro user as active in subscriptions so reset_all distinguishes them
+        # Seed PRO user and mark active in subscriptions
+        consume(pro_uid, PRO_LIMIT)
         try:
             sb.table("subscriptions").upsert({
                 "user_id": pro_uid,
@@ -286,8 +339,8 @@ def test_cron_reset():
             log(FAIL, "T6 cron: could not seed subscriptions table", str(e))
             return
 
-        # Drain PRO user too
-        for _ in range(PRO_LIMIT - 1):  # 1 already consumed above
+        # Drain PRO user (1 already consumed above)
+        for _ in range(PRO_LIMIT - 1):
             consume(pro_uid, PRO_LIMIT)
         before_pro = get_credits(pro_uid, PRO_LIMIT)
         if before_pro.get("daily_remaining") != 0:
@@ -297,26 +350,29 @@ def test_cron_reset():
         # Run the cron reset
         count = reset_all(FREE_LIMIT, PRO_LIMIT)
 
-        # Verify FREE user got FREE_LIMIT back
         after_free = get_credits(free_uid, FREE_LIMIT)
         if after_free.get("daily_remaining") != FREE_LIMIT:
-            log(FAIL, "T6 cron: free user after reset", f"expected {FREE_LIMIT}, got {after_free.get('daily_remaining')}")
+            log(FAIL, "T6 cron: free user after reset",
+                f"expected {FREE_LIMIT}, got {after_free.get('daily_remaining')}")
             return
 
-        # Verify PRO user got PRO_LIMIT back
         after_pro = get_credits(pro_uid, PRO_LIMIT)
         if after_pro.get("daily_remaining") != PRO_LIMIT:
-            log(FAIL, "T6 cron: pro user after reset", f"expected {PRO_LIMIT}, got {after_pro.get('daily_remaining')}")
+            log(FAIL, "T6 cron: pro user after reset",
+                f"expected {PRO_LIMIT}, got {after_pro.get('daily_remaining')}")
             return
 
         log(PASS, f"T6 cron: reset_all updated {count} row(s) — free={FREE_LIMIT}, pro={PRO_LIMIT}")
     finally:
-        delete_user(free_uid)
-        delete_user(pro_uid)
-        try:
-            sb.table("subscriptions").delete().eq("user_id", pro_uid).execute()
-        except Exception:
-            pass
+        if pro_uid:
+            try:
+                sb.table("subscriptions").delete().eq("user_id", pro_uid).execute()
+            except Exception:
+                pass
+        if free_uid:
+            delete_auth_user(free_uid)
+        if pro_uid:
+            delete_auth_user(pro_uid)
 
 
 # ── Run all tests ─────────────────────────────────────────────────────────────
