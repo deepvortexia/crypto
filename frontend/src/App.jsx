@@ -579,6 +579,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [loadProgress,  setLoadProgress]  = useState(0)
   const [resetIn,     setResetIn]     = useState('')
   const [tensions,    setTensions]    = useState(null)
+  const [tensionsUpdatedAt, setTensionsUpdatedAt] = useState(null)
   const [priceLoaded, setPriceLoaded] = useState(false)
   const [slowLoaded,  setSlowLoaded]  = useState(false)
   const [loadingBar,  setLoadingBar]  = useState(0)
@@ -683,7 +684,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     if (kl.status  === 'fulfilled' && kl.value)   setKeyLevels(kl.value)
     if (liq.status === 'fulfilled' && liq.value)  setLiquidations(liq.value)
     if (ns.status  === 'fulfilled' && ns.value)   setNewsSentiment(ns.value)
-    if (mt.status  === 'fulfilled' && mt.value)   setTensions(mt.value)
+    if (mt.status  === 'fulfilled' && mt.value)   { setTensions(mt.value); setTensionsUpdatedAt(Date.now()) }
 
     const predResults = await Promise.allSettled(predPromises)
     setPreds(prev => {
@@ -864,7 +865,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       if (s.status  === 'fulfilled' && s.value)  setSentiment(s.value)
       if (oc.status === 'fulfilled' && oc.value)  setOnchain(oc.value)
       if (ns.status === 'fulfilled' && ns.value)  setNewsSentiment(ns.value)
-      if (mt.status === 'fulfilled' && mt.value)  setTensions(mt.value)
+      if (mt.status === 'fulfilled' && mt.value)  { setTensions(mt.value); setTensionsUpdatedAt(Date.now()) }
       setPreds(prev => {
         const map = { ...prev }
         predResults.forEach((r, i) => {
@@ -872,7 +873,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         })
         return map
       })
-    }, 15 * 60_000)
+    }, 5 * 60_000)
     return () => clearInterval(id)
   }, [])
 
@@ -1749,6 +1750,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: '#fff', background: '#a855f7', borderRadius: 3, padding: '2px 7px', fontWeight: 700, textTransform: 'uppercase' }}>AI</span>
             {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}
           </div>
+          {tensionsUpdatedAt && (
+            <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#666', marginBottom: 10 }}>
+              Last updated {Math.floor((Date.now() - tensionsUpdatedAt) / 60000) < 1 ? 'just now' : `${Math.floor((Date.now() - tensionsUpdatedAt) / 60000)} min ago`}
+            </div>
+          )}
 
           {/* Not logged in — teaser only */}
           {!user && (
