@@ -909,6 +909,9 @@ async def deep_analysis_analyze(
     else:
         ema_trend = "N/A"
 
+    price_vs_ema50  = ("above" if current_price > ema50_val  else "below") if ema50_val  is not None else "N/A"
+    price_vs_ema200 = ("above" if current_price > ema200_val else "below") if ema200_val is not None else "N/A"
+
     if ls_ratio_val is not None:
         ls_long_pct  = round(ls_ratio_val / (1 + ls_ratio_val) * 100, 1)
         ls_short_pct = round(100 - ls_long_pct, 1)
@@ -934,8 +937,8 @@ Market Snapshot:
 - MACD Signal Line: {_fmt(macd_signal_val)}
 - Bollinger %B: {_fmt(bb_pct_val)}
 - Bollinger Bandwidth: {_fmt(bb_bw_val)}
-- EMA50: {_fmt(ema50_val, ' USD')}
-- EMA200: {_fmt(ema200_val, ' USD')}
+- EMA50: {_fmt(ema50_val, ' USD')} (price is {price_vs_ema50} EMA 50)
+- EMA200: {_fmt(ema200_val, ' USD')} (price is {price_vs_ema200} EMA 200)
 - EMA Trend: {ema_trend}
 - Fear & Greed Index: {fg_display}
 - Funding Rate: {funding_display}
