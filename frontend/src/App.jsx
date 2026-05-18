@@ -1849,7 +1849,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#6b7280', letterSpacing: '0.15em' }}>NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY</span>
             <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '5px 12px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT US</a>
           </div>
-          <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#4b5563', letterSpacing: '0.2em' }}>POWERED BY ANTHROPIC</div>
+          <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#4b5563', letterSpacing: '0.2em' }}>POWERED BY PREDICT ALPHA</div>
+          <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, color: '#374151', letterSpacing: '0.12em' }}>AI predictions may be inaccurate · Past signals do not guarantee future results · Trade responsibly</div>
         </div>
       </main>
 
