@@ -532,6 +532,26 @@ class CreditPurchaseRequest(BaseModel):
     pack: str  # "10" | "50" | "200"
 
 
+@app.post("/api/billing-portal")
+async def create_billing_portal(user: dict = Depends(get_current_user)):
+    """Create a Stripe billing portal session so the user can manage or cancel their subscription."""
+    if not stripe.api_key:
+        raise HTTPException(500, "Stripe not configured")
+    existing = supabase.table("subscriptions").select("stripe_customer_id").eq("user_id", user["id"]).execute()
+    if not existing.data or not existing.data[0].get("stripe_customer_id"):
+        raise HTTPException(404, "No subscription found for this user")
+    customer_id = existing.data[0]["stripe_customer_id"]
+    try:
+        session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=os.getenv("FRONTEND_URL", "https://predictalpha.app"),
+        )
+        return {"url": session.url}
+    except stripe.StripeError as e:
+        logger.error(f"Billing portal error: {e}")
+        raise HTTPException(400, str(e))
+
+
 @app.post("/api/credits/purchase")
 async def create_credit_pack_checkout(body: CreditPurchaseRequest, user: dict = Depends(get_current_user)):
     """Create a one-time Stripe Checkout session for a credit pack."""

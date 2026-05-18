@@ -433,6 +433,17 @@ export async function consumeDeepAnalysisCredit() {
   return data
 }
 
+export async function openBillingPortal() {
+  const headers = await getAuthHeaders()
+  const res = await fetch(`${BACKEND_URL}/api/billing-portal`, { method: 'POST', headers })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || 'Billing portal unavailable')
+  }
+  const { url } = await res.json()
+  window.location.href = url
+}
+
 export async function purchaseCreditsPack(pack) {
   const headers = { ...(await getAuthHeaders()), 'Content-Type': 'application/json' }
   const res = await fetch(`${BACKEND_URL}/api/credits/purchase`, {
