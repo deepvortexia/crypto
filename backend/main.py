@@ -903,6 +903,17 @@ async def deep_analysis_analyze(
     except Exception:
         mempool_val = None
 
+    if mempool_val is None:
+        mempool_display = "N/A"
+    elif mempool_val > 600_000:
+        mempool_display = "High network activity"
+    elif mempool_val > 450_000:
+        mempool_display = "Elevated network activity"
+    elif mempool_val > 250_000:
+        mempool_display = "Normal network activity"
+    else:
+        mempool_display = "Low network activity"
+
     # Derived display strings
     if ema50_val is not None and ema200_val is not None:
         ema_trend = "Golden Cross (bullish)" if ema50_val > ema200_val else "Death Cross (bearish)"
@@ -943,12 +954,13 @@ Market Snapshot:
 - Fear & Greed Index: {fg_display}
 - Funding Rate: {funding_display}
 - Long/Short Ratio: {ls_display}
-- Mempool Size: {_fmt(mempool_val, ' pending txs')}
+- Mempool: {mempool_display}
+
+STRICT RULES: Reference only the exact values provided above. Never invent specific numbers, transaction counts, or data not present in this snapshot. Describe mempool conditions using only the status label given.
 
 Respond with ONLY valid JSON, no markdown, no extra text:
 {{
   "direction": "BULLISH" or "BEARISH",
-  "score": integer 0-100 (overall bullish confidence),
   "recommendation": "Strong Buy" | "Weak Buy" | "Hold" | "Sell",
   "analysis": "2-3 sentence explanation referencing the specific data values above"
 }}"""
@@ -981,7 +993,7 @@ Respond with ONLY valid JSON, no markdown, no extra text:
         direction = parsed.get("direction", "BEARISH").upper()
         if direction not in ("BULLISH", "BEARISH"):
             direction = "BEARISH"
-        score = max(0, min(100, int(parsed.get("score", 50))))
+        score = round(ensemble._confidence_score(body.horizon, []) * 100)
         recommendation = parsed.get("recommendation", "Hold")
         if recommendation not in ("Strong Buy", "Weak Buy", "Hold", "Sell"):
             recommendation = "Hold"
