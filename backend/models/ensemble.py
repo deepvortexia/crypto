@@ -190,9 +190,10 @@ class BTCEnsemble:
         return result
 
     def _confidence_score(self, horizon_key: str, model_values: list[float]) -> float:
-        """Confidence = backtested direction accuracy over last 30 resolved predictions.
-        Falls back to inter-model agreement when history is thin.
-        Hard clamped to [0.55, 0.75] until sufficient prediction history exists."""
+        _CAPS  = {"1h": 0.72, "4h": 0.68, "8h": 0.63, "12h": 0.58, "24h": 0.52, "1week": 0.41, "1month": 0.34}
+        _FLOORS = {"1h": 0.45, "4h": 0.42, "8h": 0.38, "12h": 0.35, "24h": 0.30, "1week": 0.25, "1month": 0.20}
+        cap   = _CAPS.get(horizon_key, 0.55)
+        floor = _FLOORS.get(horizon_key, 0.25)
         resolved = [
             p for p in self._predictions
             if p["horizon"] == horizon_key and p["direction_correct"] is not None
@@ -200,13 +201,13 @@ class BTCEnsemble:
         if len(resolved) >= 5:
             raw = float(np.mean([p["direction_correct"] for p in resolved]))
         elif len(model_values) < 2:
-            raw = 0.60
+            raw = cap * 0.70
         else:
             std = float(np.std(model_values))
             mean = float(np.mean(model_values))
             cv = std / mean if mean else 1.0
-            raw = 1.0 - cv * 5
-        return round(min(0.75, max(0.55, raw)), 3)
+            raw = min(1.0 - cv * 5, cap * 0.70)
+        return round(min(cap, max(floor, raw)), 3)
 
     def _store_prediction(self, pred: dict):
         entry = {
