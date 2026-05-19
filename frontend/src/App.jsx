@@ -2490,12 +2490,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .buy-credits-grid  { grid-template-columns: 1fr !important; }
           /* Pricing modal: scrollable, fits screen */
           @keyframes goldenPulse {
-            0%,100% { box-shadow:0 0 60px rgba(245,158,11,0.4); border-color:#f59e0b; }
-            50% { box-shadow:0 0 90px rgba(245,158,11,0.85); border-color:#FFD700; }
+            0%,100% { box-shadow:0 0 30px rgba(245,158,11,0.25); border-color:#f59e0b; }
+            50% { box-shadow:0 0 55px rgba(255,215,0,0.6), 0 0 90px rgba(245,158,11,0.15); border-color:#FFD700; }
           }
           .pricing-modal-box { max-height: 90vh !important; max-width: 95vw !important; overflow-y: auto !important;
                                width: 95% !important; border-radius: 12px !important;
-                               padding: 0 !important; animation:goldenPulse 1.2s ease-in-out infinite; }
+                               padding: 0 !important; animation:goldenPulse 2.5s ease-in-out infinite; }
           .pricing-modal-box button { min-height: 48px !important; font-size: 13px !important; }
           .pricing-modal-box > div { padding: 18px 18px !important; }
           /* Ensure all buttons are tappable */
