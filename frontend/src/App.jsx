@@ -2490,8 +2490,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .buy-credits-grid  { grid-template-columns: 1fr !important; }
           /* Pricing modal: scrollable, fits screen */
           @keyframes goldenPulse {
-            0%,100% { box-shadow:0 0 30px rgba(245,158,11,0.25); border-color:#f59e0b; }
-            50% { box-shadow:0 0 55px rgba(255,215,0,0.6), 0 0 90px rgba(245,158,11,0.15); border-color:#FFD700; }
+            0%,100% { box-shadow:0 0 40px rgba(245,158,11,0.45); border-color:#f59e0b; border-width:2px; }
+            50% { box-shadow:0 0 70px rgba(255,215,0,0.8), 0 0 110px rgba(245,158,11,0.25); border-color:#FFD700; border-width:4px; }
           }
           .pricing-modal-box { max-height: 90vh !important; max-width: 95vw !important; overflow-y: auto !important;
                                width: 95% !important; border-radius: 12px !important;
