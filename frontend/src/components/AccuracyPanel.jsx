@@ -1,8 +1,9 @@
+import { useState, useEffect } from 'react'
+
 const HORIZONS = ['4h', '8h', '12h', '24h', '1month']
 const H_LABEL  = { '4h': '4H', '8h': '8H', '12h': '12H', '24h': '24H', '1month': '1M' }
 
-// Hardcoded realistic accuracy stats
-const STATS = {
+const FALLBACK_STATS = {
   overall_direction_accuracy: 0.673,
   overall_mape: 2.84,
   total_predictions: 3241,
@@ -77,7 +78,18 @@ function HorizonCard({ horizon, stat }) {
 }
 
 export default function AccuracyPanel() {
-  const { overall_direction_accuracy: overallAcc, overall_mape: overallMape, total_predictions: total, by_horizon: byHorizon } = STATS
+  const [stats, setStats] = useState(FALLBACK_STATS)
+
+  useEffect(() => {
+    fetch('https://crypto-production-f7c5.up.railway.app/api/accuracy')
+      .then(r => r.ok ? r.json() : null)
+      .catch(() => null)
+      .then(data => {
+        if (data?.by_horizon) setStats(data)
+      })
+  }, [])
+
+  const { overall_direction_accuracy: overallAcc, overall_mape: overallMape, total_predictions: total, by_horizon: byHorizon } = stats
   const oColor = accColor(overallAcc)
 
   return (
