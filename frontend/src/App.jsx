@@ -592,6 +592,19 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [proJustPurchased, setProJustPurchased] = useState(false)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('subscription') === 'success') {
+      const clean = new URL(window.location.href)
+      clean.searchParams.delete('subscription')
+      clean.searchParams.delete('session_id')
+      window.history.replaceState({}, '', clean.pathname + (clean.search || ''))
+      fetch('/api/subscription-status')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data) setIsPro(!!data.is_pro)
+          alert('🎉 Welcome to PRO!')
+        })
+        .catch(() => {})
+    }
     if (urlParams.get('success') === 'true') {
       setProJustPurchased(true)
       window.history.replaceState({}, '', '/')
@@ -601,6 +614,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       window.history.replaceState({}, '', '/')
     }
     if (urlParams.get('credits_canceled') === 'true') {
+      window.history.replaceState({}, '', '/')
+    }
+    if (urlParams.get('subscription') === 'cancelled') {
       window.history.replaceState({}, '', '/')
     }
   }, [])

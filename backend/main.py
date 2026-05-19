@@ -519,8 +519,8 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
             payment_method_types=["card"],
             line_items=[{"price": STRIPE_PRICE_ID, "quantity": 1}],
             mode="subscription",
-            success_url=os.getenv("FRONTEND_URL", "https://predictalpha.app") + "/dashboard?success=true",
-            cancel_url=os.getenv("FRONTEND_URL", "https://predictalpha.app") + "/pricing?canceled=true",
+            success_url="https://predictalpha.app?subscription=success&session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="https://predictalpha.app?subscription=cancelled",
         )
         return {"url": session.url}
     except stripe.StripeError as e:
