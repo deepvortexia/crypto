@@ -589,9 +589,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   // Handle Stripe redirect — strip success params and refresh credits if a pack was purchased
   const [creditsJustPurchased, setCreditsJustPurchased] = useState(null)
+  const [proJustPurchased, setProJustPurchased] = useState(false)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('success') === 'true') {
+      setProJustPurchased(true)
       window.history.replaceState({}, '', '/')
     }
     if (urlParams.get('credits_success') === 'true') {
@@ -628,6 +630,24 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     }
     tick()
   }, [creditsJustPurchased, user])
+
+  // Poll subscription status after PRO checkout — webhook may take a few seconds
+  useEffect(() => {
+    if (!proJustPurchased || !user) return
+    let attempts = 0
+    const tick = async () => {
+      attempts += 1
+      const sub = await fetchSubscriptionStatus()
+      if (sub?.status === 'active') {
+        setIsPro(true)
+        setProJustPurchased(false)
+        return
+      }
+      if (attempts < 8) setTimeout(tick, 2000)
+      else setProJustPurchased(false)
+    }
+    tick()
+  }, [proJustPurchased, user])
 
   // Supabase auth session
   useEffect(() => {
