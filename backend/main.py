@@ -658,7 +658,7 @@ async def stripe_webhook(request: Request):
         customer_id = data.get("customer", "?")
         attempt     = data.get("attempt_count", "?")
         next_attempt = data.get("next_payment_attempt")
-        next_str = unix_to_iso(next_payment_attempt) if next_attempt else "no further retries scheduled"
+        next_str = unix_to_iso(next_attempt) if next_attempt else "no further retries scheduled"
         logger.warning(
             f"[webhook] Payment failed for customer {customer_id} "
             f"(attempt {attempt}) — PRO access retained during retry window. "
