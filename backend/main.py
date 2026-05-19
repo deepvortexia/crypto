@@ -754,24 +754,18 @@ async def get_subscription_status(user: dict = Depends(get_current_user)):
 DEEP_ANALYSIS_DAILY_LIMIT = 2
 
 
-_pro_cache: dict[str, tuple[bool, float]] = {}
+_pro_cache: TTLCache = TTLCache(maxsize=1000, ttl=60)
 
 def _is_pro(user_id: str) -> bool:
-    now = time()
     if user_id in _pro_cache:
-        result, ts = _pro_cache[user_id]
-        if now - ts < 60:
-            logger.info(f"[_is_pro] CACHE HIT user_id={user_id} result={result} age={now-ts:.1f}s")
-            return result
+        return _pro_cache[user_id]
     try:
         sub = supabase.table("subscriptions").select("status").eq("user_id", user_id).execute()
-        logger.info(f"[_is_pro] user_id={user_id} sub.data={sub.data}")
         result = bool(sub.data and sub.data[0].get("status") in ("active", "past_due"))
     except Exception as e:
         logger.error(f"[_is_pro] user_id={user_id} Supabase query failed: {e!r}")
         result = False
-    logger.info(f"[_is_pro] user_id={user_id} final result={result}")
-    _pro_cache[user_id] = (result, now)
+    _pro_cache[user_id] = result
     return result
 
 
@@ -1137,7 +1131,7 @@ async def _fetch_long_short_ratio() -> dict:
                 ratio = round(float(ratio_raw), 3)
                 long_pct = round(ratio / (1 + ratio) * 100, 2)
                 short_pct = round(100 - long_pct, 2)
-                logger.info(f"DEBUG AI INPUT → long_short_ratio: {ratio}, long_pct: {long_pct}, short_pct: {short_pct}")
+                logger.debug(f"[_fetch_long_short_ratio] ratio={ratio} long_pct={long_pct} short_pct={short_pct}")
                 return {"ratio": ratio, "long_pct": long_pct, "short_pct": short_pct}
     except Exception as exc:
         logger.warning(f"Long/short ratio fetch failed: {exc}")

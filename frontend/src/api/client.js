@@ -459,19 +459,3 @@ export async function purchaseCreditsPack(pack) {
   return data  // { url, credits, dollars }
 }
 
-export async function fetchUserCredits() {
-  try {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) return { credits_remaining: 0 }
-    const { data, error } = await supabase
-      .from('user_credits')
-      .select('credits_remaining')
-      .eq('user_id', session.user.id)
-      .single()
-    if (error) throw error
-    return data || { credits_remaining: 3 }
-  } catch (err) {
-    console.error('[fetchUserCredits] Failed:', err.message)
-    return { credits_remaining: 0 }
-  }
-}
