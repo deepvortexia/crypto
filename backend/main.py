@@ -679,7 +679,21 @@ async def stripe_webhook(request: Request):
         )
 
         if metadata.get("type") != "credit_pack":
-            logger.info(f"[webhook] Skipping session {session_id} — metadata.type is '{metadata.get('type')}', not 'credit_pack'")
+            if session_mode == "subscription":
+                # Fallback: ensure the row goes active even if customer.subscription.created
+                # fires late or is missed. Mirrors the existing subscription handlers.
+                stripe_sub_id = data.get("subscription")
+                supabase.table("subscriptions").update({
+                    "status": "active",
+                    **({"stripe_subscription_id": stripe_sub_id} if stripe_sub_id else {}),
+                    "updated_at": now_iso,
+                }).eq("stripe_customer_id", data["customer"]).execute()
+                logger.info(
+                    f"[webhook] checkout.session.completed (subscription) — set active for "
+                    f"customer={data['customer']} sub_id={stripe_sub_id} session={session_id}"
+                )
+            else:
+                logger.info(f"[webhook] Skipping session {session_id} — metadata.type is '{metadata.get('type')}', not 'credit_pack'")
         elif payment_status != "paid":
             logger.warning(f"[webhook] Credit pack session {session_id} not paid yet (payment_status={payment_status}) — skipping")
         else:
