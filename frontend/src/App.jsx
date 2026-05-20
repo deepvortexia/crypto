@@ -1385,18 +1385,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                         }}>Buy Credits</button>
                       </>
                     ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: '#f59e0b88', letterSpacing: '0.1em' }}>
-                          {creditInfo.is_pro
-                            ? `${creditInfo.daily_remaining} / ${creditInfo.daily_limit} daily credits${creditInfo.bonus_remaining > 0 ? ` (+${creditInfo.bonus_remaining} bonus)` : ''}`
-                            : `${creditInfo.daily_remaining} / ${creditInfo.daily_limit} free credits today${creditInfo.bonus_remaining > 0 ? ` (+${creditInfo.bonus_remaining} bonus)` : ''}`
-                          }
-                        </div>
-                        <button onClick={() => setBuyCreditsOpen(true)} style={{
-                          fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.15em',
-                          background: 'none', border: '1px solid #f59e0b88', borderRadius: 4,
-                          color: '#f59e0b', cursor: 'pointer', padding: '3px 8px', textTransform: 'uppercase',
-                        }}>+ Credits</button>
+                      <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: '#f59e0b88', letterSpacing: '0.1em' }}>
+                        {creditInfo.is_pro
+                          ? `${creditInfo.daily_remaining} / ${creditInfo.daily_limit} daily credits${creditInfo.bonus_remaining > 0 ? ` (+${creditInfo.bonus_remaining} bonus)` : ''}`
+                          : `${creditInfo.daily_remaining} / ${creditInfo.daily_limit} free credits today${creditInfo.bonus_remaining > 0 ? ` (+${creditInfo.bonus_remaining} bonus)` : ''}`
+                        }
                       </div>
                     )}
                   </div>
