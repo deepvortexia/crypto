@@ -8,7 +8,7 @@
 :root {
   --color-bg:           #0a0a0a;
   --color-surface:      #111111;
-  --color-card:         #1c1a14;
+  --color-card:         #1a1500;
   --color-border:       #2a1f00;
   --color-muted:        #1a1400;
 
@@ -208,8 +208,8 @@ body {
 }
 
 @keyframes card-gold-pulse {
-  0%, 100% { box-shadow: 0 0 0 1px rgba(245,158,11,0.15), 0 4px 32px rgba(0,0,0,0.6); }
-  50%       { box-shadow: 0 0 0 1px rgba(245,158,11,0.30), 0 4px 32px rgba(0,0,0,0.6), 0 0 18px rgba(245,158,11,0.12); }
+  0%, 100% { border-color: rgba(245,158,11,0.6);  box-shadow: 0 0 0 1px rgba(245,158,11,0.15), 0 4px 32px rgba(0,0,0,0.6); }
+  50%      { border-color: rgba(245,158,11,0.9);  box-shadow: 0 0 0 1px rgba(245,158,11,0.30), 0 4px 32px rgba(0,0,0,0.6), 0 0 20px rgba(245,158,11,0.25), 0 0 40px rgba(245,158,11,0.1); }
 }
 
 /* ─── Card component ────────────────────────────────────────────────────────── */
@@ -217,10 +217,10 @@ body {
   .card {
     @apply relative bg-surface-card rounded-lg;
     padding: 0.75rem;
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    border: 1px solid rgba(245, 158, 11, 0.6);
     box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.15), 0 4px 32px rgba(0, 0, 0, 0.5);
     transition: border-color 0.2s, box-shadow 0.2s;
-    animation: card-gold-pulse 3s ease-in-out infinite;
+    animation: card-gold-pulse 2.5s ease-in-out infinite;
   }
   @media (min-width: 640px) {
     .card { padding: 1.25rem; }

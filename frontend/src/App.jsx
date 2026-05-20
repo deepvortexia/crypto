@@ -35,7 +35,7 @@ import {
 // ── tokens ───────────────────────────────────────────────────────────────────
 const G = {
   bg:       '#0a0a0a',
-  card:     '#1c1a14',
+  card:     '#1a1500',
   border:   '#2a1f00',
   gold:     '#f59e0b',
   goldDim:  'rgba(245,158,11,0.15)',
@@ -67,12 +67,12 @@ const fmtNum = (n, dec = 2) =>
 // ── shared styles ─────────────────────────────────────────────────────────────
 const cardStyle = {
   background: G.card,
-  border: '1px solid rgba(245,158,11,0.35)',
+  border: '1px solid rgba(245,158,11,0.6)',
   borderRadius: 10,
   padding: '18px 22px',
   boxShadow: '0 0 0 1px rgba(245,158,11,0.15), 0 4px 32px rgba(0,0,0,0.6)',
   transition: 'border-color 0.2s, box-shadow 0.2s',
-  animation: 'card-gold-pulse 3s ease-in-out infinite',
+  animation: 'card-gold-pulse 2.5s ease-in-out infinite',
 }
 
 const labelStyle = {
