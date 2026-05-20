@@ -8,7 +8,7 @@
 :root {
   --color-bg:           #0a0a0a;
   --color-surface:      #111111;
-  --color-card:         #141414;
+  --color-card:         #1c1a14;
   --color-border:       #2a1f00;
   --color-muted:        #1a1400;
 
@@ -207,14 +207,20 @@ body {
   to   { box-shadow: 0 0 14px var(--color-green), 0 0 32px var(--color-green-glow); }
 }
 
+@keyframes card-gold-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(245,158,11,0.15), 0 4px 32px rgba(0,0,0,0.6); }
+  50%       { box-shadow: 0 0 0 1px rgba(245,158,11,0.30), 0 4px 32px rgba(0,0,0,0.6), 0 0 18px rgba(245,158,11,0.12); }
+}
+
 /* ─── Card component ────────────────────────────────────────────────────────── */
 @layer components {
   .card {
     @apply relative bg-surface-card rounded-lg;
     padding: 0.75rem;
-    border: 1px solid var(--color-border);
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.15), 0 4px 32px rgba(0, 0, 0, 0.5);
     transition: border-color 0.2s, box-shadow 0.2s;
+    animation: card-gold-pulse 3s ease-in-out infinite;
   }
   @media (min-width: 640px) {
     .card { padding: 1.25rem; }
