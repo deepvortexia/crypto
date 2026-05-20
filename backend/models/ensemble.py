@@ -27,14 +27,18 @@ DEFAULT_WEIGHTS = {"1h": [0.50, 0.45, 0.05], "4h": [0.45, 0.40, 0.15],
 # Per-horizon blend weights (lstm, xgboost, prophet).
 # Prophet weighted higher at longer horizons — it captures weekly/monthly seasonality.
 # XGB weighted higher at short horizons — momentum features dominate near-term.
-# 8h / 12h not defined here — they fall through to the legacy blend path.
 HORIZON_WEIGHTS = {
     "1h":     {"lstm": 0.20, "xgboost": 0.60, "prophet": 0.20},
     "4h":     {"lstm": 0.30, "xgboost": 0.50, "prophet": 0.20},
+    "8h":     {"lstm": 0.32, "xgboost": 0.45, "prophet": 0.23},
+    "12h":    {"lstm": 0.34, "xgboost": 0.42, "prophet": 0.24},
     "24h":    {"lstm": 0.35, "xgboost": 0.40, "prophet": 0.25},
     "1week":  {"lstm": 0.30, "xgboost": 0.25, "prophet": 0.45},
     "1month": {"lstm": 0.20, "xgboost": 0.15, "prophet": 0.65},
 }
+
+# For these horizons, bullish 24h momentum shifts weight from xgboost → prophet
+MOMENTUM_HORIZONS = {"1h", "4h"}
 
 # Maximum realistic price move per horizon — ensemble output is clamped to this range
 HORIZON_MAX_MOVE = {
@@ -128,6 +132,15 @@ class BTCEnsemble:
             return {"error": "No models ready", "horizon": horizon_key}
 
         hw = HORIZON_WEIGHTS.get(horizon_key)
+        if hw and horizon_key in MOMENTUM_HORIZONS:
+            try:
+                change_24h = (hourly_df["close"].iloc[-1] - hourly_df["close"].iloc[-24]) / hourly_df["close"].iloc[-24]
+            except Exception:
+                change_24h = 0.0
+            if change_24h > 0:
+                hw = dict(hw)
+                hw["prophet"] = round(hw["prophet"] + 0.10, 3)
+                hw["xgboost"] = round(hw["xgboost"] - 0.10, 3)
         if "xgboost" in valid and "lstm" in valid and hw:
             if "prophet" in valid:
                 ensemble_price = (valid["lstm"]    * hw["lstm"] +
@@ -140,15 +153,6 @@ class BTCEnsemble:
                 w_x = hw["xgboost"] / total
                 ensemble_price = valid["lstm"] * w_l + valid["xgboost"] * w_x
                 weights_used = {"lstm": round(w_l, 3), "xgboost": round(w_x, 3), "prophet": 0}
-        elif "xgboost" in valid and "lstm" in valid:
-            # 8h / 12h — no HORIZON_WEIGHTS entry, use legacy blend
-            xgb_lstm_blend = valid["xgboost"] * 0.60 + valid["lstm"] * 0.40
-            if "prophet" in valid:
-                ensemble_price = xgb_lstm_blend * 0.80 + valid["prophet"] * 0.20
-                weights_used = {"lstm": 0.32, "xgboost": 0.48, "prophet": 0.20}
-            else:
-                ensemble_price = xgb_lstm_blend
-                weights_used = {"lstm": 0.40, "xgboost": 0.60, "prophet": 0}
         else:
             # Single-model fallback
             w = self.weights.get(horizon_key, DEFAULT_WEIGHTS.get(horizon_key, [1/3, 1/3, 1/3]))
