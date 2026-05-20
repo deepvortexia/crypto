@@ -1251,6 +1251,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             {isPro && (
               <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.12em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}`, borderRadius: 4, padding: '5px 10px' }}>PRO</span>
             )}
+            <button onClick={() => setBuyCreditsOpen(true)} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.12em', color: G.gold, background: 'none', border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '5px 10px', cursor: 'pointer', textTransform: 'uppercase' }}>+ CREDITS</button>
             {isPro && (
               <button onClick={() => openBillingPortal().catch(() => {})} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.12em', color: G.gold, background: 'none', border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 12px', cursor: 'pointer', textTransform: 'uppercase' }}>MANAGE</button>
             )}
