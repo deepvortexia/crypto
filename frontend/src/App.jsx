@@ -176,7 +176,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
             }} />
           </div>
           <div className="pred-conf" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 9, color: G.text, letterSpacing: '0.2em' }}>
-            CONFIDENCE {conf}%
+            MODEL AGREEMENT {conf}%<Tooltip text="Measures how closely LSTM, XGBoost and Prophet agree on direction. High agreement ≠ guaranteed accuracy." />
           </div>
         </>
       )}
@@ -2166,7 +2166,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                       {deepResult.direction?.toUpperCase()}
                     </div>
                     <div style={{ border:'2px solid #f59e0b', borderRadius:10, padding:'8px 22px', color:'#f59e0b', fontFamily:'"Orbitron",sans-serif', fontSize:13, letterSpacing:'0.15em' }}>
-                      {deepResult.score}% CONFIDENCE
+                      {deepResult.score}% MODEL AGREEMENT
                     </div>
                   </div>
                   {(deepResult.analysis || deepResult.recommendation) && (
