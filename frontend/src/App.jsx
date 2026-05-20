@@ -81,14 +81,12 @@ const cardHoverStyle = {
   animationPlayState: 'paused',
 }
 const onCardEnter = e => {
-  e.currentTarget.style.borderColor = cardHoverStyle.borderColor
-  e.currentTarget.style.boxShadow = cardHoverStyle.boxShadow
-  e.currentTarget.style.animationPlayState = cardHoverStyle.animationPlayState
+  e.currentTarget.style.borderColor = 'rgba(245,158,11,0.95)'
+  e.currentTarget.style.boxShadow = '0 0 0 1px rgba(245,158,11,0.4), 0 4px 32px rgba(0,0,0,0.6), 0 0 28px rgba(245,158,11,0.3)'
 }
 const onCardLeave = e => {
   e.currentTarget.style.borderColor = ''
   e.currentTarget.style.boxShadow = ''
-  e.currentTarget.style.animationPlayState = 'running'
 }
 
 const labelStyle = {
