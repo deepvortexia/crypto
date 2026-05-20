@@ -75,6 +75,22 @@ const cardStyle = {
   animation: 'card-gold-pulse 2.5s ease-in-out infinite',
 }
 
+const cardHoverStyle = {
+  borderColor: 'rgba(245,158,11,0.95)',
+  boxShadow: '0 0 0 1px rgba(245,158,11,0.4), 0 4px 32px rgba(0,0,0,0.6), 0 0 28px rgba(245,158,11,0.3)',
+  animationPlayState: 'paused',
+}
+const onCardEnter = e => {
+  e.currentTarget.style.borderColor = cardHoverStyle.borderColor
+  e.currentTarget.style.boxShadow = cardHoverStyle.boxShadow
+  e.currentTarget.style.animationPlayState = cardHoverStyle.animationPlayState
+}
+const onCardLeave = e => {
+  e.currentTarget.style.borderColor = ''
+  e.currentTarget.style.boxShadow = ''
+  e.currentTarget.style.animationPlayState = 'running'
+}
+
 const labelStyle = {
   fontFamily: '"Share Tech Mono", monospace',
   fontSize: 10,
@@ -103,7 +119,7 @@ const sectionLabel = {
 // ── sub-components ────────────────────────────────────────────────────────────
 function StatCard({ label, value, sub, valueColor, icon }) {
   return (
-    <div style={cardStyle}>
+    <div style={cardStyle} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
         <div style={labelStyle}>{label}</div>
         {icon && <span style={{ fontSize: 16, opacity: 0.5 }}>{icon}</span>}
@@ -132,7 +148,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
       boxShadow: data
         ? `0 0 12px ${up ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}, 0 4px 32px rgba(0,0,0,0.6)`
         : cardStyle.boxShadow,
-    }}>
+    }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div className="pred-horizon" style={labelStyle}>{horizon}</div>
 
       {loading && <div style={{ color: G.text, fontSize: 13, opacity: 0.5 }}>Loading…</div>}
@@ -196,7 +212,7 @@ function getBarValue(name, value) {
 function IndCard({ label, value, sub, barName, barRaw }) {
   const bar = barName ? getBarValue(barName, barRaw ?? value) : null
   return (
-    <div className="ind-card" style={{ ...cardStyle, padding: '14px 18px', display: 'flex', flexDirection: 'column' }}>
+    <div className="ind-card" style={{ ...cardStyle, padding: '14px 18px', display: 'flex', flexDirection: 'column' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.1em', color: '#9ca3af', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center' }}>{label}</span>
       </div>
@@ -215,7 +231,7 @@ function IndCard({ label, value, sub, barName, barRaw }) {
 
 function NewsSentimentWidget({ data }) {
   if (!data) return (
-    <div style={{ ...cardStyle, width: '100%', marginTop: 16 }}>
+    <div style={{ ...cardStyle, width: '100%', marginTop: 16 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={labelStyle}>Media Sentiment<Tooltip text="AI-scored crypto headlines from CoinTelegraph, CoinDesk, Decrypt — last 24h"/></div>
       <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text, opacity: 0.5 }}>Loading…</div>
     </div>
@@ -241,7 +257,7 @@ function NewsSentimentWidget({ data }) {
   }
 
   return (
-    <div style={{ ...cardStyle, width: '100%', marginTop: 16 }}>
+    <div style={{ ...cardStyle, width: '100%', marginTop: 16 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={labelStyle}>Media Sentiment<Tooltip text="AI-scored crypto headlines from CoinTelegraph, CoinDesk, Decrypt — updated every 30 min"/></div>
 
       {/* Score bar */}
@@ -320,7 +336,7 @@ function SentimentMeter({ value, label, history }) {
   const dayLabels = ['TODAY', 'YDAY', '2D', '3D', '4D', '5D', '6D']
 
   return (
-    <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }}>
+    <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={labelStyle}>Fear & Greed<Tooltip text="0-25 Extreme Fear — 26-45 Fear — 46-55 Neutral — 56-75 Greed — 76-100 Extreme Greed"/></div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
 
@@ -403,7 +419,7 @@ function SentimentMeter({ value, label, history }) {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 4,
-                }}>
+                }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
                   {/* horizon-style label */}
                   <div style={{
                     fontFamily: '"Share Tech Mono", monospace',
@@ -470,7 +486,7 @@ function TensionCard({ setup }) {
   const { color, Icon: TIcon } = cfg
   const confColor = CONF_COLOR[setup.confidence] || CONF_COLOR.low
   return (
-    <div style={{ ...cardStyle, borderLeft: `4px solid ${color}`, position: 'relative', paddingBottom: 38 }}>
+    <div style={{ ...cardStyle, borderLeft: `4px solid ${color}`, position: 'relative', paddingBottom: 38 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
         <TIcon size={24} color={color} strokeWidth={1.5} style={{ flexShrink: 0 }} />
         <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, letterSpacing: '0.1em', color, textTransform: 'uppercase', lineHeight: 1.3 }}>
@@ -1511,7 +1527,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   barName="rsi" barRaw={rsi}
                 />
                 {/* Unified MACD card */}
-                <div className="ind-card" style={{ ...cardStyle, padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div className="ind-card" style={{ ...cardStyle, padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
                   <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.1em', color: '#9ca3af', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', marginBottom: 10 }}>
                     MACD<Tooltip text="MACD above signal line = bullish momentum"/>
                   </span>
@@ -1724,7 +1740,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <div style={{ marginBottom: 40, position: 'relative' }}>
             <div style={sectionLabel}>Key Levels {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
             <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
-            <div style={{ ...cardStyle, padding: '20px 24px' }}>
+            <div style={{ ...cardStyle, padding: '20px 24px' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
 
               {/* Pivot */}
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
@@ -1829,7 +1845,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
           {/* Not logged in — teaser only */}
           {!user && (
-            <div onClick={() => setAuthOpen(true)} style={{ ...cardStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '28px 24px' }}>
+            <div onClick={() => setAuthOpen(true)} style={{ ...cardStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '28px 24px' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
               <span style={{ fontSize: 20 }}>🔒</span>
               <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text, letterSpacing: '0.1em' }}>
                 AI detected market setups —{' '}
@@ -1863,7 +1879,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               ) : (
                 <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
                   {[0, 1].map(i => (
-                    <div key={i} style={{ ...cardStyle, borderLeft: '4px solid #333', minHeight: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div key={i} style={{ ...cardStyle, borderLeft: '4px solid #333', minHeight: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
                       <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text, opacity: 0.4 }}>
                         {tensions === null ? 'Loading…' : 'No data'}
                       </span>
