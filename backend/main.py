@@ -525,6 +525,7 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
             mode="subscription",
             success_url=f"{frontend_url}/dashboard?subscription=success&session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{frontend_url}/dashboard?subscription=cancelled",
+            allow_promotion_codes=True,
         )
         return {"url": session.url}
     except stripe.StripeError as e:
