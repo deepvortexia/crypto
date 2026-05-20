@@ -192,7 +192,8 @@ async def lifespan(app: FastAPI):
         logger.info("No saved models found — triggering initial training in background")
         asyncio.create_task(retrainer.initial_train())
     else:
-        logger.info("✓ Loaded existing models successfully — skipping retraining")
+        logger.info("✓ Loaded existing models successfully — triggering background retrain to populate last_trained")
+        asyncio.create_task(retrainer.initial_train())
 
     retrainer.start_scheduler(retrain_interval_hours=RETRAIN_INTERVAL_HOURS)
     # market-tensions pre-warm removed — regenerated on demand with 60s TTL
@@ -273,6 +274,8 @@ app.add_middleware(SecurityHeadersMiddleware)
 @app.get("/health")
 async def health():
     status = retrainer.get_status()
+    if status.get("last_trained") is None and status.get("models_ready"):
+        status["warning"] = "models loaded from disk, retrain pending"
     return {"status": "ok", **status}
 
 
