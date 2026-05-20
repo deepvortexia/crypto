@@ -70,7 +70,7 @@ async def get_current_user(authorization: str = Header(...)) -> dict:
             raise HTTPException(401, "Invalid token")
         return {"id": str(user.id), "email": user.email}
     except Exception as e:
-        raise HTTPException(401, f"Invalid token: {str(e)}")
+        raise HTTPException(401, "Invalid token")
 
 from models.ensemble import BTCEnsemble
 from services.data_fetcher import fetch_daily_ohlcv, fetch_fear_greed, fetch_hourly_ohlcv, fetch_live_price, fetch_onchain
@@ -352,7 +352,7 @@ async def get_prediction(
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(401, f"Invalid token: {str(e)}")
+            raise HTTPException(401, "Invalid token")
         if not _is_pro(str(user.id)):
             raise HTTPException(403, "PRO subscription required for this horizon")
     if not ensemble.is_ready:
@@ -398,7 +398,7 @@ async def get_prediction(
         raise
     except Exception as exc:
         logger.error(f"Prediction failed for {horizon}: {exc}", exc_info=True)
-        raise HTTPException(500, f"Prediction error: {exc}")
+        raise HTTPException(500, "Prediction unavailable")
 
 
 async def _resolve_predictions(current_price: float):
@@ -526,7 +526,7 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
         return {"url": session.url}
     except stripe.StripeError as e:
         logger.error(f"Stripe error: {e}")
-        raise HTTPException(400, str(e))
+        raise HTTPException(400, "Payment service error")
 
 
 class CreditPurchaseRequest(BaseModel):
@@ -550,7 +550,7 @@ async def create_billing_portal(user: dict = Depends(get_current_user)):
         return {"url": session.url}
     except stripe.StripeError as e:
         logger.error(f"Billing portal error: {e}")
-        raise HTTPException(400, str(e))
+        raise HTTPException(400, "Payment service error")
 
 
 @app.post("/api/credits/purchase")
@@ -599,7 +599,7 @@ async def create_credit_pack_checkout(body: CreditPurchaseRequest, user: dict = 
         return {"url": session.url, "credits": pack["credits"], "dollars": pack["dollars"]}
     except stripe.StripeError as e:
         logger.error(f"Stripe credit-pack checkout error: {e}")
-        raise HTTPException(400, str(e))
+        raise HTTPException(400, "Payment service error")
 
 
 @app.post("/api/webhook")
@@ -1570,6 +1570,6 @@ Return only the 2-4 most significant setups."""
         raise
     except Exception as exc:
         logger.error(f"Market tensions failed: {exc}", exc_info=True)
-        raise HTTPException(502, f"Failed to fetch market tensions: {exc}")
+        raise HTTPException(502, "Market data unavailable")
 
 
