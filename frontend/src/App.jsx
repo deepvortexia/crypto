@@ -615,10 +615,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('subscription') === 'success') {
       window.history.replaceState({}, '', '/dashboard')
-      fetch('/api/subscription-status')
-        .then(r => r.ok ? r.json() : null)
+      fetchSubscriptionStatus()
         .then(data => {
-          if (data) setIsPro(!!data.is_pro)
+          if (data) setIsPro(data.status === 'active')
           showToast('🎉 Welcome to PRO!', 'success')
         })
         .catch(() => {})
