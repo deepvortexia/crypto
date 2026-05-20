@@ -585,6 +585,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   const [priceLoaded, setPriceLoaded] = useState(false)
   const [slowLoaded,  setSlowLoaded]  = useState(false)
   const [loadingBar,  setLoadingBar]  = useState(0)
+  const [toast,       setToast]       = useState(null)
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4000)
+  }
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
@@ -594,15 +600,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('subscription') === 'success') {
-      const clean = new URL(window.location.href)
-      clean.searchParams.delete('subscription')
-      clean.searchParams.delete('session_id')
-      window.history.replaceState({}, '', clean.pathname + (clean.search || ''))
+      window.history.replaceState({}, '', '/dashboard')
       fetch('/api/subscription-status')
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (data) setIsPro(!!data.is_pro)
-          alert('🎉 Welcome to PRO!')
+          showToast('🎉 Welcome to PRO!', 'success')
         })
         .catch(() => {})
     }
@@ -618,7 +621,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       window.history.replaceState({}, '', '/')
     }
     if (urlParams.get('subscription') === 'cancelled') {
-      window.history.replaceState({}, '', '/')
+      window.history.replaceState({}, '', '/dashboard')
+      showToast('Payment cancelled.', 'info')
     }
   }, [])
 
@@ -2540,6 +2544,24 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .main-pad     { padding: 8px !important; }
         }
       `}</style>
+
+      {/* ── toast notification ── */}
+      {toast && (
+        <div style={{
+          position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, padding: '12px 24px', borderRadius: 8,
+          background: toast.type === 'success' ? '#064e3b' : '#1e293b',
+          border: `1px solid ${toast.type === 'success' ? '#10b981' : '#475569'}`,
+          color: toast.type === 'success' ? '#6ee7b7' : '#94a3b8',
+          fontFamily: '"Share Tech Mono",monospace', fontSize: 14, letterSpacing: '0.05em',
+          boxShadow: toast.type === 'success'
+            ? '0 0 24px rgba(16,185,129,0.35)'
+            : '0 4px 16px rgba(0,0,0,0.5)',
+          pointerEvents: 'none', whiteSpace: 'nowrap',
+        }}>
+          {toast.message}
+        </div>
+      )}
     </div>
       } />
     </Routes>
