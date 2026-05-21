@@ -714,8 +714,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
     // Mempool fired independently — non-blocking, fail-silent
     fetchMempool().then(v => { if (v) setMempool(v) }).catch(() => {})
+    fetchNewsSentiment().then(v => { if (v) setNewsSentiment(v) }).catch(() => {})
+    fetchMarketTensions().then(v => { if (v) { setTensions(v); setTensionsUpdatedAt(Date.now()) } }).catch(() => {})
 
-    const [s, ind, oc, fr, ls, oi, wh, ob, kl, liq, ns, mt] = await Promise.allSettled([
+    const [s, ind, oc, fr, ls, oi, wh, ob, kl, liq] = await Promise.allSettled([
       fetchSentiment(),
       fetchIndicators(),
       fetchOnchain(),
@@ -726,8 +728,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       fetchOrderBook(),
       currentPrice ? fetchKeyLevels(currentPrice) : Promise.resolve(null),
       fetchLiquidations(),
-      fetchNewsSentiment(),
-      fetchMarketTensions(),
     ])
     if (s.status   === 'fulfilled' && s.value)   setSentiment(s.value)
     if (ind.status === 'fulfilled' && ind.value)  setIndics(ind.value)
@@ -739,8 +739,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     if (ob.status  === 'fulfilled' && ob.value)   setOrderBook(ob.value)
     if (kl.status  === 'fulfilled' && kl.value)   setKeyLevels(kl.value)
     if (liq.status === 'fulfilled' && liq.value)  setLiquidations(liq.value)
-    if (ns.status  === 'fulfilled' && ns.value)   setNewsSentiment(ns.value)
-    if (mt.status  === 'fulfilled' && mt.value)   { setTensions(mt.value); setTensionsUpdatedAt(Date.now()) }
 
     const predResults = await Promise.allSettled(predPromises)
     setPreds(prev => {
@@ -785,8 +783,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   }, [user, loadAll])
 
   useEffect(() => {
-    // Wake the server with a lightweight ping before the heavy data fetch
-    pingHealth().catch(() => {}).finally(() => loadAll())
+    loadAll()
   }, [loadAll])
 
 
