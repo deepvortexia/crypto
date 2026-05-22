@@ -349,6 +349,10 @@ async def get_indicators():
             logger.warning(f"4H MACD fetch failed, falling back to daily: {macd_exc}")
 
         snapshot = get_indicator_snapshot(compute_indicators(daily_df, macd_close=macd_close_4h))
+        logger.info(
+            f"[indicators] macd_close_4h={'None' if macd_close_4h is None else len(macd_close_4h)} candles | "
+            f"macd={snapshot['macd']['macd']} signal={snapshot['macd']['signal']} hist={snapshot['macd']['histogram']}"
+        )
         _indicators_cache["indicators"] = snapshot
         return snapshot
     except Exception as exc:
@@ -1452,7 +1456,21 @@ async def get_market_tensions(request: Request):
             indicators_data = _indicators_cache["indicators"]
         else:
             _hourly_df, daily_df = await _get_dataframes()
-            indicators_data = get_indicator_snapshot(compute_indicators(daily_df))
+            _macd_close_4h = None
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as _client:
+                    _resp = await _client.get(
+                        f"{_OKX_BASE}/api/v5/market/candles",
+                        params={"instId": "BTC-USDT", "bar": "4H", "limit": 200},
+                    )
+                    _resp.raise_for_status()
+                    _candles_4h = list(reversed(_resp.json().get("data", [])))
+                if len(_candles_4h) >= 35:
+                    import pandas as _pd
+                    _macd_close_4h = _pd.Series([float(k[4]) for k in _candles_4h])
+            except Exception as _macd_exc:
+                logger.warning(f"4H MACD fetch failed in tensions path, falling back to daily: {_macd_exc}")
+            indicators_data = get_indicator_snapshot(compute_indicators(daily_df, macd_close=_macd_close_4h))
             _indicators_cache["indicators"] = indicators_data
 
         # Remaining live data (no dedicated UI cache)
