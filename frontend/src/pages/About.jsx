@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 
 const G = {
   bg:       '#0a0a0a',
@@ -91,6 +92,48 @@ export default function About() {
   const [menuOpen, setMenuOpen] = useState(false)
   return (
     <div style={{ background: G.bg, minHeight: '100vh', color: G.bright, fontFamily: mono, position: 'relative', zIndex: 1 }}>
+      <Helmet>
+        <title>How PredictAlpha Works — AI Crypto Prediction Engine</title>
+        <meta name="description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
+        <meta property="og:title" content="How PredictAlpha Works — AI Crypto Prediction Engine" />
+        <meta property="og:description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
+        <meta property="og:url" content="https://predictalpha.app/about" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="How PredictAlpha Works — AI Crypto Prediction Engine" />
+        <meta name="twitter:description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How accurate are PredictAlpha AI predictions?",
+              "acceptedAnswer": { "@type": "Answer", "text": "PredictAlpha achieves 72–92% directional accuracy depending on timeframe. The 4H horizon is the most reliable for short-term trading signals. The 1-month prediction is a directional bias indicator only and should not be used for precise entry/exit timing." }
+            },
+            {
+              "@type": "Question",
+              "name": "What assets does PredictAlpha cover?",
+              "acceptedAnswer": { "@type": "Answer", "text": "PredictAlpha currently covers Bitcoin (BTC). Ethereum and Gold predictions are coming soon." }
+            },
+            {
+              "@type": "Question",
+              "name": "What data sources power the predictions?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Live price data is sourced from CoinMarketCap, order book data from OKX, on-chain metrics from Blockchain.info and Mempool.space, and the Fear & Greed Index from alternative.me." }
+            },
+            {
+              "@type": "Question",
+              "name": "Is this financial advice?",
+              "acceptedAnswer": { "@type": "Answer", "text": "No. PredictAlpha is an educational and analytical tool only. Nothing on this platform constitutes financial advice. Always do your own research before making any investment decisions." }
+            },
+            {
+              "@type": "Question",
+              "name": "How often does the dashboard update?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Price updates every 30 seconds, AI predictions are cached for 5 minutes, and on-chain data refreshes every 10 minutes." }
+            }
+          ]
+        })}</script>
+      </Helmet>
 
       {/* ── Navbar ── */}
       <header style={{

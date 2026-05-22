@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { supabase } from './lib/supabase'
 
 function ScrollToTop() {
@@ -1166,6 +1167,29 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   return (
     <>
+    <Helmet>
+      <title>PredictAlpha — Bitcoin &amp; Crypto AI Price Predictions</title>
+      <meta name="description" content="Real-time Bitcoin and crypto AI price predictions powered by LSTM, XGBoost and Prophet. 6 time horizons, live on-chain data, derivatives signals. Free to start." />
+      <meta property="og:title" content="PredictAlpha — Bitcoin & Crypto AI Price Predictions" />
+      <meta property="og:description" content="Real-time Bitcoin and crypto AI price predictions powered by LSTM, XGBoost and Prophet. 6 time horizons, live on-chain data, derivatives signals. Free to start." />
+      <meta property="og:url" content="https://predictalpha.app" />
+      <meta property="og:type" content="website" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="PredictAlpha — Bitcoin & Crypto AI Price Predictions" />
+      <meta name="twitter:description" content="Real-time Bitcoin and crypto AI price predictions powered by LSTM, XGBoost and Prophet. 6 time horizons, live on-chain data, derivatives signals. Free to start." />
+      <script type="application/ld+json">{JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "PredictAlpha",
+        "url": "https://predictalpha.app",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "offers": [
+          { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
+          { "@type": "Offer", "name": "PRO", "price": "19.99", "priceCurrency": "USD", "billingIncrement": "month" }
+        ]
+      })}</script>
+    </Helmet>
     <ScrollToTop />
     <Routes>
       <Route path="/dashboard" element={<Navigate to="/" replace />} />
