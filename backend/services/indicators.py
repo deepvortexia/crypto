@@ -2,9 +2,10 @@ import numpy as np
 import pandas as pd
 
 
-def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
+def compute_indicators(df: pd.DataFrame, macd_close: pd.Series = None) -> pd.DataFrame:
     """
     Expects df with columns: open, high, low, close, volume.
+    macd_close: optional close Series (e.g. 4H) used only for MACD; falls back to df["close"].
     Returns df with added indicator columns.
     """
     df = df.copy()
@@ -22,12 +23,15 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     rs = avg_gain / avg_loss.replace(0, np.nan)
     df["rsi"] = 100 - (100 / (1 + rs))
 
-    # MACD (12/26 EMA, 9-period signal)
-    ema12 = close.ewm(span=12, adjust=False).mean()
-    ema26 = close.ewm(span=26, adjust=False).mean()
-    df["macd"] = ema12 - ema26
-    df["macd_signal"] = df["macd"].ewm(span=9, adjust=False).mean()
-    df["macd_hist"] = df["macd"] - df["macd_signal"]
+    # MACD (12/26 EMA, 9-period signal) — uses macd_close (4H) if provided, else daily close
+    _mc = macd_close if macd_close is not None else close
+    ema12 = _mc.ewm(span=12, adjust=False).mean()
+    ema26 = _mc.ewm(span=26, adjust=False).mean()
+    macd_line = ema12 - ema26
+    macd_sig  = macd_line.ewm(span=9, adjust=False).mean()
+    df["macd"]        = float(macd_line.iloc[-1])
+    df["macd_signal"] = float(macd_sig.iloc[-1])
+    df["macd_hist"]   = float((macd_line - macd_sig).iloc[-1])
 
     # Bollinger Bands (20-period, 2σ)
     bb_mid = close.rolling(20).mean()

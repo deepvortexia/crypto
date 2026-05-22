@@ -331,7 +331,24 @@ async def get_indicators():
 
     try:
         hourly_df, daily_df = await _get_dataframes()
-        snapshot = get_indicator_snapshot(compute_indicators(daily_df))
+
+        # Fetch 200 4H candles for MACD — more responsive than daily
+        macd_close_4h = None
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(
+                    f"{_OKX_BASE}/api/v5/market/candles",
+                    params={"instId": "BTC-USDT", "bar": "4H", "limit": 200},
+                )
+                resp.raise_for_status()
+                candles_4h = list(reversed(resp.json().get("data", [])))
+            if len(candles_4h) >= 35:
+                import pandas as _pd
+                macd_close_4h = _pd.Series([float(k[4]) for k in candles_4h])
+        except Exception as macd_exc:
+            logger.warning(f"4H MACD fetch failed, falling back to daily: {macd_exc}")
+
+        snapshot = get_indicator_snapshot(compute_indicators(daily_df, macd_close=macd_close_4h))
         _indicators_cache["indicators"] = snapshot
         return snapshot
     except Exception as exc:
