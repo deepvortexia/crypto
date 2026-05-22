@@ -216,12 +216,20 @@ async def lifespan(app: FastAPI):
 
 
 async def _reset_daily_credits_job() -> None:
-    """Backstop: reset every user_credits row's daily counter at 00:00 UTC."""
+    """Backstop: reset overdue user_credits rows at 00:00 UTC.
+
+    Only rows whose daily_reset_at has elapsed are touched; rows already
+    lazily-reset during the day are skipped.  Running the sync Supabase call
+    in a thread pool keeps the event loop free so in-flight requests are not
+    stalled during the reset.
+    """
     try:
-        rpc = supabase.rpc(
-            "reset_all_daily_credits",
-            {"p_free_limit": FREE_DAILY_LIMIT, "p_pro_limit": PRO_DAILY_LIMIT},
-        ).execute()
+        rpc = await asyncio.to_thread(
+            lambda: supabase.rpc(
+                "reset_all_daily_credits",
+                {"p_free_limit": FREE_DAILY_LIMIT, "p_pro_limit": PRO_DAILY_LIMIT},
+            ).execute()
+        )
         logger.info(f"Daily credit reset complete — {rpc.data} rows updated")
     except Exception as e:
         logger.error(f"Daily credit reset job failed: {e}")
