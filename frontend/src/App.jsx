@@ -1918,6 +1918,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         </div>
 
         {/* footer */}
+        <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: 'rgba(168,162,158,0.4)', textAlign: 'center', maxWidth: 800, margin: '0 auto', padding: '24px 16px 0' }}>
+          PredictAlpha is an AI-powered price prediction platform for Bitcoin, Ethereum, and Gold. Real-time forecasts across 6 time horizons — 4H, 8H, 12H, 24H, 1 Week, and 1 Month — powered by a stacked ensemble of LSTM, XGBoost, and Prophet models. Live on-chain data, derivatives signals, and AI-generated market analysis updated every 5 minutes. Currently covering BTC. ETH and Gold coming soon.
+        </div>
         <div className="site-footer" style={{ borderTop: `1px solid ${G.border}`, paddingTop: 28, paddingBottom: 20, marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
           <div className="footer-row" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
             <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.12em', color: G.gold }}>PREDICT ALPHA</span>
