@@ -1534,15 +1534,22 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                       <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 14, color: G.gold, textShadow: `0 0 8px ${G.goldGlow}` }}>
                         {macd ? fmtNum(macd.macd, 1) : '—'}
                       </span>
-                      {macd && (
-                        <span style={{
-                          fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.1em',
-                          color: macd.macd >= 0 ? G.green : G.red,
-                          background: macd.macd >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                          border: `1px solid ${macd.macd >= 0 ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
-                          borderRadius: 3, padding: '2px 6px',
-                        }}>{macd.macd >= 0 ? 'BULLISH' : 'BEARISH'}</span>
-                      )}
+                      {macd && (() => {
+                        const isBullish = macd.macd > 0 && macd.histogram > 0
+                        const isBearish = macd.macd < 0
+                        const bdgColor  = isBullish ? G.green : isBearish ? G.red : G.gold
+                        const bdgBg     = isBullish ? 'rgba(16,185,129,0.1)' : isBearish ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)'
+                        const bdgBorder = isBullish ? 'rgba(16,185,129,0.3)' : isBearish ? 'rgba(239,68,68,0.3)' : 'rgba(245,158,11,0.3)'
+                        const bdgLabel  = isBullish ? 'BULLISH' : isBearish ? 'BEARISH' : 'NEUTRAL'
+                        return (
+                          <span style={{
+                            fontFamily: '"Share Tech Mono", monospace', fontSize: 9, letterSpacing: '0.1em',
+                            color: bdgColor, background: bdgBg,
+                            border: `1px solid ${bdgBorder}`,
+                            borderRadius: 3, padding: '2px 6px',
+                          }}>{bdgLabel}</span>
+                        )
+                      })()}
                     </div>
                   </div>
                   {/* Row 2: Signal Line */}
