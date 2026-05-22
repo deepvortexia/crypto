@@ -55,36 +55,24 @@ const SectionTitle = ({ children }) => (
 
 const FAQ_ITEMS = [
   {
-    q: 'How accurate are PREDICT ALPHA AI predictions?',
-    a: 'Our ensemble model achieves historical directional accuracy of 72–92% depending on timeframe. Shorter horizons (4H) are most reliable because the signal-to-noise ratio is higher. Accuracy degrades naturally for longer horizons — our 1-month forecast carries a 51% confidence baseline and should be used as a directional bias, not a price target. We publish real confidence scores, not marketing numbers.',
+    q: 'How accurate are the predictions?',
+    a: '72–92% directional accuracy depending on timeframe. 4H is most reliable. 1-month is a macro bias — treat it as directional orientation, not a price target.',
   },
   {
-    q: 'What data sources power the predictions?',
-    a: 'PREDICT ALPHA ingests live data from Binance (OHLCV, futures), CoinGecko (market cap, sentiment), Glassnode-compatible on-chain APIs (hash rate, MVRV, active addresses), and aggregated order book depth snapshots. All feeds are updated every 30 seconds. No social media sentiment or news scraping is used — our signal is purely quantitative.',
+    q: 'What assets does PredictAlpha cover?',
+    a: 'Currently Bitcoin. Ethereum and Gold are coming soon.',
   },
   {
     q: 'Is this financial advice?',
-    a: 'No. PREDICT ALPHA is an educational and analytical tool. All outputs — predictions, indicators, key levels — are for informational purposes only and do not constitute investment advice. Cryptocurrency markets are highly volatile. Always do your own research and consult a licensed financial advisor before making any trading decisions.',
+    a: 'No. PredictAlpha is an educational and analytical tool. All outputs are for informational purposes only. Always do your own research.',
   },
   {
-    q: 'What is the difference between the AI prediction timeframes?',
-    a: 'We offer six horizons: 4H (intraday, 92% confidence), 8H (swing entry, 88%), 12H (half-day, 84%), 24H (daily trend, 78%), 1 Week (medium-term, 65%), and 1 Month (macro bias, 51%). Each horizon uses a slightly different feature weighting — shorter horizons emphasize order book imbalance and funding rates, while longer horizons lean on on-chain fundamentals and macro momentum.',
+    q: 'How often does the dashboard update?',
+    a: 'Price and order book every 30 seconds. Predictions cached 5 minutes. On-chain data every 10 minutes. Market Tensions regenerated every 5 minutes.',
   },
   {
-    q: 'What is the Fear & Greed index and how is it calculated?',
-    a: 'The Fear & Greed index aggregates volatility (25%), market momentum and volume (25%), social sentiment (15%), Bitcoin dominance (10%), and Google Trends search interest (25%). A reading below 25 is Extreme Fear — historically a buy signal. Above 75 is Extreme Greed — historically correlated with local tops. PREDICT ALPHA displays this live alongside its own directional models.',
-  },
-  {
-    q: 'How do Fibonacci retracement levels work?',
-    a: 'Fibonacci retracements mark key price zones derived from the golden ratio (0.618, 0.382, 0.236, 0.786). These are drawn from the most recent significant swing high to swing low. Price tends to pause or reverse at these levels because algorithmic trading systems and high-volume participants place orders there. The 61.8% level ("golden ratio") is the most respected and watched by professional traders worldwide.',
-  },
-  {
-    q: 'What is the funding rate and why does it matter?',
-    a: 'The funding rate is a periodic payment between long and short futures traders, designed to keep perpetual contract prices anchored to spot price. A high positive funding rate (above 0.05%) means longs are paying shorts — the market is overleveraged bullish, which often precedes a correction. A negative funding rate signals the opposite: short-side overcrowding, which can spark short squeezes.',
-  },
-  {
-    q: 'How often is the dashboard refreshed?',
-    a: 'Live price and order book data refresh every 30 seconds. AI predictions are recalculated on each page load and cached for 5 minutes. On-chain data (hash rate, mempool, block time) updates approximately every 10 minutes, as block-level data changes more slowly. All timestamps are shown in your local browser timezone.',
+    q: 'What makes PredictAlpha different?',
+    a: 'Real confidence scores. Three-model ensemble with live accuracy weighting. MACD on 4H candles. AI trading setups every 5 minutes. A platform that shows uncertainty instead of hiding it.',
   },
 ]
 
@@ -176,7 +164,7 @@ export default function About() {
 
         {/* ── SEO meta hint (visible heading for crawlers) ── */}
         <h1 style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}>
-          PREDICT ALPHA — AI Bitcoin Price Prediction Dashboard
+          PREDICT ALPHA — How It Works — AI Bitcoin Price Prediction Engine
         </h1>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -187,10 +175,10 @@ export default function About() {
             <img src="/logoegyptfinal.webp" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} alt="PREDICT ALPHA" />
           </div>
           <h2 className="about-hero-title" style={{ fontFamily: orb, fontSize: 'clamp(20px,5vw,42px)', letterSpacing: '0.18em', ...goldText, marginBottom: 18, lineHeight: 1.2 }}>
-            AI-POWERED MARKET INTELLIGENCE
+            PREDICT ALPHA — HOW IT WORKS
           </h2>
           <p className="about-body" style={{ fontFamily: mono, fontSize: 14, color: G.text, maxWidth: 660, margin: '0 auto 28px', lineHeight: 1.9, letterSpacing: '0.05em' }}>
-            PREDICT ALPHA runs a stacked ensemble of neural networks and gradient-boosted models against a continuous stream of real-time market data — processing thousands of data points per minute across price action, on-chain flows, and derivatives markets to generate calibrated directional forecasts across six time horizons.
+            We don't predict the future. We build the perception of it. PredictAlpha is a real-time market intelligence platform built for traders who need more than a price chart. Every prediction, every signal, every metric reflects the current state of the market — updated continuously, never cached beyond 5 minutes. Currently covering Bitcoin. Ethereum and Gold coming soon.
           </p>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
             {['AI Predictions', 'On-Chain', 'Futures Data', 'Key Levels', 'Live Feeds'].map(tag => (
@@ -204,28 +192,28 @@ export default function About() {
         </section>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* WHAT IS PREDICT ALPHA */}
+        {/* THE PREDICTION ENGINE */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ marginBottom: 72 }}>
-          <SectionTitle>WHAT IS PREDICT ALPHA</SectionTitle>
+          <SectionTitle>THE PREDICTION ENGINE</SectionTitle>
 
           <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20, marginBottom: 32 }}>
             {[
               {
-                title: 'Real-Time Intelligence',
-                body: 'PREDICT ALPHA pulls live market data every 30 seconds from major exchanges and on-chain APIs. Unlike static charts, every metric on the dashboard reflects the current state of the Bitcoin market — from the order book to the mempool.',
+                title: 'LSTM Neural Network',
+                body: 'A recurrent neural network trained on sequential price patterns. The LSTM captures temporal dependencies across hundreds of candles, learning how momentum builds and reverses over time.',
               },
               {
-                title: 'Multi-Layer Analysis',
-                body: 'No single signal is reliable alone. PREDICT ALPHA layers technical indicators (RSI, MACD, Bollinger Bands) over on-chain fundamentals (hash rate, active addresses, MVRV) and derivatives sentiment (funding rate, open interest, long/short ratio) to produce a composite view.',
+                title: 'XGBoost Gradient Boosting',
+                body: 'A gradient-boosted model trained on 40+ engineered features across price action, on-chain flows, and derivatives data. Excels at non-linear relationships and feature interactions that single models miss.',
               },
               {
-                title: 'Transparent Confidence',
-                body: 'Every AI prediction is accompanied by a calibrated confidence score. We do not hide uncertainty behind vague language. A 51% confidence on the 1-month forecast means exactly that — it is a directional lean, not a guarantee, and we show the bar accordingly.',
+                title: 'Prophet Time-Series',
+                body: 'A decomposable time-series model capturing cyclical and trend components specific to Bitcoin — weekly seasonality, macro momentum, and longer-term structural patterns.',
               },
               {
-                title: 'AI Market Intelligence',
-                body: 'Market Tensions & Divergences powered by Claude Haiku detects 2–4 live trading setups every 5 minutes — bullish, bearish, warning, and squeeze patterns. Bollinger squeeze detection identifies volatility compression before explosive moves. Real-time whale activity tracks large-wallet accumulation and distribution signals.',
+                title: 'Meta-Learner Ensemble',
+                body: 'A meta-learner combines the three models, continuously re-weighting each based on recent accuracy. The result: a predicted price, a directional signal (UP or DOWN), and a model agreement score.',
               },
             ].map(({ title, body }) => (
               <div key={title} style={{ ...cardStyle, position: 'relative' }}>
@@ -242,29 +230,29 @@ export default function About() {
 
           <div style={{ ...cardStyle, borderColor: `${G.gold}33` }}>
             <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, letterSpacing: '0.04em' }}>
-              PREDICT ALPHA was built for traders who want more than a price chart. Whether you are a day trader watching the 4-hour signal, a swing trader tracking weekly momentum, or a long-term holder monitoring macro on-chain health, the platform surfaces the signals that matter at the horizon you care about. The dashboard is designed to be read in under 60 seconds — all critical data is above the fold, color-coded, and updated continuously.
+              Most tools run a single model and call it AI. PredictAlpha runs three independent models simultaneously and combines them through a meta-learner that weights each model's recent accuracy. No single model dominates — the meta-learner rebalances weights continuously based on recent performance. Low agreement means the three models disagree — we show that uncertainty instead of hiding it.
             </p>
           </div>
         </section>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* AI PREDICTIONS */}
+        {/* SIX TIME HORIZONS */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ marginBottom: 72 }}>
-          <SectionTitle>AI PRICE PREDICTIONS · 4H TO 1 MONTH</SectionTitle>
+          <SectionTitle>SIX TIME HORIZONS</SectionTitle>
 
           <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 32, letterSpacing: '0.04em' }}>
-            The prediction engine at the core of PREDICT ALPHA is a stacked ensemble of gradient-boosted decision trees, a short-term LSTM recurrent network, and a linear regression baseline. Each model is trained independently on historical OHLCV data and then combined using a meta-learner that weights each model's recent accuracy. The result is a predicted price and directional confidence score for each of six horizons.
+            Shorter horizons are more reliable. We publish confidence scores honestly — not as marketing copy, but as calibrated estimates of model certainty. Each horizon uses a distinct feature weighting tuned to the dynamics of that timeframe.
           </p>
 
           <div className="horizon-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 16, marginBottom: 32 }}>
             {[
-              { h: '4H', conf: 92, desc: 'Intraday momentum. Powered heavily by order book imbalance and 4-hour RSI divergence. Best for active traders entering or exiting within the same session.' },
-              { h: '8H', conf: 88, desc: 'Extended intraday. Incorporates funding rate direction and MACD crossovers on the 4H chart. Useful for catching swing moves without overnight exposure.' },
-              { h: '12H', conf: 84, desc: 'Half-day outlook. Blends technical momentum with short-term on-chain flow. Ideal for traders who check the market twice a day.' },
-              { h: '24H', conf: 78, desc: 'Daily forecast. Weighted toward daily MACD, EMA alignment, and mempool congestion as a proxy for network demand. Most-watched horizon on the platform.' },
-              { h: '1 WEEK', conf: 65, desc: 'Medium-term trend. On-chain fundamentals carry the most weight here — MVRV ratio, hash rate momentum, and exchange net flow. Best paired with macro context.' },
-              { h: '1 MONTH', conf: 51, desc: 'Macro directional bias. Model confidence drops to near-coin-flip territory. Use as a sentiment gauge and strategic orientation, not a price target.' },
+              { h: '4H', conf: 92, desc: 'Order book + RSI divergence — Intraday momentum. Best for active traders entering or exiting within the same session.' },
+              { h: '8H', conf: 88, desc: 'Funding rate + MACD 4H — Extended intraday. Useful for catching swing moves without overnight exposure.' },
+              { h: '12H', conf: 84, desc: 'Technical momentum + on-chain flow — Half-day outlook. Ideal for traders who check the market twice a day.' },
+              { h: '24H', conf: 78, desc: 'MACD + EMA alignment — Daily forecast. Most-watched horizon on the platform.' },
+              { h: '1 WEEK', conf: 65, desc: 'MVRV + hash rate + exchange flow — Medium-term trend. Best paired with macro context.' },
+              { h: '1 MONTH', conf: 51, desc: 'Macro on-chain bias — Directional lean only, not a price target. Shorter horizons are more reliable. We publish confidence scores honestly.' },
             ].map(({ h, conf, desc }) => (
               <div key={h} style={{ ...cardStyle, borderTop: `2px solid ${G.gold}66` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -284,38 +272,38 @@ export default function About() {
 
           <div style={{ ...cardStyle }}>
             <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
-              Each prediction is recalculated on page load and cached server-side for 5 minutes, ensuring that the model runs on the freshest available data without overloading the API. The Deep Analysis feature runs an extended multi-step reasoning chain that annotates each signal, explains its current reading, and synthesises a final directional conclusion — surfacing the why behind the number, not just the number itself.
+              Each prediction is recalculated on page load and cached server-side for 5 minutes, ensuring the model runs on the freshest available data. The Deep Analysis feature runs an extended multi-step reasoning chain that annotates each signal, explains its current reading in plain language, and synthesises a final directional conclusion — the why behind the number, not just the number.
             </p>
           </div>
         </section>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* TECHNICAL INDICATORS */}
+        {/* WHAT POWERS THE SIGNAL */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ marginBottom: 72 }}>
-          <SectionTitle>TECHNICAL INDICATORS</SectionTitle>
+          <SectionTitle>WHAT POWERS THE SIGNAL</SectionTitle>
 
           <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
-            Technical analysis describes the statistical patterns in price and volume data. While no single indicator predicts the future, the convergence of multiple indicators on the same signal significantly increases the probability of a directional move. PREDICT ALPHA tracks the following indicators in real time, all visualised with colour-coded bar gauges.
+            PredictAlpha ingests live data every 30 seconds across four distinct signal stacks. Each stack feeds both the prediction engine and the live dashboard simultaneously.
           </p>
 
           <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 18 }}>
             {[
               {
-                name: 'RSI — Relative Strength Index',
-                body: 'The RSI measures the speed and change of price movements on a scale of 0–100. Readings below 30 indicate oversold conditions — the asset may be due for a bounce. Readings above 70 indicate overbought conditions — a pullback is likely. PREDICT ALPHA tracks RSI on the primary active timeframe and flags extreme readings in the indicator bar.',
+                name: 'Price & Market',
+                body: 'Live BTC/USDT from CoinMarketCap, order book depth from OKX. Best bid, best ask, bid/ask ratio, and spread updated every 30 seconds.',
               },
               {
-                name: 'MACD — Moving Average Convergence Divergence',
-                body: 'MACD compares two exponential moving averages (typically 12 and 26 periods) and plots the difference as a line. When the MACD line crosses above its signal line, it is a bullish crossover. The histogram represents momentum strength. PREDICT ALPHA shows the raw MACD value and signal value alongside their bar gauges so you can read momentum at a glance.',
+                name: 'On-Chain',
+                body: 'Hash rate, block time, total fees from Blockchain.info and Mempool.space. Mempool congestion and fee rates updated with each block. Active addresses, exchange net flow, MVRV ratio.',
               },
               {
-                name: 'Bollinger Bands',
-                body: 'Bollinger Bands plot two standard deviation lines above and below a 20-period moving average. Price touching or breaching the upper band in a non-trending market often reverts to the mean. The band width (distance between upper and lower) is a volatility indicator — wide bands mean high volatility, narrow bands precede breakouts. PREDICT ALPHA displays the upper and lower band values live.',
+                name: 'Derivatives',
+                body: 'Funding rate, open interest, long/short ratio, and taker volume from OKX perpetual futures. These signals reveal how leveraged the market is and which side is crowded.',
               },
               {
-                name: 'Fear & Greed Index',
-                body: 'A composite sentiment index ranging from 0 (Extreme Fear) to 100 (Extreme Greed). Historically, extreme fear periods have been the best long-term entry points for Bitcoin, while extreme greed readings have preceded major corrections. The index is updated daily and displayed as a circular gauge with colour gradient from red through amber to green.',
+                name: 'Sentiment & Technical',
+                body: 'Fear and Greed Index from alternative.me, whale activity, media sentiment scored across recent crypto news headlines. RSI 14-period, MACD on 4H candles, Bollinger Bands 20-period 2-sigma, EMA 50 and EMA 200.',
               },
             ].map(({ name, body }) => (
               <div key={name} style={{ ...cardStyle }}>
@@ -332,40 +320,40 @@ export default function About() {
         </section>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* ON-CHAIN */}
+        {/* WHY MACD ON 4H, NOT DAILY */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ marginBottom: 72 }}>
-          <SectionTitle>ON-CHAIN ANALYTICS</SectionTitle>
+          <SectionTitle>WHY MACD ON 4H, NOT DAILY</SectionTitle>
 
           <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
-            On-chain data is the heartbeat of the Bitcoin network. Unlike price, which can be manipulated by short-term sentiment, on-chain metrics reflect the actual behaviour of participants — wallets moving, miners mining, transactions confirming. These signals are slower-moving but structurally more significant for medium and long-term analysis.
+            Most platforms calculate MACD on daily candles. The problem: daily signal lines lag by weeks after a major trend reversal. PredictAlpha uses 4H candles for MACD — fast enough to catch real momentum shifts, stable enough to filter noise. The signal you see reflects the market today, not two weeks ago.
           </p>
 
           <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 18 }}>
             {[
               {
-                name: 'Hash Rate',
-                body: 'The total computational power securing the Bitcoin network, measured in exahashes per second (EH/s). Rising hash rate reflects miner confidence — miners only invest in hardware if they expect the price to be profitable long-term. Hash rate at all-time highs is a macro-bullish signal. A sudden drop can indicate miner capitulation, often seen near cycle bottoms.',
+                name: 'The Daily MACD Problem',
+                body: 'A daily MACD signal line is a 9-day EMA of the MACD line. After a sharp reversal, it can take 2–3 weeks for the signal to reflect the new trend direction. By then, the move is already over.',
               },
               {
-                name: 'Block Time',
-                body: 'Average time between mined blocks, targeting 10 minutes. When hash rate surges faster than the difficulty adjustment can accommodate, block times fall below 10 minutes — the network is running hot. When hash rate drops, block times stretch above 10 minutes. This metric is an indirect proxy for network health and miner activity.',
+                name: 'The 4H Advantage',
+                body: 'At 4H resolution, MACD responds to trend changes within hours, not weeks. The signal line converges to current conditions roughly 6x faster than on daily candles.',
               },
               {
-                name: 'MVRV Ratio',
-                body: 'Market Value to Realised Value compares the current market cap to the average cost basis of all Bitcoin in circulation. MVRV above 3.5 has historically marked cycle tops. MVRV below 1.0 means the average holder is at a loss and has historically been an exceptional buy zone. PREDICT ALPHA displays this ratio live with contextual colour coding.',
+                name: 'Signal Freshness',
+                body: 'PredictAlpha fetches 200 4H candles from OKX on every indicator refresh. The MACD, signal line, and histogram you see are never more than 4 hours stale.',
               },
               {
-                name: 'Active Addresses',
-                body: 'The number of unique Bitcoin addresses participating in transactions daily. Rising active addresses indicate growing network utilisation and adoption. Sustained address growth while price consolidates is a bullish divergence — more people are using Bitcoin even as speculators stay sidelined. Falling addresses during a rally can signal a lack of real demand behind the price move.',
+                name: 'EMA 12 / 26 / 9',
+                body: 'Standard MACD parameters preserved: 12-period and 26-period exponential moving averages of 4H closes, with a 9-period signal line. Industry-standard settings, industry-leading freshness.',
               },
               {
-                name: 'Exchange Net Flow',
-                body: 'Net Bitcoin flowing into or out of exchange wallets. Positive net flow (more BTC entering exchanges) is bearish — it means holders are depositing to sell. Negative net flow (BTC leaving exchanges) is bullish — it means buyers are withdrawing to self-custody, removing supply from the market. This metric is one of the strongest short-to-medium term directional indicators.',
+                name: 'Histogram Interpretation',
+                body: 'The histogram shows the distance between the MACD line and the signal line. Expanding histogram means momentum is accelerating. Contracting histogram means momentum is fading — often the first warning before a crossover.',
               },
               {
-                name: 'Mempool Congestion',
-                body: 'The number of unconfirmed transactions waiting to be included in a block. A congested mempool with rising fees indicates high demand for Bitcoin block space — often coinciding with active markets. A clear mempool with minimal fees suggests calm conditions. PREDICT ALPHA shows pending transaction count, the fastest fee rate (sat/vB), and a one-hour fee estimate.',
+                name: 'Crossover Signals',
+                body: 'A bullish crossover occurs when the MACD line crosses above the signal line. On 4H data, these crossovers are actionable intraday signals, not lagging confirmations of a move that already happened.',
               },
             ].map(({ name, body }) => (
               <div key={name} style={{ ...cardStyle }}>
@@ -382,32 +370,32 @@ export default function About() {
         </section>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* FUTURES */}
+        {/* AI MARKET TENSIONS */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ marginBottom: 72 }}>
-          <SectionTitle>FUTURES & DERIVATIVES INTELLIGENCE</SectionTitle>
+          <SectionTitle>AI MARKET TENSIONS — LIVE TRADING SETUPS</SectionTitle>
 
           <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
-            Bitcoin futures markets trade more volume than the spot market. Understanding the mechanics of funding rates, open interest, and long/short ratios is essential for reading short-term market sentiment and avoiding the traps that catch most retail traders. PREDICT ALPHA aggregates all key derivatives metrics from Binance perpetual futures into a single, colour-coded view.
+            Every 5 minutes, PredictAlpha scans all live signals simultaneously and generates 2–4 active trading setups. Not generic alerts — reasoned setups with context: what the signal is, why it matters right now, and what to watch for next.
           </p>
 
           <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 18, marginBottom: 28 }}>
             {[
               {
-                name: 'Funding Rate',
-                body: 'Perpetual futures contracts use a funding mechanism to keep price anchored to spot. Every 8 hours, long positions pay shorts (or vice versa) based on the rate. A persistently positive rate above 0.05% signals extreme long-side leverage — the market is overcrowded on the bullish side and is vulnerable to a leveraged long liquidation cascade (a "long squeeze"). Negative funding signals short overcrowding and potential for a short squeeze.',
+                name: 'Bullish Divergences',
+                body: 'When price makes a new low but momentum indicators do not follow. A classic early warning for reversals — the market is losing selling conviction before price confirms it.',
               },
               {
-                name: 'Open Interest',
-                body: 'Total value of outstanding futures contracts that have not been settled. Rising open interest with rising price confirms the trend — new money is entering on the long side. Rising open interest with falling price is a bearish signal — new shorts are being opened aggressively. A sudden collapse in open interest means a major liquidation event has cleared the market — these often mark local price extremes.',
+                name: 'Bearish Crossovers',
+                body: 'MACD and RSI divergences confirming a downtrend. Flagged with context explaining which signals are aligning and what level to watch for confirmation or invalidation.',
               },
               {
-                name: 'Long/Short Ratio',
-                body: 'The ratio of long positions to short positions held by retail traders on major exchanges. Contrary to intuition, an extremely high long/short ratio is often bearish — when everyone is long, there is no one left to push price higher and the market becomes vulnerable to a flush. Professional traders often fade extreme retail positioning. PREDICT ALPHA shows this ratio live with signal interpretation.',
+                name: 'Bollinger Squeeze',
+                body: 'Volatility compression identified before explosive moves. When Bollinger Bands contract to their narrowest range, a breakout is imminent — PredictAlpha flags the direction bias from other signals.',
               },
               {
-                name: 'Whale Activity',
-                body: 'Large on-chain transactions (typically above 100 BTC) are tracked as a proxy for high-volume participant activity. When whales are accumulating — moving Bitcoin off exchanges to cold storage — it is a long-term bullish signal. When whales deposit large amounts to exchanges, it often precedes selling pressure. PREDICT ALPHA surfaces whale trade count and directional signal.',
+                name: 'Extreme Positioning',
+                body: 'Funding rate extremes, long/short ratio crowding, and whale positioning alerts when the market is dangerously one-sided. These are the conditions that precede sharp liquidation cascades.',
               },
             ].map(({ name, body }) => (
               <div key={name} style={{ ...cardStyle }}>
@@ -424,38 +412,38 @@ export default function About() {
 
           <div style={{ ...cardStyle, borderColor: `${G.gold}33` }}>
             <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
-              The Order Book section adds another layer: it surfaces the best bid and best ask prices in real time, calculates the bid/ask ratio as a proxy for near-term buying or selling pressure, and displays the spread. A tightening spread indicates deep liquidity and efficient price discovery. A wide spread signals thin markets where price can move sharply on moderate volume.
+              This is the feature that separates PredictAlpha from a dashboard that just shows numbers. It tells you what the numbers mean together. Each setup includes the signal, the context, and the key level to watch — generated fresh every 5 minutes from the full live signal stack.
             </p>
           </div>
         </section>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
-        {/* KEY LEVELS & FIBONACCI */}
+        {/* TRANSPARENCY BY DESIGN */}
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ marginBottom: 72 }}>
-          <SectionTitle>KEY LEVELS & FIBONACCI RETRACEMENTS</SectionTitle>
+          <SectionTitle>TRANSPARENCY BY DESIGN</SectionTitle>
 
           <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, marginBottom: 28, letterSpacing: '0.04em' }}>
-            Price does not move randomly — it gravitates toward levels where large amounts of orders cluster. PREDICT ALPHA automatically calculates pivot points, support and resistance levels, and Fibonacci retracements from the most recent significant swing, updating them with each data refresh.
+            PredictAlpha was built on one principle: show the work. Every confidence score is real. Every model agreement percentage reflects actual consensus between three independent models. When models disagree, you see a low agreement score — not a false confidence number engineered to look impressive.
           </p>
 
           <div className="levels-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 24 }}>
             <div style={{ ...cardStyle }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <div className="indicator-icon"><LogoIcon /></div>
-                <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.green }}>SUPPORT LEVELS — S1 / S2 / S3</span>
+                <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.green }}>REAL CONFIDENCE SCORES</span>
               </div>
               <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>
-                Calculated using the classic pivot point formula from the prior session's high, low, and close. S1 is the first natural floor below the pivot — price often pauses here. S2 and S3 are deeper levels that come into play during larger corrections. These are the levels where buyers are expected to step in, making them high-probability zones to watch for reversals or bounces.
+                Every prediction confidence score reflects actual model consensus — not a marketing number. A 51% score on the 1-month forecast means exactly that: the three models marginally agree on direction. We publish the number as it is.
               </p>
             </div>
             <div style={{ ...cardStyle }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                 <div className="indicator-icon"><LogoIcon /></div>
-                <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.red }}>RESISTANCE LEVELS — R1 / R2 / R3</span>
+                <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.red }}>UNCERTAINTY ON DISPLAY</span>
               </div>
               <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>
-                Mirror calculations above the pivot. R1 is the first ceiling above the current price — bulls need to reclaim this to confirm an uptrend. R2 and R3 are extension targets in a strongly trending market. Resistance levels that flip to support after a breakout become the strongest holding zones in a bull market.
+                When models disagree, the agreement score drops visibly and the confidence bar shrinks. No hidden smoothing, no confidence floor, no false precision. Low agreement is a signal in itself — the market is in a regime the models find ambiguous.
               </p>
             </div>
           </div>
@@ -463,10 +451,54 @@ export default function About() {
           <div style={{ ...cardStyle }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
               <div className="about-card-icon"><LogoIcon /></div>
-              <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.gold }}>FIBONACCI RETRACEMENTS EXPLAINED</span>
+              <span style={{ fontFamily: orb, fontSize: 10, letterSpacing: '0.15em', color: G.gold }}>DEEP ANALYSIS REASONING CHAIN</span>
             </div>
             <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 2, letterSpacing: '0.03em' }}>
-              The Fibonacci sequence — 0, 1, 1, 2, 3, 5, 8, 13, 21 — produces a ratio of approximately 1.618 between successive terms, known as the golden ratio. Its inverse, 0.618, is the most-watched Fibonacci retracement level in markets. The 0.382, 0.5, 0.618, and 0.786 levels are plotted between a swing high and swing low to identify where price might find support or resistance during a pullback. When the AI model detects that price is within 1% of a key Fibonacci level, it fires an alert banner on the dashboard. These near-level warnings have historically preceded significant price reactions in either direction.
+              The Deep Analysis feature runs a multi-step reasoning chain that annotates each signal, explains its current reading in plain language, and synthesises a final directional conclusion. Not just the number — the why behind the number. Each analysis step is shown sequentially so you can follow the logic, not just accept the output.
+            </p>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        {/* COMING SOON */}
+        {/* ══════════════════════════════════════════════════════════════════ */}
+        <section className="about-section" style={{ marginBottom: 72 }}>
+          <SectionTitle>COMING SOON — ETHEREUM AND GOLD</SectionTitle>
+
+          <div className="about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 20, marginBottom: 32 }}>
+            {[
+              {
+                title: 'Ethereum Predictions',
+                body: 'The same ensemble architecture powering Bitcoin predictions is being extended to Ethereum. ETH will have its own dedicated signal stack, calibrated to Ethereum-specific dynamics: gas fees, staking yields, layer-2 activity, and the distinct volatility profile of ETH relative to BTC.',
+              },
+              {
+                title: 'Gold Predictions',
+                body: 'Gold requires a fundamentally different signal stack — macro interest rate expectations, USD strength, geopolitical risk, and inflation expectations replace on-chain data. The prediction engine will be retrained with Gold-specific features and evaluated independently.',
+              },
+              {
+                title: 'Multi-Asset Intelligence',
+                body: 'PredictAlpha is being built as a multi-asset intelligence platform, not a single-coin tool. The goal: one dashboard, three assets, six horizons each — with cross-asset correlation signals surfaced when Bitcoin, Ethereum, and Gold diverge or converge in unusual ways.',
+              },
+              {
+                title: 'Same Transparency Standards',
+                body: 'Every new asset will launch with the same real confidence scores, model agreement display, and Deep Analysis reasoning chain. No asset will be added until the ensemble achieves validated directional accuracy above 70% on the 4H horizon.',
+              },
+            ].map(({ title, body }) => (
+              <div key={title} style={{ ...cardStyle, position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <div className="about-card-icon" style={{ flexShrink: 0 }}>
+                    <LogoIcon />
+                  </div>
+                  <span style={{ fontFamily: orb, fontSize: 11, letterSpacing: '0.2em', color: G.gold }}>{title}</span>
+                </div>
+                <p className="about-body" style={{ fontFamily: mono, fontSize: 12, color: G.text, lineHeight: 1.9, letterSpacing: '0.03em' }}>{body}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ ...cardStyle, borderColor: `${G.gold}33` }}>
+            <p className="about-body" style={{ fontFamily: mono, fontSize: 13, color: G.text, lineHeight: 2, letterSpacing: '0.04em' }}>
+              The same ensemble architecture powering Bitcoin predictions is being extended to Ethereum and Gold. Each asset will have its own dedicated signal stack, calibrated to the specific dynamics of that market. PredictAlpha is being built as a multi-asset intelligence platform, not a single-coin tool.
             </p>
           </div>
         </section>
