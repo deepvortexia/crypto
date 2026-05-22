@@ -273,7 +273,9 @@ export async function fetchIndicators() {
   if (backend?.ema?.ema200) ema200 = backend.ema.ema200
   return {
     rsi: _calcRsi(closes),
-    macd: _calcMacd(closes),
+    macd: (backend?.macd?.macd != null && backend?.macd?.signal != null && backend?.macd?.histogram != null)
+      ? { macd: backend.macd.macd, signal: backend.macd.signal, histogram: backend.macd.histogram }
+      : _calcMacd(closes),
     bollinger_bands: _calcBollinger(closes),
     ema50,
     ema200,
