@@ -1,4 +1,5 @@
 import asyncio
+import collections
 import hmac
 import json
 import logging
@@ -31,6 +32,32 @@ from supabase import create_client, Client
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+# ── In-memory log buffer ──────────────────────────────────────────────────────
+_LOG_SENSITIVE = ("key", "secret", "token", "password", "sk_", "pk_", "jwt",
+                  "supabase", "stripe", "traceback", "error in")
+
+class _MemoryLogHandler(logging.Handler):
+    def __init__(self, maxlen=100):
+        super().__init__()
+        self._buf: collections.deque = collections.deque(maxlen=maxlen)
+
+    def emit(self, record: logging.LogRecord):
+        try:
+            msg = record.getMessage()
+            low = msg.lower()
+            if any(w in low for w in _LOG_SENSITIVE):
+                return
+            self._buf.append({
+                "time":    datetime.fromtimestamp(record.created, tz=timezone.utc).strftime("%H:%M:%S"),
+                "level":   record.levelname,
+                "message": msg,
+            })
+        except Exception:
+            pass
+
+_mem_handler = _MemoryLogHandler(maxlen=100)
+logging.getLogger().addHandler(_mem_handler)
 
 # ── Stripe setup ─────────────────────────────────────────────────────────────
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -519,6 +546,14 @@ async def get_accuracy():
     Computed from all stored predictions that have been resolved against actual prices.
     """
     return ensemble.get_accuracy()
+
+
+# ── Live logs ─────────────────────────────────────────────────────────────────
+@app.get("/api/logs")
+async def get_logs():
+    """Last 50 in-memory log lines, sensitive values pre-filtered."""
+    entries = list(_mem_handler._buf)
+    return {"logs": entries[-50:][::-1]}
 
 
 # ── Training status ───────────────────────────────────────────────────────────
