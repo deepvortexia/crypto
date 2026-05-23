@@ -329,7 +329,7 @@ export default function Proof() {
                   : entry.level === 'WARNING' ? '#f59e0b'
                   : '#00ff88'
                 return (
-                  <div key={i} style={{ color: levelColor, marginBottom: 2, wordBreak: 'break-all' }}>
+                  <div key={i} className="proof-log-line" style={{ color: levelColor, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     <span style={{ opacity: 0.5 }}>[{entry.time}]</span>
                     {' '}<span style={{ opacity: 0.8 }}>{entry.level}</span>
                     {' — '}{entry.message}
@@ -338,6 +338,7 @@ export default function Proof() {
               })
             )}
           </div>
+          <style>{`@media (max-width: 480px) { .proof-log-line { font-size: 9px !important; } }`}</style>
         </section>
 
         {/* ── SECTION 4: DATA SOURCES FOOTER ── */}
