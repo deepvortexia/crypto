@@ -2,16 +2,8 @@
   "rewrites": [
     { "source": "/alternativeme/(.*)", "destination": "https://api.alternative.me/$1" },
     { "source": "/blockchain/(.*)",    "destination": "https://api.blockchain.info/$1" },
-    { "source": "/coingecko/(.*)",     "destination": "https://api.coingecko.com/$1" },
     { "source": "/cryptocompare/(.*)", "destination": "https://min-api.cryptocompare.com/$1" },
-    { "source": "/coinstats/(.*)",     "destination": "https://openapiv1.coinstats.app/$1" }
-  ],
-  "routes": [
-    { "src": "/alternativeme/(.*)", "dest": "https://api.alternative.me/$1" },
-    { "src": "/blockchain/(.*)",    "dest": "https://api.blockchain.info/$1" },
-    { "src": "/coingecko/(.*)",     "dest": "https://api.coingecko.com/$1" },
-    { "src": "/cryptocompare/(.*)", "dest": "https://min-api.cryptocompare.com/$1" },
-    { "src": "/coinstats/(.*)",     "dest": "https://openapiv1.coinstats.app/$1" },
-    { "src": "/(.*)",               "dest": "/index.html" }
+    { "source": "/coinstats/(.*)",     "destination": "https://openapiv1.coinstats.app/$1" },
+    { "source": "/(.*)",               "destination": "/index.html" }
   ]
 }
