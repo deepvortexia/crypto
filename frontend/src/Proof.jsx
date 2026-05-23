@@ -201,6 +201,10 @@ export default function Proof() {
             </div>
           )}
 
+          <p style={{ fontFamily: mono, fontSize: 11, color: G.gold, opacity: 0.5, textAlign: 'center', letterSpacing: '0.08em', margin: '16px 0 0' }}>
+            Industry benchmark: 50% (random) · Top quant funds: 55–60% · PredictAlpha target: 57–60%
+          </p>
+
           {/* by-horizon breakdown */}
           {hasData && data.by_horizon && Object.keys(data.by_horizon).length > 0 && (
             <div style={{ ...cardStyle, marginTop: 20 }}>
