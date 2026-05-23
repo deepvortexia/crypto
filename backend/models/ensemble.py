@@ -283,9 +283,58 @@ class BTCEnsemble:
 
     def _recompute_weights(self):
         """Adjust ensemble weights based on recent per-model accuracy (if tracked)."""
-        # Weight update logic reserved for when per-model accuracy is tracked.
-        # Currently uses static defaults tuned per horizon.
-        pass
+        resolved = [p for p in self._predictions if p.get("actual_price") is not None]
+        if not resolved:
+            return
+
+        by_model: dict[str, list] = {}
+        for p in resolved:
+            model = p.get("model_name")
+            if model is None:
+                continue
+            by_model.setdefault(model, []).append(p)
+
+        if not by_model:
+            return
+
+        MODEL_ORDER = ["lstm", "xgboost", "prophet"]
+
+        scores: dict[str, float] = {}
+        for model, preds in by_model.items():
+            if len(preds) < 5:
+                continue
+            directions = [p["direction_correct"] for p in preds if p.get("direction_correct") is not None]
+            errors = [p["pct_error"] for p in preds if p.get("pct_error") is not None]
+            if not directions or not errors:
+                continue
+            direction_accuracy = float(np.mean(directions))
+            mean_pct_error = float(np.mean(errors))
+            scores[model] = direction_accuracy / (1 + mean_pct_error)
+
+        if not scores:
+            return
+
+        total_score = sum(scores.values())
+        if total_score == 0:
+            return
+        normalized = {m: s / total_score for m, s in scores.items()}
+
+        new_weights = {}
+        for horizon, w_list in self.weights.items():
+            updated = list(w_list)
+            for i, model in enumerate(MODEL_ORDER):
+                if model not in normalized:
+                    continue  # fewer than 5 resolved predictions — keep current weight
+                current_w = w_list[i] if i < len(w_list) else 1 / len(MODEL_ORDER)
+                updated[i] = 0.7 * normalized[model] + 0.3 * current_w
+            total = sum(updated)
+            if total > 0:
+                updated = [round(v / total, 4) for v in updated]
+            new_weights[horizon] = updated
+
+        self.weights = new_weights
+        self._save_weights()
+        logger.info(f"[Ensemble] Weights recomputed from {len(scores)} models: {scores}")
 
     def _load_weights(self) -> dict:
         if self.weights_path.exists():
@@ -295,6 +344,10 @@ class BTCEnsemble:
             except Exception:
                 pass
         return dict(DEFAULT_WEIGHTS)
+
+    def _save_weights(self):
+        with open(self.weights_path, "w") as f:
+            json.dump(self.weights, f)
 
     def _load_predictions(self) -> list:
         if self.predictions_path.exists():
