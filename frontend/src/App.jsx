@@ -1229,6 +1229,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* learn link — desktop only */}
         <Link to="/about" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
+        <Link to="/proof" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>PROOF</Link>
         <a href="mailto:admin@predictalpha.app" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', cursor: 'pointer', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
 
         {/* auth — desktop only */}
@@ -1332,6 +1333,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             {[
               { label: 'Dashboard', to: '/', dim: false },
               { label: 'Learn',     to: '/about', dim: false },
+              { label: 'Proof',     to: '/proof', dim: false },
             ].map(({ label, to }) => (
               <Link key={label} to={to} onClick={() => setMenuOpen(false)} style={{display:'block',fontFamily:'"Share Tech Mono",monospace',fontSize:13,letterSpacing:'0.2em',color:'#f59e0b',textDecoration:'none',padding:'12px 24px',textTransform:'uppercase'}}>{label}</Link>
             ))}
