@@ -89,7 +89,7 @@ export default function Proof() {
         .then(d => setLogs(d.logs ?? []))
         .catch(() => {})
     fetchLogs()
-    const id = setInterval(fetchLogs, 10000)
+    const id = setInterval(fetchLogs, 3000)
     return () => clearInterval(id)
   }, [])
 
