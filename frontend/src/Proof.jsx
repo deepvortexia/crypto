@@ -114,6 +114,7 @@ export default function Proof() {
         padding: '0 32px', height: 68,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
+        <div style={{ flex: 1 }} />
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <img src="/logoegyptfinal.webp" alt="PredictAlpha" style={{ height: 38, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: orb, letterSpacing: '0.05em' }}>
@@ -121,7 +122,7 @@ export default function Proof() {
             <span style={{ color: G.gold, fontWeight: 700, textShadow: `0 0 8px ${G.goldGlow}` }}> ALPHA</span>
           </span>
         </Link>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>
           <Link to="/about" style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
           <Link to="/"     style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>DASHBOARD</Link>
         </div>
@@ -257,7 +258,7 @@ export default function Proof() {
                 No resolved predictions yet — check back soon.
               </div>
             ) : (
-              <div style={{ overflowX: 'auto' }}>
+              <div style={{ height: 400, overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: mono, fontSize: 12 }}>
                   <thead>
                     <tr>
