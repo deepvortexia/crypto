@@ -2,6 +2,7 @@ import logging
 import os
 import pickle
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -129,7 +130,9 @@ class BTCProphetModel:
                     return None
                 future = self.model_hourly.make_future_dataframe(periods=horizon_h, freq="h")
                 forecast = self.model_hourly.predict(future)
-                forecast_price = float(forecast.iloc[-1]["yhat"])
+                target_ts = datetime.now(timezone.utc) + timedelta(hours=horizon_h)
+                idx = (forecast["ds"].dt.tz_localize("UTC") - target_ts).abs().idxmin()
+                forecast_price = float(forecast.loc[idx, "yhat"])
             else:
                 # 24h+: daily model avoids the artifact where T+24h ≈ T in the hourly
                 # model (same time of day triggers same daily-seasonality component).
@@ -138,7 +141,9 @@ class BTCProphetModel:
                 horizon_days = max(1, round(horizon_h / 24))
                 future = self.model_daily.make_future_dataframe(periods=horizon_days, freq="D")
                 forecast = self.model_daily.predict(future)
-                forecast_price = float(forecast.iloc[-1]["yhat"])
+                target_ts = datetime.now(timezone.utc) + timedelta(days=horizon_days)
+                idx = (forecast["ds"].dt.tz_localize("UTC") - target_ts).abs().idxmin()
+                forecast_price = float(forecast.loc[idx, "yhat"])
 
             self._cache[horizon_key] = (forecast_price, time.time())
             logger.info(f"PROPHET cache miss {horizon_key} — computed fresh")
