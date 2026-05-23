@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "react-snap",
+    "prerender": "react-snap",
     "preview": "vite preview",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives"
   },
@@ -14,7 +14,9 @@
     "source": "dist",
     "destination": "dist",
     "routes": ["/", "/about"],
-    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"]
+    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"],
+    "skipThirdPartyRequests": true,
+    "headless": true
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.1",
