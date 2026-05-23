@@ -254,8 +254,18 @@ export default function Proof() {
           <div style={sectionLabel}>Past Predictions</div>
           <div style={cardStyle}>
             {predictions.length === 0 ? (
-              <div style={{ fontFamily: mono, fontSize: 13, color: G.text, opacity: 0.7, textAlign: 'center', padding: '32px 0' }}>
-                No resolved predictions yet — check back soon.
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <span style={{
+                  fontFamily: mono,
+                  fontSize: 12,
+                  letterSpacing: '0.3em',
+                  color: G.gold,
+                  textTransform: 'uppercase',
+                  animation: 'awaiting-pulse 2s ease-in-out infinite',
+                }}>
+                  𓂀&nbsp;&nbsp;AWAITING FIRST RESOLVED PREDICTION&nbsp;&nbsp;𓂀
+                </span>
+                <style>{`@keyframes awaiting-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }`}</style>
               </div>
             ) : (
               <div style={{ height: 400, overflow: 'hidden' }}>
@@ -305,18 +315,16 @@ export default function Proof() {
             border: `1px solid #00ff8833`,
             borderRadius: 10,
             padding: '14px 18px',
-            height: 300,
-            overflowY: 'scroll',
+            height: 320,
+            overflow: 'hidden',
             fontFamily: mono,
             fontSize: 11,
             lineHeight: 1.75,
           }}>
-            {logs === null ? (
-              <span style={{ color: '#00ff8866' }}>Connecting to Railway...</span>
-            ) : logs.length === 0 ? (
+            {logs === null || logs.length === 0 ? (
               <span style={{ color: '#00ff8866' }}>Connecting to Railway...</span>
             ) : (
-              logs.slice(0, 20).map((entry, i) => {
+              logs.slice(0, 10).map((entry, i) => {
                 const levelColor = entry.level === 'ERROR' ? '#ef4444'
                   : entry.level === 'WARNING' ? '#f59e0b'
                   : '#00ff88'
