@@ -73,7 +73,7 @@ async def get_current_user(authorization: str = Header(...)) -> dict:
         raise HTTPException(401, "Invalid token")
 
 from models.ensemble import BTCEnsemble
-from services.data_fetcher import fetch_daily_ohlcv, fetch_fear_greed, fetch_hourly_ohlcv, fetch_live_price, fetch_onchain
+from services.data_fetcher import _fetch_cmc_data, fetch_daily_ohlcv, fetch_fear_greed, fetch_hourly_ohlcv, fetch_live_price, fetch_onchain
 from services.indicators import compute_indicators, get_indicator_snapshot
 from services.news_sentiment import fetch_news_sentiment
 from services import retrainer
@@ -324,10 +324,11 @@ async def get_live_price():
         last = float(ticker["last"])
         open24h = float(ticker["open24h"])
         change_24h_pct = round((last - open24h) / open24h * 100, 2) if open24h else 0
+        cmc = await _fetch_cmc_data()
         data = {
             "price": last,
             "change_24h_pct": change_24h_pct,
-            "market_cap": 0,
+            "market_cap": cmc["market_cap"],
             "volume_24h": float(ticker.get("volCcy24h", 0)),
             "last_updated": int(time()),
         }
