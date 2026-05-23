@@ -568,8 +568,8 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
             payment_method_types=["card"],
             line_items=[{"price": STRIPE_PRICE_ID, "quantity": 1}],
             mode="subscription",
-            success_url=f"{frontend_url}/dashboard?subscription=success&session_id={{CHECKOUT_SESSION_ID}}",
-            cancel_url=f"{frontend_url}/dashboard?subscription=cancelled",
+            success_url=f"{frontend_url}?subscription=success&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{frontend_url}?subscription=cancelled",
             allow_promotion_codes=True,
         )
         return {"url": session.url}
@@ -640,8 +640,8 @@ async def create_credit_pack_checkout(body: CreditPurchaseRequest, user: dict = 
             payment_method_types=["card"],
             line_items=[{"price": pack["price_id"], "quantity": 1}],
             mode="payment",
-            success_url=f"{frontend_url}/dashboard?credits_success=true&pack={body.pack}",
-            cancel_url=f"{frontend_url}/dashboard?credits_canceled=true",
+            success_url=f"{frontend_url}?credits_success=true&pack={body.pack}",
+            cancel_url=f"{frontend_url}?credits_canceled=true",
             metadata=checkout_metadata,
         )
         logger.info(f"[credits/purchase] Created checkout session {session.id} for user {user['id']} pack={body.pack} metadata={checkout_metadata}")
