@@ -309,17 +309,33 @@ async def get_ohlc():
 # ── Live Price ────────────────────────────────────────────────────────────────
 @app.get("/api/price/live")
 async def get_live_price():
-    """Current BTC price from CoinGecko with 24h stats."""
+    """Current BTC price from OKX with 24h stats."""
     if "price" in _price_cache:
         return _price_cache["price"]
 
     try:
-        data = await fetch_live_price()
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                f"{_OKX_BASE}/api/v5/market/ticker",
+                params={"instId": "BTC-USDT"},
+            )
+            resp.raise_for_status()
+            ticker = resp.json()["data"][0]
+        last = float(ticker["last"])
+        open24h = float(ticker["open24h"])
+        change_24h_pct = round((last - open24h) / open24h * 100, 2) if open24h else 0
+        data = {
+            "price": last,
+            "change_24h_pct": change_24h_pct,
+            "market_cap": 0,
+            "volume_24h": float(ticker.get("volCcy24h", 0)),
+            "last_updated": int(time()),
+        }
         _price_cache["price"] = data
         return data
     except Exception as exc:
         logger.error(f"Live price fetch failed: {exc}")
-        raise HTTPException(502, "Failed to fetch live price from CoinGecko")
+        raise HTTPException(502, "Failed to fetch live price from OKX")
 
 
 # ── Technical Indicators ──────────────────────────────────────────────────────
