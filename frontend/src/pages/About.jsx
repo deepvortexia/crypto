@@ -576,14 +576,21 @@ export default function About() {
       </footer>
 
       <style>{`
-        /* burger visible at tablet and mobile */
-        @media (max-width: 1024px) {
+        /* burger visible below 1280px (tablet + mobile) */
+        @media (max-width: 1279px) {
           .about-nav    { display: none !important; }
           .about-burger { display: flex !important; align-items: center !important; order: 3 !important; }
         }
         /* tablet: constrained dropdown */
-        @media (min-width: 769px) and (max-width: 1024px) {
+        @media (min-width: 769px) and (max-width: 1279px) {
           .about-dropdown { width: 280px !important; }
+        }
+        /* ≤1024px: tighter main padding + cap all grids at 2 columns */
+        @media (max-width: 1024px) {
+          .about-main   { padding: 48px 20px !important; }
+          .about-grid   { grid-template-columns: repeat(2, 1fr) !important; }
+          .horizon-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .levels-grid  { grid-template-columns: repeat(2, 1fr) !important; }
         }
         /* mobile: full-width dropdown */
         @media (max-width: 768px) {
@@ -634,7 +641,7 @@ export default function About() {
         }
         @media (max-width: 480px) {
           .horizon-grid {
-            grid-template-columns: 1fr 1fr !important;
+            grid-template-columns: 1fr !important;
             gap: 10px !important;
           }
           .about-credit {
@@ -642,6 +649,10 @@ export default function About() {
             padding: 20px 10px !important;
             letter-spacing: 0.08em !important;
           }
+        }
+        @media (max-width: 320px) {
+          .about-main      { padding: 16px 12px !important; }
+          header a span    { font-size: 14px !important; }
         }
       `}</style>
 
