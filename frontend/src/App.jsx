@@ -9,6 +9,7 @@ function ScrollToTop() {
   return null
 }
 const About = lazy(() => import('./pages/About'))
+const Proof = lazy(() => import('./Proof'))
 import { TrendingUp, TrendingDown, AlertTriangle, Zap, Lock } from 'lucide-react'
 import { fetchMarketTensions, pingHealth } from './api/client'
 import {
@@ -1194,6 +1195,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     <Routes>
       <Route path="/dashboard" element={<Navigate to="/" replace />} />
       <Route path="/about" element={<Suspense fallback={null}><About /></Suspense>} />
+      <Route path="/proof" element={<Suspense fallback={null}><Proof /></Suspense>} />
       <Route path="/" element={
     <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
 
