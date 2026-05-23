@@ -346,6 +346,7 @@ class BTCEnsemble:
         return dict(DEFAULT_WEIGHTS)
 
     def _save_weights(self):
+        self.data_dir.mkdir(parents=True, exist_ok=True)
         with open(self.weights_path, "w") as f:
             json.dump(self.weights, f)
 
@@ -359,5 +360,6 @@ class BTCEnsemble:
         return []
 
     def _save_predictions(self):
+        self.data_dir.mkdir(parents=True, exist_ok=True)
         with open(self.predictions_path, "w") as f:
             json.dump(self._predictions, f)
