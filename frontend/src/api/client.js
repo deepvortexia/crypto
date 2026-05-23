@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase'
 
-const COINGECKO = 'https://api.coingecko.com/api/v3'
 const BACKEND_URL = 'https://crypto-production-f7c5.up.railway.app'
 
 class ApiError extends Error {
@@ -180,7 +179,7 @@ export async function fetchLivePrice() {
 
 export async function fetchPriceHistory() {
   try {
-    // Route through backend proxy (already fetched from CoinGecko) — avoids geo-blocks
+    // Route through backend (fetches from OKX)
     const data = await get(`${BACKEND_URL}/api/ohlc`, { timeout: 10000, retries: 2 })
     return data.slice(-60).map(k => [k[0], k[4]])
   } catch (err) {
