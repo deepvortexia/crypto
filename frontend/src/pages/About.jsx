@@ -134,7 +134,7 @@ export default function About() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" style={{ height: 46, width: 'auto', objectFit: 'contain' }} />
+          <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="46" height="46" style={{ height: 46, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: orb, fontSize: 18, letterSpacing: '0.15em', color: G.gold, opacity: 0.9 }}>PREDICT ALPHA</span>
         </Link>
         {/* desktop nav links */}
@@ -172,7 +172,7 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ textAlign: 'center', marginBottom: 80, paddingTop: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
-            <img src="/logoegyptfinal.webp" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} alt="PREDICT ALPHA" />
+            <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="120" height="120" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} />
           </div>
           <h2 className="about-hero-title" style={{ fontFamily: orb, fontSize: 'clamp(20px,5vw,42px)', letterSpacing: '0.18em', ...goldText, marginBottom: 18, lineHeight: 1.2 }}>
             PREDICT ALPHA — HOW IT WORKS

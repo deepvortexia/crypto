@@ -89,7 +89,7 @@ export default function Proof() {
         .then(d => setLogs(d.logs ?? []))
         .catch(() => {})
     fetchLogs()
-    const id = setInterval(fetchLogs, 3000)
+    const id = setInterval(fetchLogs, 8000)
     return () => clearInterval(id)
   }, [])
 
@@ -116,7 +116,7 @@ export default function Proof() {
       }}>
         <div style={{ flex: 1 }} />
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logoegyptfinal.webp" alt="PredictAlpha" style={{ height: 38, width: 'auto', objectFit: 'contain' }} />
+          <img src="/logoegyptfinal.webp" alt="PredictAlpha" width="38" height="38" style={{ height: 38, width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: orb, letterSpacing: '0.05em' }}>
             <span style={{ color: G.gold, fontWeight: 400 }}>PREDICT</span>
             <span style={{ color: G.gold, fontWeight: 700, textShadow: `0 0 8px ${G.goldGlow}` }}> ALPHA</span>
@@ -132,7 +132,7 @@ export default function Proof() {
 
         {/* ── SECTION 1: HEADER ── */}
         <section style={{ textAlign: 'center', marginBottom: 72 }}>
-          <img src="/logoegyptfinal.webp" alt="Eye of Horus" style={{ height: 64, marginBottom: 24, opacity: 0.9 }} />
+          <img src="/logoegyptfinal.webp" alt="Eye of Horus" width="64" height="64" style={{ height: 64, marginBottom: 24, opacity: 0.9 }} />
           <h1 style={{ fontFamily: orb, fontSize: 'clamp(24px,5vw,48px)', letterSpacing: '0.2em', ...goldText, marginBottom: 16 }}>
             PROOF OF WORK
           </h1>
