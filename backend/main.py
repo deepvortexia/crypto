@@ -812,12 +812,8 @@ async def stripe_webhook(request: Request):
                 logger.error(f"[webhook] Credit-pack session {session_id} has bad metadata: user_id={target_user_id!r} credits={credits}")
             else:
                 # ── Idempotency guard: skip if this session was already processed ──
-                try:
-                    supabase.table("processed_webhook_sessions").insert(
-                        {"session_id": session_id}
-                    ).execute()
-                except Exception:
-                    # Unique-key violation → already processed; safe to ignore replay
+                existing = supabase.table("processed_webhook_sessions").select("session_id").eq("session_id", session_id).execute()
+                if existing.data:
                     logger.warning(f"[webhook] Duplicate session {session_id} — already processed, skipping credit grant")
                     return {"status": "ok"}
 
@@ -834,6 +830,15 @@ async def stripe_webhook(request: Request):
                     # Stripe will retry on non-2xx; raise so we don't lose the grant
                     logger.error(f"[webhook] ✗ add_bonus_credits RPC failed for {target_user_id}: {e!r}", exc_info=True)
                     raise HTTPException(500, "Failed to grant credits — Stripe will retry")
+
+                # Insert idempotency record only after credits are successfully granted
+                try:
+                    supabase.table("processed_webhook_sessions").insert(
+                        {"session_id": session_id}
+                    ).execute()
+                except Exception:
+                    # Unique-key violation means a concurrent replay just beat us; credits already granted above
+                    logger.warning(f"[webhook] Idempotency insert conflict for {session_id} — credits already granted, ignoring")
     else:
         # Catch-all log so we can see what events Stripe sends that we don't handle
         logger.info(f"[webhook] Unhandled event type: {event_type}")
