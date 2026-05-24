@@ -1328,17 +1328,17 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         )}
 
         {/* hamburger — mobile only */}
-        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:34,lineHeight:1,padding:'10px',minWidth:48,minHeight:48,display:'none'}}>☰</button>
+        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:34,lineHeight:1,padding:'10px',minWidth:48,minHeight:48}}>☰</button>
 
         {/* mobile dropdown */}
         {menuOpen && (
           <div onClick={() => setMenuOpen(false)} style={{
-            position: 'fixed', top: 68, left: 0, right: 0, bottom: 0,
+            position: 'fixed', top: 'var(--header-h)', left: 0, right: 0, bottom: 0,
             background: 'rgba(0,0,0,0.7)', zIndex: 998
           }} />
         )}
         {menuOpen && (
-          <div className="mobile-dropdown" style={{position:'absolute',top:68,left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:999,padding:'0'}}>
+          <div className="mobile-dropdown" style={{position:'absolute',top:'var(--header-h)',left:0,right:0,background:'rgba(10,10,10,0.97)',borderBottom:`1px solid #2a1f00`,zIndex:999,padding:'0'}}>
             {/* Close button row — full-width flex so it can't overlap content below */}
             <div style={{display:'flex',justifyContent:'flex-end',padding:'6px 8px 0'}}>
               <button onClick={() => setMenuOpen(false)} style={{background:'none',border:'none',color:'#f59e0b',fontSize:28,lineHeight:1,cursor:'pointer',padding:'8px',minWidth:44,minHeight:44,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
@@ -1513,7 +1513,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 2 — AI predictions */}
         <div style={{ marginBottom: 40 }}>
           <div style={sectionLabel}>AI Price Predictions</div>
-          <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 16 }}>
+          <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
 
             {/* 1H — always free */}
             <div style={{ position: 'relative' }}>
@@ -2143,7 +2143,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             borderRadius: 12,
             boxShadow: `0 0 40px ${G.goldGlow}`,
             width: '90vw', maxWidth: 1000,
-            height: '85vh',
+            height: '85vh', maxHeight: '85vh',
             display: 'flex', flexDirection: 'column',
             overflowY: 'auto',
           }}>
@@ -2491,6 +2491,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       )}
 
       <style>{`
+        :root { --header-h: 68px; }
         @keyframes shimmer          { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes analysisShimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
         @keyframes textPulse   { 0%,100%{opacity:0.5; text-shadow:0 0 8px #f59e0b} 50%{opacity:1; text-shadow:0 0 20px #f59e0b, 0 0 40px #f59e0b88} }
