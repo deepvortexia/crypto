@@ -333,6 +333,7 @@ class BTCEnsemble:
                         "horizon":           row["horizon"],
                         "direction_correct": direction_correct,
                         "pct_error":         mean_error,
+                        "model_name":        row.get("model_name"),
                     })
                     self._predictions = self._predictions[-1000:]
                     resolved_count += 1
