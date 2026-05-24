@@ -245,6 +245,7 @@ class BTCEnsemble:
             "direction":       pred["direction"],
             "confidence":      pred.get("confidence"),
             "target_time":     pred["target_time"],
+            "model_name":      pred.get("model_name"),
         }
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
