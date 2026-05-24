@@ -720,7 +720,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       setUser(session?.user ?? null)
       setAuthLoading(false)
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') freshLoginRef.current = true
       setUser(session?.user ?? null)
     })
     return () => subscription.unsubscribe()
@@ -791,10 +792,19 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   // Fetch subscription status when user changes; re-run loadAll on first login
   const prevUserRef = useRef(null)
+  const freshLoginRef = useRef(false)
   useEffect(() => {
     if (user) {
-      fetchSubscriptionStatus().then(sub => {
-        setIsPro(sub.status === 'active')
+      const isFreshLogin = freshLoginRef.current
+      freshLoginRef.current = false
+      fetchSubscriptionStatus().then(async sub => {
+        if (sub.status === 'active') {
+          setIsPro(true)
+        } else if (isFreshLogin) {
+          await new Promise(r => setTimeout(r, 2000))
+          const retried = await fetchSubscriptionStatus()
+          setIsPro(retried.status === 'active')
+        }
       })
       fetchDeepAnalysisRemaining().then(c => {
         if (c !== null) setCreditInfo({
