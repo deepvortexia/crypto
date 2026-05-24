@@ -298,6 +298,7 @@ export default function Proof() {
             </div>
             <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.15em', color: G.text }}>
               Last updated:&nbsp;<span style={{ color: G.green }}>LIVE · {now.toLocaleTimeString()}</span>
+              &nbsp;·&nbsp;Powered by Claude Haiku · Anthropic · PredictAlpha
             </div>
           </div>
         </section>
