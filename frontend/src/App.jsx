@@ -1229,7 +1229,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         "operatingSystem": "Web",
         "offers": [
           { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
-          { "@type": "Offer", "name": "PRO", "price": "19.99", "priceCurrency": "USD", "billingIncrement": "month" }
+          { "@type": "Offer", "name": "PRO", "price": "12.99", "priceCurrency": "USD", "billingIncrement": "month" }
         ]
       })}</script>
     </Helmet>
