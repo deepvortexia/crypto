@@ -143,7 +143,7 @@ export default function Proof() {
           )}
 
           <p style={{ fontFamily: mono, fontSize: 11, color: G.gold, opacity: 0.5, textAlign: 'center', letterSpacing: '0.08em', margin: '0 0 16px' }}>
-            Industry benchmark: 50% (random) · Top quant funds: 55–60% · PredictAlpha target: 57–60%
+            Industry benchmark: 50% (random) · Top quant funds: 58–65% · PredictAlpha target: 57–68%
           </p>
 
           {/* by-horizon breakdown */}
