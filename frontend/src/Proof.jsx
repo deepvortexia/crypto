@@ -90,7 +90,15 @@ export default function Proof() {
         <title>Proof of Work — PredictAlpha</title>
         <meta name="description" content="PredictAlpha's full prediction track record. Every AI prediction logged, every result verified." />
         <meta property="og:title" content="Proof of Work — PredictAlpha" />
+        <meta property="og:description" content="PredictAlpha's full prediction track record. Every AI prediction logged, every result verified." />
         <meta property="og:url" content="https://predictalpha.app/proof" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
+        <link rel="canonical" href="https://predictalpha.app/proof" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Proof of Work — PredictAlpha" />
+        <meta name="twitter:description" content="PredictAlpha's full prediction track record. Every AI prediction logged, every result verified." />
+        <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
       </Helmet>
 
       {/* ── NAV ── */}
