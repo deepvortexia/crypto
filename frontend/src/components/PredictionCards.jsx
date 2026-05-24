@@ -78,11 +78,15 @@ function PredCard({ horizon }) {
 
   if (state === 'idle' || state === 'loading') {
     return (
-      <div className="card animate-pulse min-h-[200px]">
-        <div className="h-3 w-10 bg-surface-border rounded mb-3" />
-        <div className="h-7 w-28 bg-surface-border rounded mb-2" />
-        <div className="h-5 w-16 bg-surface-border rounded mb-4" />
-        <div className="h-1 w-full bg-surface-border rounded-full" />
+      <div
+        className="card min-h-[200px]"
+        style={{
+          background: 'rgba(245,158,11,0.06)',
+          border: '1px solid rgba(245,158,11,0.2)',
+          animation: 'predGoldPulse 1.2s ease-in-out infinite',
+        }}
+      >
+        <style>{`@keyframes predGoldPulse{0%,100%{opacity:.15}50%{opacity:.35}}`}</style>
       </div>
     )
   }

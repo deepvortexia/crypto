@@ -203,7 +203,7 @@ export default function PriceChart() {
         {error && !loading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <p className="font-mono text-xs text-neon-red">Chart data unavailable</p>
+              <p className="font-mono text-xs text-neon-red">⟳ Loading price history...</p>
               <p className="font-mono text-[10px] text-gray-600 mt-1">{error}</p>
             </div>
           </div>

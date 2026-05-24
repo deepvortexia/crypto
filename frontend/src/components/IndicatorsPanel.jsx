@@ -231,7 +231,7 @@ export default function IndicatorsPanel() {
   if (error) {
     return (
       <div className="card border-glow-red py-6 text-center">
-        <p className="font-mono text-xs text-neon-red tracking-widest uppercase">Indicators unavailable</p>
+        <p className="font-mono text-xs text-neon-red tracking-widest uppercase">⟳ Scanning market indicators...</p>
         <p className="font-mono text-[10px] text-gray-600 mt-1">{error}</p>
       </div>
     )
