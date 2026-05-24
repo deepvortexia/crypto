@@ -253,7 +253,7 @@ export async function fetchPrediction(horizon) {
     return get(`${BACKEND_URL}/api/predict/1h`, { retries: 1 })
   }
   let session = null
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
     try {
       session = await getProSession()
       if (session) break

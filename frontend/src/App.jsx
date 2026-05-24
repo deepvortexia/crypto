@@ -153,11 +153,12 @@ function PredCardSkeleton() {
 function PredCard({ horizon, horizonKey, data, loading }) {
   const gold = G.gold
   const timedOut = useRef(false)
-  const [past8s, setPast8s] = useState(false)
+  const isMobile = useRef(typeof window !== 'undefined' && window.innerWidth < 768)
+  const [past20s, setPast20s] = useState(false)
 
   useEffect(() => {
     if (data) return
-    const id = setTimeout(() => { timedOut.current = true; setPast8s(true) }, 8000)
+    const id = setTimeout(() => { timedOut.current = true; setPast20s(true) }, 20000)
     return () => clearTimeout(id)
   }, [data])
 
@@ -167,7 +168,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
     ? (data.confidence != null ? Math.round(data.confidence > 1 ? data.confidence : data.confidence * 100) : 60)
     : 0
 
-  const showUnavailable = !loading && !data && past8s
+  const showUnavailable = !loading && !data && past20s && !isMobile.current
   const showSkeleton    = !data && !showUnavailable
 
   return (
