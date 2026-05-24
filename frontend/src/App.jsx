@@ -132,14 +132,43 @@ function StatCard({ label, value, sub, valueColor, icon }) {
   )
 }
 
+function PredCardSkeleton() {
+  const bar = (w, h = 10, mb = 8) => (
+    <div style={{
+      width: w, height: h, borderRadius: 4, marginBottom: mb,
+      background: 'linear-gradient(90deg, rgba(245,158,11,0.15) 25%, rgba(245,158,11,0.35) 50%, rgba(245,158,11,0.15) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'shimmer 1.5s infinite',
+    }} />
+  )
+  return (
+    <div style={{ paddingTop: 4 }}>
+      {bar('60%', 16, 12)}
+      {bar('40%', 9, 8)}
+      {bar('40%', 9, 0)}
+    </div>
+  )
+}
+
 function PredCard({ horizon, horizonKey, data, loading }) {
   const gold = G.gold
-  // Derive direction from change_pct (single source of truth — never trust the string field alone)
+  const timedOut = useRef(false)
+  const [past8s, setPast8s] = useState(false)
+
+  useEffect(() => {
+    if (data) return
+    const id = setTimeout(() => { timedOut.current = true; setPast8s(true) }, 8000)
+    return () => clearTimeout(id)
+  }, [data])
+
   const up = data != null ? (data.change_pct ?? 0) >= 0 : false
   const dirColor = up ? G.green : G.red
   const conf = data
     ? (data.confidence != null ? Math.round(data.confidence > 1 ? data.confidence : data.confidence * 100) : 60)
     : 0
+
+  const showUnavailable = !loading && !data && past8s
+  const showSkeleton    = !data && !showUnavailable
 
   return (
     <div style={{
@@ -151,9 +180,9 @@ function PredCard({ horizon, horizonKey, data, loading }) {
     }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div className="pred-horizon" style={labelStyle}>{horizon}</div>
 
-      {loading && <div style={{ color: G.text, fontSize: 13, opacity: 0.5 }}>Loading…</div>}
+      {showSkeleton && <PredCardSkeleton />}
 
-      {!loading && data && (
+      {data && (
         <>
           <div style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 20, ...goldText, marginBottom: 8 }}>
             {fmtPrice(data.predicted_price)}
@@ -183,7 +212,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
         </>
       )}
 
-      {!loading && !data && (
+      {showUnavailable && (
         <div style={{ color: G.red, fontSize: 11, fontFamily: '"Share Tech Mono", monospace' }}>UNAVAILABLE</div>
       )}
     </div>
