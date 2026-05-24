@@ -1,11 +1,13 @@
 import concurrent.futures
 import json
 import logging
+import os
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
+import httpx
 import numpy as np
 import pandas as pd
 
@@ -190,7 +192,6 @@ class BTCEnsemble:
             "target_time": (datetime.now(timezone.utc) + timedelta(hours=HORIZON_HOURS[horizon_key])).isoformat(),
         }
 
-        self._store_prediction(result)
         return result
 
     def _confidence_score(self, horizon_key: str, model_values: list[float]) -> float:
@@ -213,47 +214,155 @@ class BTCEnsemble:
             raw = min(1.0 - cv * 5, cap * 0.70)
         return round(min(cap, max(floor, raw)), 3)
 
-    def _store_prediction(self, pred: dict):
-        entry = {
-            "id": f"{pred['horizon']}_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M')}",
-            "horizon": pred["horizon"],
-            "predicted_price": pred["predicted_price"],
-            "current_price": pred["current_price"],
-            "change_pct": pred["change_pct"],
-            "direction": pred["direction"],
-            "prediction_time": pred["timestamp"],
-            "target_time": pred["target_time"],
-            "actual_price": None,
-            "direction_correct": None,
-            "pct_error": None,
+    # ── Supabase helpers ──────────────────────────────────────────────────────
+
+    @staticmethod
+    def _sb_headers() -> dict:
+        key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+        return {
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
         }
-        self._predictions.append(entry)
-        # Keep only last 1000 predictions
-        self._predictions = self._predictions[-1000:]
-        self._save_predictions()
 
-    def resolve_predictions(self, current_price: float):
-        """Fill in actual prices for past predictions that have reached their target time."""
-        now = datetime.now(timezone.utc)
-        updated = False
-        for pred in self._predictions:
-            if pred["actual_price"] is not None:
-                continue
-            try:
-                target = datetime.fromisoformat(pred["target_time"].replace("Z", "+00:00"))
-            except Exception:
-                continue
-            if now >= target:
-                pred["actual_price"] = round(current_price, 2)
-                pred["direction_correct"] = (pred["direction"] == "up") == (current_price > pred["current_price"])
-                pred["pct_error"] = abs(current_price - pred["predicted_price"]) / pred["current_price"] * 100
-                updated = True
-        if updated:
-            self._save_predictions()
+    @staticmethod
+    def _sb_url(path: str) -> str:
+        base = os.environ.get("SUPABASE_URL", "").rstrip("/")
+        return f"{base}/rest/v1/{path}"
+
+    # ── Horizon → OKX bar string ──────────────────────────────────────────────
+
+    _HORIZON_BAR = {
+        "1h": "1H", "4h": "4H", "8h": "8H", "12h": "12H",
+        "24h": "1D", "1week": "1W", "1month": "1M",
+    }
+
+    async def _store_prediction(self, pred: dict):
+        row = {
+            "horizon":         pred["horizon"],
+            "predicted_price": pred["predicted_price"],
+            "current_price":   pred["current_price"],
+            "direction":       pred["direction"],
+            "confidence":      pred.get("confidence"),
+            "target_time":     pred["target_time"],
+        }
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(
+                    self._sb_url("predictions"),
+                    headers=self._sb_headers(),
+                    json=row,
+                )
+                resp.raise_for_status()
+        except Exception as exc:
+            logger.error(f"[Ensemble] Failed to store prediction in Supabase: {exc}")
+
+    async def resolve_predictions(self, current_price: Optional[float] = None) -> int:
+        """Fetch unresolved expired predictions from Supabase and resolve each with the
+        actual OKX candle price at the prediction's target_time.
+        Returns the count of predictions successfully resolved in this call."""
+        headers = self._sb_headers()
+        now_iso = datetime.now(timezone.utc).isoformat()
+        resolved_count = 0
+
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.get(
+                    self._sb_url("predictions"),
+                    headers=headers,
+                    params={
+                        "select": "*",
+                        "resolved": "eq.false",
+                        "target_time": f"lte.{now_iso}",
+                    },
+                )
+                resp.raise_for_status()
+                unresolved = resp.json()
+        except Exception as exc:
+            logger.error(f"[Ensemble] Failed to fetch unresolved predictions: {exc}")
+            return 0
+
+        if not unresolved:
+            return 0
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            for row in unresolved:
+                try:
+                    target_time_str = row["target_time"]
+                    target_dt = datetime.fromisoformat(target_time_str.replace("Z", "+00:00"))
+                    target_ms = int(target_dt.timestamp() * 1000)
+
+                    bar = self._HORIZON_BAR.get(row["horizon"], "1H")
+                    okx_resp = await client.get(
+                        "https://www.okx.com/api/v5/market/candles",
+                        params={
+                            "instId": "BTC-USDT",
+                            "bar":    bar,
+                            "limit":  "1",
+                            "after":  str(target_ms),
+                        },
+                    )
+                    okx_resp.raise_for_status()
+                    candles = okx_resp.json().get("data", [])
+                    if not candles:
+                        logger.warning(f"[Ensemble] No OKX candle for {row['horizon']} target={target_time_str}")
+                        continue
+
+                    actual_price = float(candles[0][4])  # close price
+                    direction_correct = (row["direction"] == "up") == (actual_price > row["current_price"])
+                    mean_error = abs(actual_price - row["predicted_price"]) / row["current_price"] * 100
+
+                    patch_resp = await client.patch(
+                        self._sb_url(f"predictions?id=eq.{row['id']}"),
+                        headers=headers,
+                        json={
+                            "resolved":          True,
+                            "actual_price":      round(actual_price, 2),
+                            "direction_correct": direction_correct,
+                            "resolved_at":       datetime.now(timezone.utc).isoformat(),
+                        },
+                    )
+                    patch_resp.raise_for_status()
+                    logger.info(
+                        f"[Ensemble] Resolved {row['horizon']} id={row['id']} "
+                        f"actual={actual_price:.2f} correct={direction_correct}"
+                    )
+
+                    # Update in-memory weights using freshly resolved data
+                    self._predictions.append({
+                        "horizon":           row["horizon"],
+                        "direction_correct": direction_correct,
+                        "pct_error":         mean_error,
+                    })
+                    self._predictions = self._predictions[-1000:]
+                    resolved_count += 1
+
+                except Exception as exc:
+                    logger.error(f"[Ensemble] Error resolving prediction id={row.get('id')}: {exc}")
+
+        if resolved_count:
             self._recompute_weights()
+        return resolved_count
 
-    def get_accuracy(self) -> dict:
-        resolved = [p for p in self._predictions if p["actual_price"] is not None]
+    async def get_accuracy(self) -> dict:
+        headers = self._sb_headers()
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(
+                    self._sb_url("predictions"),
+                    headers=headers,
+                    params={
+                        "select":   "horizon,actual_price,predicted_price,current_price,direction_correct",
+                        "resolved": "eq.true",
+                        "limit":    "10000",
+                    },
+                )
+                resp.raise_for_status()
+                resolved = resp.json()
+        except Exception as exc:
+            logger.error(f"[Ensemble] Failed to fetch resolved predictions: {exc}")
+            return {"message": "Failed to fetch accuracy data", "count": 0}
+
         if not resolved:
             return {"message": "No resolved predictions yet", "count": 0}
 
@@ -263,22 +372,30 @@ class BTCEnsemble:
 
         stats = {}
         for horizon, preds in by_horizon.items():
-            errors = [p["pct_error"] for p in preds if p["pct_error"] is not None]
-            directions = [p["direction_correct"] for p in preds if p["direction_correct"] is not None]
+            errors = [
+                abs(p["actual_price"] - p["predicted_price"]) / p["current_price"] * 100
+                for p in preds
+                if p.get("actual_price") is not None and p.get("predicted_price") is not None
+            ]
+            directions = [p["direction_correct"] for p in preds if p.get("direction_correct") is not None]
             stats[horizon] = {
-                "count": len(preds),
-                "mape": round(float(np.mean(errors)), 3) if errors else None,
+                "count":              len(preds),
+                "mape":               round(float(np.mean(errors)), 3) if errors else None,
                 "direction_accuracy": round(float(np.mean(directions)) * 100, 1) if directions else None,
             }
 
-        overall_errors = [p["pct_error"] for p in resolved if p["pct_error"] is not None]
-        overall_dir = [p["direction_correct"] for p in resolved if p["direction_correct"] is not None]
+        all_errors = [
+            abs(p["actual_price"] - p["predicted_price"]) / p["current_price"] * 100
+            for p in resolved
+            if p.get("actual_price") is not None and p.get("predicted_price") is not None
+        ]
+        all_dirs = [p["direction_correct"] for p in resolved if p.get("direction_correct") is not None]
         return {
-            "total_predictions": len(resolved),
-            "overall_mape": round(float(np.mean(overall_errors)), 3) if overall_errors else None,
-            "overall_direction_accuracy": round(float(np.mean(overall_dir)) * 100, 1) if overall_dir else None,
-            "by_horizon": stats,
-            "current_weights": self.weights,
+            "total_predictions":          len(resolved),
+            "overall_mape":               round(float(np.mean(all_errors)), 3) if all_errors else None,
+            "overall_direction_accuracy": round(float(np.mean(all_dirs)) * 100, 1) if all_dirs else None,
+            "by_horizon":                 stats,
+            "current_weights":            self.weights,
         }
 
     def _recompute_weights(self):

@@ -167,6 +167,7 @@ All external APIs used have a free tier. Only CoinGecko benefits from a key; the
 | `CORS_ORIGINS` | Yes (prod) | localhost variants | Comma-separated list of allowed frontend origins |
 | `MODEL_RETRAIN_INTERVAL_HOURS` | No | `24` | How often the ensemble is automatically retrained |
 | `ADMIN_SECRET` | Yes (prod) | `change_me_...` | Passed as `X-Admin-Secret` header to POST `/api/admin/retrain` |
+| `CRON_SECRET` | Yes (prod) | *(empty)* | Passed as `x-cron-secret` header to POST `/api/cron/resolve` — authorises the external cron job that resolves expired predictions |
 | `PORT` | No | `8000` | HTTP port — Railway sets this automatically |
 
 ### Frontend (`frontend/.env`)

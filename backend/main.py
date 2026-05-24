@@ -223,7 +223,7 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(retrainer.initial_train())
 
     retrainer.start_scheduler(retrain_interval_hours=RETRAIN_INTERVAL_HOURS)
-    # market-tensions pre-warm removed — regenerated on demand with 60s TTL
+    asyncio.create_task(_resolve_loop())
 
     # Daily credit reset backstop — lazy reset in the RPCs is the primary path
     credits_scheduler = AsyncIOScheduler(timezone="UTC")
@@ -240,6 +240,16 @@ async def lifespan(app: FastAPI):
 
     credits_scheduler.shutdown(wait=False)
     retrainer.stop_scheduler()
+
+
+async def _resolve_loop():
+    while True:
+        try:
+            await asyncio.sleep(900)
+            count = await ensemble.resolve_predictions(None)
+            logger.info(f"[cron] resolved {count} predictions")
+        except Exception as exc:
+            logger.error(f"[cron] resolve loop error: {exc}")
 
 
 async def _reset_daily_credits_job() -> None:
@@ -466,7 +476,7 @@ async def get_prediction(
         result = _apply_temporal_coherence(horizon, result)
         _pred_cache[cache_key] = result
 
-        # Also check if any outstanding predictions can now be resolved
+        await ensemble._store_prediction(result)
         asyncio.create_task(_resolve_predictions(current_price))
 
         return result
@@ -479,8 +489,7 @@ async def get_prediction(
 
 async def _resolve_predictions(current_price: float):
     try:
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, ensemble.resolve_predictions, current_price)
+        await ensemble.resolve_predictions(current_price)
     except Exception as exc:
         logger.error(f"resolve_predictions error: {exc}")
 
@@ -545,7 +554,18 @@ async def get_accuracy():
     Historical prediction accuracy: MAPE and direction accuracy per horizon.
     Computed from all stored predictions that have been resolved against actual prices.
     """
-    return ensemble.get_accuracy()
+    return await ensemble.get_accuracy()
+
+
+# ── Cron resolve ──────────────────────────────────────────────────────────────
+@app.post("/api/cron/resolve")
+async def cron_resolve(request: Request):
+    secret = request.headers.get("x-cron-secret", "")
+    expected = os.getenv("CRON_SECRET", "")
+    if not expected or secret != expected:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    count = await ensemble.resolve_predictions(None)
+    return {"resolved": count}
 
 
 # ── Live logs ─────────────────────────────────────────────────────────────────

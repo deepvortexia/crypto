@@ -50,18 +50,6 @@ const sectionLabel = {
   paddingLeft: 10,
 }
 
-const MODELS = [
-  { key: 'lstm',    label: 'LSTM',     desc: 'Neural Network',      idx: 0 },
-  { key: 'xgboost', label: 'XGBoost', desc: 'Gradient Boosting',   idx: 1 },
-  { key: 'prophet', label: 'Prophet', desc: 'Time-Series Forecast', idx: 2 },
-]
-
-function avgWeight(weights, idx) {
-  if (!weights) return null
-  const vals = Object.values(weights).map(w => w[idx]).filter(v => v != null)
-  if (!vals.length) return null
-  return (vals.reduce((a, b) => a + b, 0) / vals.length * 100).toFixed(1)
-}
 
 export default function Proof() {
   const [data,    setData]    = useState(null)
@@ -154,98 +142,51 @@ export default function Proof() {
             </div>
           )}
 
-          {!loading && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
-              {MODELS.map(({ key, label, desc, idx }) => {
-                const w = avgWeight(data?.current_weights, idx)
-                const dirAcc = hasData ? data.overall_direction_accuracy : null
-                const mape   = hasData ? data.overall_mape : null
-                const count  = hasData ? data.total_predictions : null
-
-                return (
-                  <div key={key} style={cardStyle}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                      <div>
-                        <div style={{ fontFamily: orb, fontSize: 14, letterSpacing: '0.15em', ...goldText, marginBottom: 4 }}>
-                          {label}
-                        </div>
-                        <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.2em', color: G.text, textTransform: 'uppercase' }}>
-                          {desc}
-                        </div>
-                      </div>
-                      {w != null && (
-                        <div style={{ fontFamily: mono, fontSize: 11, color: G.text, background: G.goldDim, border: `1px solid ${G.gold}33`, borderRadius: 4, padding: '4px 8px', letterSpacing: '0.1em' }}>
-                          {w}% weight
-                        </div>
-                      )}
-                    </div>
-
-                    {!hasData ? (
-                      <div style={{ fontFamily: mono, fontSize: 12, color: G.text, opacity: 0.6 }}>
-                        Accumulating data…
-                      </div>
-                    ) : (
-                      <>
-                        <div style={{ marginBottom: 12 }}>
-                          <div style={labelStyle}>Direction Accuracy</div>
-                          <div style={{ fontFamily: mono, fontSize: 26, color: dirAcc >= 55 ? G.green : dirAcc >= 45 ? G.gold : G.red }}>
-                            {dirAcc != null ? `${dirAcc.toFixed(1)}%` : '—'}
-                          </div>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                          <div>
-                            <div style={labelStyle}>Mean Error</div>
-                            <div style={{ fontFamily: mono, fontSize: 16, color: G.bright }}>
-                              {mape != null ? `${mape.toFixed(2)}%` : '—'}
-                            </div>
-                          </div>
-                          <div>
-                            <div style={labelStyle}>Predictions</div>
-                            <div style={{ fontFamily: mono, fontSize: 16, color: G.bright }}>
-                              {count ?? '—'}
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          <p style={{ fontFamily: mono, fontSize: 11, color: G.gold, opacity: 0.5, textAlign: 'center', letterSpacing: '0.08em', margin: '16px 0 0' }}>
+          <p style={{ fontFamily: mono, fontSize: 11, color: G.gold, opacity: 0.5, textAlign: 'center', letterSpacing: '0.08em', margin: '0 0 16px' }}>
             Industry benchmark: 50% (random) · Top quant funds: 55–60% · PredictAlpha target: 57–60%
           </p>
 
           {/* by-horizon breakdown */}
           {hasData && data.by_horizon && Object.keys(data.by_horizon).length > 0 && (
-            <div style={{ ...cardStyle, marginTop: 20 }}>
-              <div style={{ ...labelStyle, marginBottom: 14 }}>Accuracy by Horizon</div>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: mono, fontSize: 12 }}>
-                  <thead>
-                    <tr>
-                      {['Horizon', 'Direction Accuracy', 'Mean Error', 'Count'].map(h => (
-                        <th key={h} style={{ textAlign: 'left', color: G.text, letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: 10, padding: '6px 12px', borderBottom: `1px solid ${G.border}` }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(data.by_horizon).map(([horizon, s]) => (
-                      <tr key={horizon} style={{ borderBottom: `1px solid ${G.border}22` }}>
-                        <td style={{ padding: '8px 12px', color: G.gold, letterSpacing: '0.1em' }}>{horizon.toUpperCase()}</td>
-                        <td style={{ padding: '8px 12px', color: s.direction_accuracy >= 55 ? G.green : s.direction_accuracy >= 45 ? G.gold : G.red }}>
-                          {s.direction_accuracy != null ? `${s.direction_accuracy.toFixed(1)}%` : '—'}
-                        </td>
-                        <td style={{ padding: '8px 12px', color: G.bright }}>{s.mape != null ? `${s.mape.toFixed(2)}%` : '—'}</td>
-                        <td style={{ padding: '8px 12px', color: G.text }}>{s.count}</td>
+            <>
+              <div style={{ ...cardStyle, marginTop: 20 }}>
+                <div style={{ ...labelStyle, marginBottom: 14 }}>Accuracy by Horizon</div>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: mono, fontSize: 12 }}>
+                    <thead>
+                      <tr>
+                        {['Horizon', 'Direction Accuracy', 'Mean Error', 'Count'].map(h => (
+                          <th key={h} style={{ textAlign: 'left', color: G.text, letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: 10, padding: '6px 12px', borderBottom: `1px solid ${G.border}` }}>{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {Object.entries(data.by_horizon).map(([horizon, s]) => (
+                        <tr key={horizon} style={{ borderBottom: `1px solid ${G.border}22` }}>
+                          <td style={{ padding: '8px 12px', color: G.gold, letterSpacing: '0.1em' }}>{horizon.toUpperCase()}</td>
+                          <td style={{ padding: '8px 12px' }}>
+                            {s.count < 50 ? (
+                              <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}55`, borderRadius: 4, padding: '2px 7px' }}>
+                                calibrating
+                              </span>
+                            ) : (
+                              <span style={{ color: s.direction_accuracy >= 55 ? G.green : s.direction_accuracy >= 45 ? G.gold : G.red }}>
+                                {s.direction_accuracy != null ? `${s.direction_accuracy.toFixed(1)}%` : '—'}
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '8px 12px', color: G.bright }}>{s.mape != null ? `${s.mape.toFixed(2)}%` : '—'}</td>
+                          <td style={{ padding: '8px 12px', color: G.text }}>{s.count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+              <p style={{ fontFamily: mono, fontSize: 11, color: G.text, opacity: 0.55, marginTop: 12, paddingLeft: 2, letterSpacing: '0.04em' }}>
+                Live predictions resolved against real price at expiration. Sample grows daily.
+              </p>
+            </>
           )}
         </section>
 
