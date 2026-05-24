@@ -252,7 +252,15 @@ export async function fetchPrediction(horizon) {
   if (horizon === '1h') {
     return get(`${BACKEND_URL}/api/predict/1h`, { retries: 1 })
   }
-  const session = await getProSession()
+  let session = null
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      session = await getProSession()
+      if (session) break
+    } catch (_) {}
+    await new Promise(r => setTimeout(r, 2000))
+  }
+  if (!session) throw new ApiError(401, 'Session unavailable')
   return get(`${BACKEND_URL}/api/predict/${horizon}`, {
     headers: { Authorization: `Bearer ${session.access_token}` },
     retries: 1,
