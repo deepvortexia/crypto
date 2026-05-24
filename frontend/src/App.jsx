@@ -1217,9 +1217,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       <meta property="og:description" content="Real-time Bitcoin and crypto AI price predictions powered by LSTM, XGBoost and Prophet. 6 time horizons, live on-chain data, derivatives signals. Free to start." />
       <meta property="og:url" content="https://predictalpha.app" />
       <meta property="og:type" content="website" />
+      <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
+      <link rel="canonical" href="https://predictalpha.app" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="PredictAlpha — Bitcoin & Crypto AI Price Predictions" />
       <meta name="twitter:description" content="Real-time Bitcoin and crypto AI price predictions powered by LSTM, XGBoost and Prophet. 6 time horizons, live on-chain data, derivatives signals. Free to start." />
+      <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
       <script type="application/ld+json">{JSON.stringify({
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
@@ -1492,6 +1495,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
       {/* ── BODY ── */}
       <main className="main-pad" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
+        <h1 style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, overflow: 'hidden' }}>Bitcoin AI Price Predictions — PredictAlpha</h1>
 
         {/* row 1 — market overview */}
         <div style={{ marginBottom: 40 }}>
