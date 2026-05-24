@@ -233,7 +233,7 @@ export async function fetchOnchain() {
 
 let _sessionPromise = null
 let _sessionTs = 0
-function getProSession() {
+export function getProSession() {
   if (_sessionPromise && Date.now() - _sessionTs < 30000) return _sessionPromise
   _sessionTs = Date.now()
   _sessionPromise = (async () => {

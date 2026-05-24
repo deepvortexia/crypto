@@ -562,7 +562,7 @@ async def get_accuracy():
 async def cron_resolve(request: Request):
     secret = request.headers.get("x-cron-secret", "")
     expected = os.getenv("CRON_SECRET", "")
-    if not expected or secret != expected:
+    if not expected or not hmac.compare_digest(secret, expected):
         raise HTTPException(status_code=401, detail="Unauthorized")
     count = await ensemble.resolve_predictions(None)
     return {"resolved": count}
@@ -737,7 +737,7 @@ async def stripe_webhook(request: Request):
     if event_type == "customer.subscription.created":
         supabase.table("subscriptions").update({
             "stripe_subscription_id": data["id"],
-            "status": "active",
+            "status": "active" if data["status"] == "active" else data["status"],
             "current_period_end": unix_to_iso(data.get("current_period_end")) if data.get("current_period_end") else None,
             "updated_at": now_iso
         }).eq("stripe_customer_id", data["customer"]).execute()
@@ -910,9 +910,11 @@ def _consume_credit(user_id: str, is_pro: bool) -> dict:
         rpc = supabase.rpc("consume_credit", {"p_user_id": user_id, "p_daily_limit": daily_lim}).execute()
         data = rpc.data or {}
     except Exception as e:
-        logger.error(f"consume_credit RPC failed for {user_id}: {e} — failing open")
-        # Fail-open so a Supabase outage doesn't block paid users
-        return {"allowed": True, "daily_remaining": daily_lim - 1, "bonus_remaining": 0, "daily_limit": daily_lim}
+        is_cached_pro = user_id in _pro_cache
+        logger.error(f"consume_credit RPC failed for {user_id}: {e} — {'failing open (pro)' if is_cached_pro else 'failing closed'}")
+        if is_cached_pro:
+            return {"allowed": True, "daily_remaining": daily_lim - 1, "bonus_remaining": 0, "daily_limit": daily_lim}
+        return {"allowed": False, "daily_remaining": 0, "bonus_remaining": 0, "daily_limit": daily_lim}
 
     return {
         "allowed":         bool(data.get("allowed", False)),

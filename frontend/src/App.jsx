@@ -11,7 +11,7 @@ function ScrollToTop() {
 const About = lazy(() => import('./pages/About'))
 const Proof = lazy(() => import('./Proof'))
 import { TrendingUp, TrendingDown, AlertTriangle, Zap, Lock } from 'lucide-react'
-import { fetchMarketTensions, pingHealth } from './api/client'
+import { fetchMarketTensions, pingHealth, getProSession } from './api/client'
 import {
   fetchSentiment,
   fetchNewsSentiment,
@@ -948,8 +948,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   async function runDeepAnalysis(horizon) {
     setDeepOpen(true); setDeepRunning(true); setDeepLogs([]); setDeepResult(null)
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    let session
+    try { session = await getProSession() } catch {
       setDeepOpen(false); setDeepRunning(false)
       setAuthOpen(true)
       return
@@ -1055,7 +1055,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       window.location.href = url
     } catch (err) {
       console.error('Checkout error:', err)
-      alert('Failed to start checkout: ' + err.message)
+      showToast('Failed to start checkout: ' + err.message, 'error')
     }
   }
 
@@ -1067,7 +1067,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       window.location.href = url
     } catch (err) {
       console.error('Credit pack checkout error:', err)
-      alert('Failed to start checkout: ' + err.message)
+      showToast('Failed to start checkout: ' + err.message, 'error')
       setBuyingPack(null)
     }
   }
