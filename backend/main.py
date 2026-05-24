@@ -976,6 +976,7 @@ class DeepAnalysisRequest(BaseModel):
     ema200: Optional[float] = None
     funding_rate: Optional[float] = None
     long_short_ratio: Optional[float] = None
+    predicted_price: Optional[float] = None
 
 
 @app.post("/api/deep-analysis/analyze")
@@ -1104,11 +1105,16 @@ async def deep_analysis_analyze(
         f"macd_hist={macd_hist_val} fg={fear_greed_val} funding={funding_rate_val} ls={ls_ratio_val}"
     )
 
+    predicted_price_line = (
+        f"- Ensemble Model Target ({body.horizon}): ${body.predicted_price:,.2f}\n"
+        if body.predicted_price is not None else ""
+    )
+
     prompt = f"""You are a professional Bitcoin trading analyst. Analyze the following market snapshot and provide a structured assessment.
 
 Market Snapshot:
 - Current BTC Price: ${current_price:,.2f}
-- Horizon: {body.horizon}
+{predicted_price_line}- Horizon: {body.horizon}
 - RSI (14): {_fmt(rsi_val)} ({rsi_signal_val})
 - MACD Histogram: {_fmt(macd_hist_val)} ({macd_cross_val} crossover)
 - MACD Signal Line: {_fmt(macd_signal_val)}
@@ -1182,6 +1188,7 @@ Respond with ONLY valid JSON, no markdown, no extra text:
         "total_remaining": credit_state["daily_remaining"] + credit_state["bonus_remaining"],
         "is_pro":          is_pro,
         "current_price":   current_price,
+        "predicted_price": body.predicted_price,
         "analysis":        analysis,
         "direction":       direction,
         "score":           score,

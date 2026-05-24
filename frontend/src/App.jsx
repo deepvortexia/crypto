@@ -995,6 +995,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         ema200: indics?.ema200,
         funding_rate: fundingRate?.rate,
         long_short_ratio: longShort?.ratio,
+        predicted_price: preds[horizon]?.predicted_price ?? null,
       }),
     })
 
@@ -1029,6 +1030,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         recommendation: data.recommendation,
         analysis: data.analysis,
         current_price: data.current_price,
+        predicted_price: data.predicted_price ?? null,
       })
     } catch (err) {
       console.error('Deep analysis failed:', err)
@@ -2185,11 +2187,13 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 </>)}
 
                 {deepResult && (<>
-                  <div style={{ fontSize:11, color:'#6b7280', marginBottom:6, letterSpacing:'0.2em' }}>PREDICTED IN {deepHorizon?.toUpperCase()}</div>
+                  <div style={{ fontSize:11, color:'#6b7280', marginBottom:6, letterSpacing:'0.2em' }}>ENSEMBLE TARGET — {deepHorizon?.toUpperCase()}</div>
                   <div className="deep-price" style={{ fontFamily:'"Orbitron",sans-serif', fontSize:48, color:'#f59e0b', animation:'goldPulse 2s ease-in-out infinite', marginBottom:4, lineHeight:1 }}>
-                    ${deepResult?.current_price?.toLocaleString()}
+                    {deepResult?.predicted_price != null ? '$'+deepResult.predicted_price.toLocaleString() : '$'+deepResult?.current_price?.toLocaleString()}
                   </div>
-                  <div style={{ fontSize:11, color:'#6b7280', letterSpacing:'0.2em', marginBottom:18 }}>CURRENT BTC PRICE</div>
+                  <div style={{ fontSize:11, color:'#6b7280', letterSpacing:'0.2em', marginBottom:18 }}>
+                    {deepResult?.predicted_price != null ? 'ENSEMBLE TARGET PRICE' : 'CURRENT BTC PRICE'}
+                  </div>
                   <div className="deep-badges" style={{ display:'flex', gap:12, justifyContent:'center', marginBottom:18 }}>
                     <div style={{
                       border:`2px solid ${deepResult.score>50?'#10b981':'#ef4444'}`,
