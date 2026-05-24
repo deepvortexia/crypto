@@ -393,8 +393,7 @@ export async function fetchMarketTensions() {
 
 // ── Subscription API ────────────────────────────────────────────────────────
 async function getAuthHeaders() {
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.access_token) throw new Error('Not authenticated')
+  const session = await getProSession()
   return { Authorization: `Bearer ${session.access_token}` }
 }
 
