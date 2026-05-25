@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 
-const BACKEND = import.meta.env.VITE_API_URL
+const BACKEND = 'https://crypto-production-f7c5.up.railway.app'
 
 const G = {
   bg:       '#0a0a0a',

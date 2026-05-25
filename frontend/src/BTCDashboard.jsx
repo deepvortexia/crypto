@@ -708,7 +708,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setLoadingBar(10)
     // Phase 1: price + 1h prediction — unblocks hero stats and 1h card immediately
     const [p, pred1h] = await Promise.allSettled([
-      fetch(`${import.meta.env.VITE_API_URL}/api/price/live`).then(r => r.json()),
+      fetch('https://crypto-production-f7c5.up.railway.app/api/price/live').then(r => r.json()),
       fetchPrediction('1h'),
     ])
     if (p.status      === 'fulfilled') setPrice(p.value)
@@ -951,7 +951,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const data = await fetch(`${import.meta.env.VITE_API_URL}/api/price/live`).then(r => r.json())
+        const data = await fetch('https://crypto-production-f7c5.up.railway.app/api/price/live').then(r => r.json())
         setPrice(data)
       } catch (err) {
         console.error('[Price poll] Failed to fetch price:', err)
@@ -997,7 +997,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     ]
 
     // Fire the API call concurrently with the log animation
-    const apiPromise = fetch(`${import.meta.env.VITE_API_URL}/api/deep-analysis/analyze`, {
+    const apiPromise = fetch('https://crypto-production-f7c5.up.railway.app/api/deep-analysis/analyze', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${session.access_token}`,

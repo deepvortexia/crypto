@@ -19,7 +19,7 @@ const G = {
 const MONO    = '"Share Tech Mono", monospace'
 const DISPLAY = '"Orbitron", sans-serif'
 
-const PRICES_URL = `${import.meta.env.VITE_API_URL}/api/hub/prices`
+const PRICES_URL = 'https://crypto-production-f7c5.up.railway.app/api/hub/prices'
 
 const fmtUsd = n =>
   n == null ? '···' : '$' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })
