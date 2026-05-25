@@ -126,39 +126,57 @@ export default function About() {
         })}</script>
       </Helmet>
 
-      {/* ── Navbar ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 50, overflow: 'visible',
-        background: 'rgba(10,10,10,0.9)',
+      {/* ── HEADER ── */}
+      <header className="header-inner" style={{
+        position: 'sticky', top: 0, zIndex: 50,
+        background: 'rgba(10,10,10,0.85)',
         backdropFilter: 'blur(14px)',
         borderBottom: `1px solid ${G.border}`,
-        padding: '0 24px',
+        padding: '0 32px',
         height: 68,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="46" height="46" style={{ height: 46, width: 'auto', objectFit: 'contain' }} />
-          <span style={{ fontFamily: orb, fontSize: 18, letterSpacing: '0.15em', color: G.gold, opacity: 0.9 }}>PREDICT ALPHA</span>
-        </Link>
-        {/* desktop nav links */}
-        <nav className="about-nav" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <Link to="/" style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.2em', color: G.text, textDecoration: 'none', textTransform: 'uppercase' }}>Dashboard</Link>
-          <Link to="/about" style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', textShadow: `0 0 8px ${G.goldGlow}` }}>Learn</Link>
+        {/* logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="40" height="40" style={{ height: 40, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <span className="navbar-brand" style={{ fontFamily: '"Orbitron",sans-serif', letterSpacing: '0.05em', opacity: 0.9, whiteSpace: 'nowrap' }}>
+              <span style={{ color: '#f59e0b', fontWeight: 400 }}>PREDICT</span>{' '}<span style={{ color: '#f59e0b', fontWeight: 700, textShadow: '0 0 8px rgba(245,158,11,0.4)' }}>ALPHA</span>
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.3em', color: G.green }}>LIVE</span>
+            </div>
+          </div>
+        </div>
+
+        {/* nav — desktop only */}
+        <nav className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <Link to="/about" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
+          <Link to="/proof" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>PROOF</Link>
+          <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>← HUB</Link>
+          <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
         </nav>
-        {/* burger — tablet and mobile */}
-        <button className="about-burger" onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', fontSize: 34, lineHeight: 1, padding: '10px', minWidth: 48, minHeight: 48, display: 'none' }}>☰</button>
-        {/* backdrop */}
+
+        {/* hamburger — mobile only */}
+        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', fontSize: 34, lineHeight: 1, padding: '10px', minWidth: 48, minHeight: 48 }}>☰</button>
+
+        {/* mobile backdrop */}
         {menuOpen && (
           <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 998 }} />
         )}
-        {/* dropdown */}
+        {/* mobile dropdown */}
         {menuOpen && (
-          <div className="about-dropdown" style={{ position: 'absolute', top: 68, left: 'auto', right: 0, background: 'rgba(10,10,10,0.97)', borderBottom: `1px solid #2a1f00`, borderLeft: `1px solid #2a1f00`, borderBottomLeftRadius: 8, zIndex: 999, padding: '8px 0 16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '4px 8px 0' }}>
-              <button onClick={() => setMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#f59e0b', fontSize: 28, lineHeight: 1, cursor: 'pointer', padding: '8px', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <div style={{ position: 'absolute', top: 68, left: 0, right: 0, background: 'rgba(10,10,10,0.97)', borderBottom: '1px solid #2a1f00', zIndex: 999 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 8px 0' }}>
+              <button onClick={() => setMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#f59e0b', fontSize: 28, cursor: 'pointer', padding: 8, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
             </div>
-            <Link to="/" onClick={() => setMenuOpen(false)} style={{ display: 'block', fontFamily: mono, fontSize: 13, letterSpacing: '0.2em', color: G.text, textDecoration: 'none', padding: '12px 24px', textTransform: 'uppercase' }}>Dashboard</Link>
-            <Link to="/about" onClick={() => setMenuOpen(false)} style={{ display: 'block', fontFamily: mono, fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', padding: '12px 24px', textTransform: 'uppercase', textShadow: `0 0 8px ${G.goldGlow}` }}>Learn</Link>
+            <div style={{ display: 'flex', flexDirection: 'column', padding: '8px 0 20px' }}>
+              <Link to="/about" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase' }}>LEARN</Link>
+              <Link to="/proof" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase' }}>PROOF</Link>
+              <Link to="/" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: '#f59e0b', textDecoration: 'none', textTransform: 'uppercase' }}>← HUB</Link>
+              <a href="mailto:admin@predictalpha.app" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase' }}>CONTACT</a>
+            </div>
           </div>
         )}
       </header>
@@ -580,14 +598,13 @@ export default function About() {
       </footer>
 
       <style>{`
-        /* burger visible below 1280px (tablet + mobile) */
-        @media (max-width: 1279px) {
-          .about-nav    { display: none !important; }
-          .about-burger { display: flex !important; align-items: center !important; order: 3 !important; }
-        }
-        /* tablet: constrained dropdown */
-        @media (min-width: 769px) and (max-width: 1279px) {
-          .about-dropdown { width: 280px !important; }
+        @keyframes hub-blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .show-mobile { display: none; }
+        @media (max-width: 768px) {
+          .header-inner { padding: 0 12px !important; }
+          .navbar-brand  { font-size: 14px !important; white-space: nowrap !important; }
+          .hide-mobile   { display: none !important; }
+          .show-mobile   { display: flex !important; align-items: center !important; }
         }
         /* ≤1024px: tighter main padding + cap all grids at 2 columns */
         @media (max-width: 1024px) {
@@ -595,11 +612,6 @@ export default function About() {
           .about-grid   { grid-template-columns: repeat(2, 1fr) !important; }
           .horizon-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .levels-grid  { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-        /* mobile: full-width dropdown */
-        @media (max-width: 768px) {
-          .about-dropdown { width: 100% !important; left: 0 !important; right: 0 !important;
-                            border-left: none !important; border-bottom-left-radius: 0 !important; }
         }
         @media (max-width: 768px) {
           .about-main {

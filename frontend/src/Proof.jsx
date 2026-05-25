@@ -52,10 +52,11 @@ const sectionLabel = {
 
 
 export default function Proof() {
-  const [data,    setData]    = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [now,     setNow]     = useState(new Date())
-  const [logs,    setLogs]    = useState(null)
+  const [data,     setData]     = useState(null)
+  const [loading,  setLoading]  = useState(true)
+  const [now,      setNow]      = useState(new Date())
+  const [logs,     setLogs]     = useState(null)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     fetch(`${BACKEND}/api/accuracy`)
@@ -101,27 +102,59 @@ export default function Proof() {
         <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
       </Helmet>
 
-      {/* ── NAV ── */}
-      <header style={{
+      {/* ── HEADER ── */}
+      <header className="header-inner" style={{
         position: 'sticky', top: 0, zIndex: 50,
-        background: 'rgba(10,10,10,0.88)',
+        background: 'rgba(10,10,10,0.85)',
         backdropFilter: 'blur(14px)',
         borderBottom: `1px solid ${G.border}`,
-        padding: '0 32px', height: 68,
+        padding: '0 32px',
+        height: 68,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ flex: 1 }} />
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <img src="/logoegyptfinal.webp" alt="PredictAlpha" width="38" height="38" style={{ height: 38, width: 'auto', objectFit: 'contain' }} />
-          <span style={{ fontFamily: orb, letterSpacing: '0.05em' }}>
-            <span style={{ color: G.gold, fontWeight: 400 }}>PREDICT</span>
-            <span style={{ color: G.gold, fontWeight: 700, textShadow: `0 0 8px ${G.goldGlow}` }}> ALPHA</span>
-          </span>
-        </Link>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>
-          <Link to="/about" style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
-          <Link to="/"     style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>DASHBOARD</Link>
+        {/* logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="40" height="40" style={{ height: 40, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <span className="navbar-brand" style={{ fontFamily: '"Orbitron",sans-serif', letterSpacing: '0.05em', opacity: 0.9, whiteSpace: 'nowrap' }}>
+              <span style={{ color: '#f59e0b', fontWeight: 400 }}>PREDICT</span>{' '}<span style={{ color: '#f59e0b', fontWeight: 700, textShadow: '0 0 8px rgba(245,158,11,0.4)' }}>ALPHA</span>
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
+              <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.3em', color: G.green }}>LIVE</span>
+            </div>
+          </div>
         </div>
+
+        {/* nav — desktop only */}
+        <nav className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <Link to="/about" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
+          <Link to="/proof" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>PROOF</Link>
+          <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>← HUB</Link>
+          <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
+        </nav>
+
+        {/* hamburger — mobile only */}
+        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', fontSize: 34, lineHeight: 1, padding: '10px', minWidth: 48, minHeight: 48 }}>☰</button>
+
+        {/* mobile backdrop */}
+        {menuOpen && (
+          <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 998 }} />
+        )}
+        {/* mobile dropdown */}
+        {menuOpen && (
+          <div style={{ position: 'absolute', top: 68, left: 0, right: 0, background: 'rgba(10,10,10,0.97)', borderBottom: '1px solid #2a1f00', zIndex: 999 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 8px 0' }}>
+              <button onClick={() => setMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#f59e0b', fontSize: 28, cursor: 'pointer', padding: 8, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', padding: '8px 0 20px' }}>
+              <Link to="/about" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase' }}>LEARN</Link>
+              <Link to="/proof" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase' }}>PROOF</Link>
+              <Link to="/" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: '#f59e0b', textDecoration: 'none', textTransform: 'uppercase' }}>← HUB</Link>
+              <a href="mailto:admin@predictalpha.app" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase' }}>CONTACT</a>
+            </div>
+          </div>
+        )}
       </header>
 
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 24px' }}>
@@ -317,6 +350,17 @@ export default function Proof() {
         </div>
 
       </main>
+
+      <style>{`
+        @keyframes hub-blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .show-mobile { display: none; }
+        @media (max-width: 768px) {
+          .header-inner { padding: 0 12px !important; }
+          .navbar-brand  { font-size: 14px !important; white-space: nowrap !important; }
+          .hide-mobile   { display: none !important; }
+          .show-mobile   { display: flex !important; align-items: center !important; }
+        }
+      `}</style>
     </div>
   )
 }
