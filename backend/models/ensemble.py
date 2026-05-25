@@ -356,7 +356,7 @@ class BTCEnsemble:
                     self._sb_url("predictions"),
                     headers=headers,
                     params={
-                        "select":   "horizon,actual_price,predicted_price,current_price,direction_correct",
+                        "select":   "horizon,actual_price,predicted_price,current_price,direction_correct,created_at",
                         "resolved": "eq.true",
                         "limit":    "10000",
                     },
@@ -394,12 +394,29 @@ class BTCEnsemble:
             if p.get("actual_price") is not None and p.get("predicted_price") is not None
         ]
         all_dirs = [p["direction_correct"] for p in resolved if p.get("direction_correct") is not None]
+
+        prediction_records = []
+        for p in resolved:
+            ap = p.get("actual_price")
+            pp = p.get("predicted_price")
+            cp = p.get("current_price")
+            pct_error = round(abs(ap - pp) / cp * 100, 4) if (ap is not None and pp is not None and cp) else None
+            prediction_records.append({
+                "prediction_time": p.get("created_at"),
+                "horizon":         p["horizon"],
+                "predicted_price": pp,
+                "actual_price":    ap,
+                "pct_error":       pct_error,
+                "direction_correct": p.get("direction_correct"),
+            })
+
         return {
             "total_predictions":          len(resolved),
             "overall_mape":               round(float(np.mean(all_errors)), 3) if all_errors else None,
             "overall_direction_accuracy": round(float(np.mean(all_dirs)) * 100, 1) if all_dirs else None,
             "by_horizon":                 stats,
             "current_weights":            self.weights,
+            "predictions":                prediction_records,
         }
 
     def _recompute_weights(self):
