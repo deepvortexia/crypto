@@ -49,7 +49,7 @@ export default function Pricing() {
           min-height: 100vh;
           background: #0a0a0a;
           color: #f0e6c8;
-          font-family: 'Georgia', serif;
+          font-family: "Share Tech Mono", monospace;
         }
 
         .pricing-nav {
@@ -61,7 +61,7 @@ export default function Pricing() {
           justify-content: space-between;
           padding: 1rem 2rem;
           background: rgba(10,10,10,0.92);
-          border-bottom: 1px solid rgba(212,175,55,0.2);
+          border-bottom: 1px solid rgba(245,158,11,0.2);
           backdrop-filter: blur(12px);
         }
 
@@ -76,7 +76,7 @@ export default function Pricing() {
         .nav-logo-text {
           font-size: 1.1rem;
           font-weight: 700;
-          color: #d4af37;
+          color: #f59e0b;
           letter-spacing: 0.05em;
         }
 
@@ -97,11 +97,11 @@ export default function Pricing() {
         }
 
         .nav-links a:hover {
-          color: #d4af37;
+          color: #f59e0b;
         }
 
         .nav-cta {
-          background: #d4af37;
+          background: #f59e0b;
           color: #0a0a0a;
           border: none;
           padding: 0.5rem 1.2rem;
@@ -130,14 +130,14 @@ export default function Pricing() {
           transform: translateX(-50%);
           width: 600px;
           height: 300px;
-          background: radial-gradient(ellipse, rgba(212,175,55,0.08) 0%, transparent 70%);
+          background: radial-gradient(ellipse, rgba(245,158,11,0.08) 0%, transparent 70%);
           pointer-events: none;
         }
 
         .hero-eyebrow {
           font-size: 0.75rem;
           letter-spacing: 0.2em;
-          color: #d4af37;
+          color: #f59e0b;
           text-transform: uppercase;
           margin-bottom: 1rem;
         }
@@ -151,7 +151,7 @@ export default function Pricing() {
         }
 
         .hero-title span {
-          color: #d4af37;
+          color: #f59e0b;
         }
 
         .hero-sub {
@@ -173,7 +173,7 @@ export default function Pricing() {
 
         .plan-card {
           background: #111;
-          border: 1px solid rgba(212,175,55,0.2);
+          border: 1px solid rgba(245,158,11,0.2);
           border-radius: 12px;
           padding: 2rem;
           position: relative;
@@ -181,12 +181,12 @@ export default function Pricing() {
         }
 
         .plan-card:hover {
-          border-color: rgba(212,175,55,0.5);
+          border-color: rgba(245,158,11,0.5);
         }
 
         .plan-card.featured {
-          border: 1px solid rgba(212,175,55,0.6);
-          background: linear-gradient(135deg, #111 0%, #161208 100%);
+          border: 1px solid rgba(245,158,11,0.6);
+          background: linear-gradient(135deg, #111 0%, #141414 100%);
         }
 
         .plan-card.featured::before {
@@ -195,7 +195,7 @@ export default function Pricing() {
           top: -12px;
           left: 50%;
           transform: translateX(-50%);
-          background: #d4af37;
+          background: #f59e0b;
           color: #0a0a0a;
           font-size: 0.65rem;
           font-weight: 800;
@@ -230,7 +230,7 @@ export default function Pricing() {
         .plan-price .currency {
           font-size: 1.5rem;
           vertical-align: super;
-          color: #d4af37;
+          color: #f59e0b;
         }
 
         .plan-desc {
@@ -255,17 +255,17 @@ export default function Pricing() {
 
         .plan-btn.free {
           background: transparent;
-          border: 1px solid rgba(212,175,55,0.35);
-          color: #d4af37;
+          border: 1px solid rgba(245,158,11,0.35);
+          color: #f59e0b;
         }
 
         .plan-btn.free:hover {
-          background: rgba(212,175,55,0.08);
-          border-color: rgba(212,175,55,0.7);
+          background: rgba(245,158,11,0.08);
+          border-color: rgba(245,158,11,0.7);
         }
 
         .plan-btn.pro {
-          background: #d4af37;
+          background: #f59e0b;
           color: #0a0a0a;
         }
 
@@ -276,7 +276,7 @@ export default function Pricing() {
 
         .plan-divider {
           border: none;
-          border-top: 1px solid rgba(212,175,55,0.1);
+          border-top: 1px solid rgba(245,158,11,0.1);
           margin-bottom: 1.5rem;
         }
 
@@ -299,7 +299,7 @@ export default function Pricing() {
         }
 
         .feat-check {
-          color: #d4af37;
+          color: #f59e0b;
           font-size: 1rem;
           flex-shrink: 0;
           margin-top: 1px;
@@ -325,7 +325,7 @@ export default function Pricing() {
         .section-eyebrow {
           font-size: 0.7rem;
           letter-spacing: 0.2em;
-          color: #d4af37;
+          color: #f59e0b;
           text-transform: uppercase;
           text-align: center;
           margin-bottom: 0.5rem;
@@ -355,7 +355,7 @@ export default function Pricing() {
 
         .credit-card {
           background: #111;
-          border: 1px solid rgba(212,175,55,0.15);
+          border: 1px solid rgba(245,158,11,0.15);
           border-radius: 10px;
           padding: 1.5rem;
           text-align: center;
@@ -364,14 +364,14 @@ export default function Pricing() {
         }
 
         .credit-card:hover {
-          border-color: rgba(212,175,55,0.5);
+          border-color: rgba(245,158,11,0.5);
           transform: translateY(-2px);
         }
 
         .credit-count {
           font-size: 2.5rem;
           font-weight: 700;
-          color: #d4af37;
+          color: #f59e0b;
           line-height: 1;
           margin-bottom: 0.25rem;
         }
@@ -403,7 +403,7 @@ export default function Pricing() {
         }
 
         .faq-item {
-          border-bottom: 1px solid rgba(212,175,55,0.1);
+          border-bottom: 1px solid rgba(245,158,11,0.1);
           padding: 1.25rem 0;
         }
 
@@ -421,7 +421,7 @@ export default function Pricing() {
         }
 
         .pricing-footer {
-          border-top: 1px solid rgba(212,175,55,0.1);
+          border-top: 1px solid rgba(245,158,11,0.1);
           padding: 2rem;
           text-align: center;
         }
@@ -443,7 +443,7 @@ export default function Pricing() {
         }
 
         .footer-links a:hover {
-          color: #d4af37;
+          color: #f59e0b;
         }
 
         .footer-disclaimer {
@@ -467,14 +467,8 @@ export default function Pricing() {
         {/* NAV */}
         <nav className="pricing-nav">
           <a className="nav-logo" onClick={() => navigate('/')}>
-            <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="50" cy="50" rx="48" ry="30" stroke="#d4af37" strokeWidth="2.5" fill="none"/>
-              <ellipse cx="50" cy="50" rx="32" ry="20" stroke="#d4af37" strokeWidth="1.5" fill="none" opacity="0.6"/>
-              <ellipse cx="50" cy="42" rx="12" ry="16" fill="#d4af37" opacity="0.9"/>
-              <ellipse cx="50" cy="42" rx="6" ry="9" fill="#0a0a0a"/>
-              <path d="M50 58 L44 72 L50 68 L56 72 Z" fill="#d4af37" opacity="0.8"/>
-            </svg>
-            <span className="nav-logo-text">PredictAlpha</span>
+            <img src="/logoegyptfinal.webp" style={{width:'40px',height:'40px',objectFit:'contain',opacity:0.8}} alt="" />
+            <span style={{fontFamily:'"Orbitron", sans-serif',fontSize:'1rem',fontWeight:700,color:'#f59e0b',letterSpacing:'0.08em'}}>PREDICT ALPHA</span>
           </a>
           <ul className="nav-links">
             <li><a onClick={() => navigate('/about')} style={{cursor:'pointer'}}>How it works</a></li>
