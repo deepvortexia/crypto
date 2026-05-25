@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useNavigate } from 'react-router-dom'
 
 export default function Pricing() {
   const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -454,9 +455,12 @@ export default function Pricing() {
           line-height: 1.6;
         }
 
-        @media (max-width: 600px) {
-          .pricing-nav { padding: 1rem; }
-          .nav-links { display: none; }
+        .show-mobile { display: none; }
+
+        @media (max-width: 1024px) {
+          .pricing-nav { padding: 0 12px !important; }
+          .hide-mobile { display: none !important; }
+          .show-mobile { display: flex !important; align-items: center !important; }
           .pricing-cards { grid-template-columns: 1fr; }
           .credit-cards { grid-template-columns: 1fr 1fr; }
         }
@@ -470,11 +474,33 @@ export default function Pricing() {
             <img src="/logoegyptfinal.webp" style={{width:'40px',height:'40px',objectFit:'contain',opacity:0.8}} alt="" />
             <span style={{fontFamily:'"Orbitron", sans-serif',fontSize:'1rem',fontWeight:700,color:'#f59e0b',letterSpacing:'0.08em'}}>PREDICT ALPHA</span>
           </a>
-          <ul className="nav-links">
+          <ul className="nav-links hide-mobile">
             <li><a onClick={() => navigate('/about')} style={{cursor:'pointer'}}>How it works</a></li>
             <li><a onClick={() => navigate('/proof')} style={{cursor:'pointer'}}>Proof</a></li>
           </ul>
-          <button className="nav-cta" onClick={() => navigate('/btc')}>Get Started</button>
+          <button className="nav-cta hide-mobile" onClick={() => navigate('/btc')}>Get Started</button>
+
+          {/* hamburger — mobile/tablet only */}
+          <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', fontSize: 34, lineHeight: 1, padding: '10px', minWidth: 48, minHeight: 48 }}>☰</button>
+
+          {/* mobile backdrop */}
+          {menuOpen && (
+            <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 998 }} />
+          )}
+          {/* mobile dropdown */}
+          {menuOpen && (
+            <div style={{ position: 'absolute', top: 68, left: 0, right: 0, background: 'rgba(10,10,10,0.97)', borderBottom: '1px solid #2a1f00', zIndex: 999 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 8px 0' }}>
+                <button onClick={() => setMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#f59e0b', fontSize: 28, cursor: 'pointer', padding: 8, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', padding: '8px 0 20px' }}>
+                <a onClick={() => { navigate('/about'); setMenuOpen(false) }} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: '#f59e0b', textDecoration: 'none', textTransform: 'uppercase', cursor: 'pointer' }}>LEARN</a>
+                <a onClick={() => { navigate('/proof'); setMenuOpen(false) }} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: '#f59e0b', textDecoration: 'none', textTransform: 'uppercase', cursor: 'pointer' }}>PROOF</a>
+                <a onClick={() => { navigate('/'); setMenuOpen(false) }} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: '#f59e0b', textDecoration: 'none', textTransform: 'uppercase', cursor: 'pointer' }}>← HUB</a>
+                <a href="mailto:admin@predictalpha.app" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: '#f59e0b', textDecoration: 'none', textTransform: 'uppercase' }}>CONTACT</a>
+              </div>
+            </div>
+          )}
         </nav>
 
         {/* HERO */}
