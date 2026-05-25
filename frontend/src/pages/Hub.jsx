@@ -44,7 +44,7 @@ function EthDiamond() {
 
 function GoldBar() {
   return (
-    <span style={{ fontSize: 56, lineHeight: 1, filter: 'drop-shadow(0 4px 12px rgba(245,158,11,0.6))' }}>🥇</span>
+    <img src="/goldbar.png" alt="Gold bar" style={{ width: 90, height: 65, objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(245,158,11,0.6))' }} />
   )
 }
 
