@@ -43,27 +43,63 @@ function EthDiamond() {
 }
 
 function GoldBar() {
+  // 3/4 view geometry — depth vector is (+8, -20) from front to back
+  // Front face:  TL(12,26)  TR(78,22)  BR(78,63)  BL(12,63)
+  // Top face:    FL(12,26)  FR(78,22)  BR(86,2)   BL(20,6)
+  // Right face:  FT(78,22)  BT(86,2)   BB(86,43)  FB(78,63)
   return (
-    <svg width="80" height="60" viewBox="0 0 100 72" fill="none"
-      style={{ filter: 'drop-shadow(0 4px 12px rgba(245,158,11,0.5)) drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}>
-      {/* right side face — darkest */}
-      <polygon points="72,10 86,18 86,52 72,44" fill="#92400e" />
-      {/* front face — medium gold */}
-      <polygon points="14,18 72,10 72,44 14,52" fill="#d97706" />
-      {/* top face — brightest gold, slight trapezoid perspective */}
-      <polygon points="18,8 78,2 86,18 72,10 14,18" fill="#fbbf24" />
-      {/* top face inner bevel edge (slightly darker strip at rear) */}
-      <polygon points="18,8 78,2 72,6 14,12" fill="#f59e0b" opacity="0.6" />
-      {/* shine streak 1 — diagonal highlight on top */}
-      <polygon points="28,4 48,2 44,8 24,10" fill="white" opacity="0.18" />
-      {/* shine streak 2 — narrower glint */}
-      <polygon points="52,2 64,2 60,5 48,5" fill="white" opacity="0.12" />
-      {/* engraved text on front face */}
-      <text x="43" y="34" textAnchor="middle" fontFamily={MONO} fontSize="8" fontWeight="bold"
-        fill="#92400e" opacity="0.9" letterSpacing="1">AU 999.9</text>
-      {/* subtle text highlight (offset up-left for engraved look) */}
-      <text x="42.5" y="33.5" textAnchor="middle" fontFamily={MONO} fontSize="8" fontWeight="bold"
-        fill="#fbbf24" opacity="0.35" letterSpacing="1">AU 999.9</text>
+    <svg width="90" height="65" viewBox="0 0 110 76" fill="none"
+      style={{ filter: 'drop-shadow(0 6px 18px rgba(180,83,9,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.9))' }}>
+      <defs>
+        {/* top face: front edge (y=26) brightest, back edge (y=2) slightly darker */}
+        <linearGradient id="gTop" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor="#fbbf24" />
+          <stop offset="100%" stopColor="#f59e0b" />
+        </linearGradient>
+        {/* front face: top bright, bottom darker — metallic rolloff */}
+        <linearGradient id="gFront" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#fde68a" />
+          <stop offset="40%"  stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+        {/* right side: slightly lighter top, darkest at bottom */}
+        <linearGradient id="gSide" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor="#d97706" />
+          <stop offset="100%" stopColor="#b45309" />
+        </linearGradient>
+      </defs>
+
+      {/* right side face */}
+      <polygon points="78,22 86,2 86,43 78,63" fill="url(#gSide)" />
+      {/* top face */}
+      <polygon points="20,6 86,2 78,22 12,26" fill="url(#gTop)" />
+      {/* top rear bevel — thin dark strip where top meets back, adds thickness */}
+      <polygon points="20,6 86,2 84,4 18,8" fill="#b45309" opacity="0.35" />
+
+      {/* front face — path with subtle rounded corners (~4px) */}
+      <path
+        d="M16,26.5 L74,22.5 Q78,22 78,26 L78,59 Q78,63 74,63 L16,63 Q12,63 12,59 L12,30 Q12,26 16,26.5 Z"
+        fill="url(#gFront)"
+      />
+
+      {/* engraved border frame — dark shadow line */}
+      <path d="M19,31 L71,27.5 L71,58 L19,58 Z"
+        fill="none" stroke="#b45309" strokeWidth="1" opacity="0.9" />
+      {/* engraved border frame — bright highlight line (offset 0.5px for depth) */}
+      <path d="M19.5,30.5 L71.5,27 L71.5,57.5 L19.5,57.5 Z"
+        fill="none" stroke="#fef3c7" strokeWidth="0.5" opacity="0.3" />
+
+      {/* top face shine streak — central glint */}
+      <polygon points="28,8 58,5 52,14 22,17" fill="white" opacity="0.14" />
+      {/* top face narrow glint near right */}
+      <polygon points="62,4 76,3 72,9 58,10" fill="white" opacity="0.10" />
+
+      {/* AU 999.9 — dark engraved shadow layer */}
+      <text x="45" y="46" textAnchor="middle" fontFamily={MONO}
+        fontSize="7.5" fontWeight="bold" fill="#7c2d12" opacity="0.85" letterSpacing="2">AU 999.9</text>
+      {/* AU 999.9 — bright highlight layer (offset 0.5px up-left for emboss feel) */}
+      <text x="44.5" y="45.5" textAnchor="middle" fontFamily={MONO}
+        fontSize="7.5" fontWeight="bold" fill="#fef3c7" opacity="0.4" letterSpacing="2">AU 999.9</text>
     </svg>
   )
 }
