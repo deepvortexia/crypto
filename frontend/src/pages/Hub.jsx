@@ -20,18 +20,18 @@ const DISPLAY = '"Orbitron", sans-serif'
 
 const TAGLINE = 'AI · 6 TIMEFRAMES · LIVE DATA'
 
-function EyeOfHorus() {
+function EthDiamond() {
   return (
-    <svg width="96" height="64" viewBox="0 0 120 80" fill="none"
-      style={{ filter: `drop-shadow(0 0 12px ${G.goldGlow})`, marginBottom: 22 }}>
-      <g stroke={G.gold} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M12 20 Q44 4 86 16" />
-        <path d="M10 42 Q46 16 92 34" />
-        <path d="M10 42 Q40 56 70 48" />
-        <path d="M92 34 L112 60" />
-        <path d="M32 50 Q24 74 46 74 Q60 74 54 60" />
-      </g>
-      <circle cx="48" cy="37" r="8" fill={G.gold} />
+    <svg width="60" height="80" viewBox="0 0 60 80" fill="none"
+      style={{ filter: `drop-shadow(0 0 16px ${G.goldGlow})` }}>
+      {/* upper-left facet */}
+      <polygon points="30,2 4,38 30,50" fill={G.gold} />
+      {/* upper-right facet (darker) */}
+      <polygon points="30,2 56,38 30,50" fill={G.gold} opacity="0.6" />
+      {/* lower-left facet (darker) */}
+      <polygon points="4,38 30,50 30,78" fill={G.gold} opacity="0.6" />
+      {/* lower-right facet */}
+      <polygon points="56,38 30,50 30,78" fill={G.gold} />
     </svg>
   )
 }
@@ -169,7 +169,7 @@ export default function Hub() {
       padding: '64px 20px',
       textAlign: 'center',
     }}>
-      <EyeOfHorus />
+      <img src="/logoegyptfinal.webp" alt="PredictAlpha" style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 22 }} />
 
       <h1 style={{
         fontFamily: DISPLAY,
@@ -229,7 +229,7 @@ export default function Hub() {
 
         {/* ── ETHEREUM — coming soon ── */}
         <div style={lockedCard}>
-          <Symbol char="Ξ" />
+          <EthDiamond />
           <div style={assetName}>Ethereum</div>
           <div style={tagline}>{TAGLINE}</div>
           <span style={comingBadge}>Coming Soon</span>
