@@ -626,8 +626,12 @@ async def cron_resolve(request: Request):
 
 # ── Live logs ─────────────────────────────────────────────────────────────────
 @app.get("/api/logs")
-async def get_logs():
+async def get_logs(x_admin_secret: str = Header(None)):
     """Last 50 in-memory log lines, sensitive values pre-filtered."""
+    admin_secret = os.getenv("ADMIN_SECRET", "")
+    provided = (x_admin_secret or "").strip()
+    if not admin_secret or not hmac.compare_digest(provided, admin_secret):
+        raise HTTPException(403, "Forbidden")
     entries = list(_mem_handler._buf)
     return {"logs": entries[-50:][::-1]}
 
@@ -756,7 +760,7 @@ async def create_credit_pack_checkout(body: CreditPurchaseRequest, user: dict = 
             cancel_url=f"{frontend_url}?credits_canceled=true",
             metadata=checkout_metadata,
         )
-        logger.info(f"[credits/purchase] Created checkout session {session.id} for user {user['id']} pack={body.pack} metadata={checkout_metadata}")
+        logger.info(f"[credits/purchase] Created checkout session {session.id} for user {user['id'][:8]}... pack={body.pack}")
         return {"url": session.url, "credits": pack["credits"], "dollars": pack["dollars"]}
     except stripe.StripeError as e:
         logger.error(f"Stripe credit-pack checkout error: {e}")
@@ -875,13 +879,13 @@ async def stripe_webhook(request: Request):
 
                 # Pick daily_limit so the row is seeded correctly if it doesn't exist yet
                 daily_lim = PRO_DAILY_LIMIT if _is_pro(target_user_id) else FREE_DAILY_LIMIT
-                logger.info(f"[webhook] Granting +{credits} credits to user {target_user_id} (daily_lim={daily_lim})")
+                logger.info(f"[webhook] Granting +{credits} credits to user {target_user_id[:8]}... (daily_lim={daily_lim})")
                 try:
                     rpc = supabase.rpc(
                         "add_bonus_credits",
                         {"p_user_id": target_user_id, "p_amount": credits, "p_daily_limit": daily_lim},
                     ).execute()
-                    logger.info(f"[webhook] ✓ Credit pack delivered: +{credits} to {target_user_id} — new balance: {rpc.data}")
+                    logger.info(f"[webhook] ✓ Credit pack delivered: +{credits} to {target_user_id[:8]}... — new balance: {rpc.data}")
                 except Exception as e:
                     # Stripe will retry on non-2xx; raise so we don't lose the grant
                     logger.error(f"[webhook] ✗ add_bonus_credits RPC failed for {target_user_id}: {e!r}", exc_info=True)
