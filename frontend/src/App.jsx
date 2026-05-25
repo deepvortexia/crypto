@@ -63,7 +63,8 @@ export default function App() {
       <Route path="/dashboard" element={<Navigate to="/btc" replace />} />
       <Route path="/about" element={<Suspense fallback={null}><About /></Suspense>} />
       <Route path="/proof" element={<Suspense fallback={null}><Proof /></Suspense>} />
-      <Route path="/" element={<BTCDashboard user={user} setUser={setUser} authLoading={authLoading} freshLoginRef={freshLoginRef} />} />
+      <Route path="/btc" element={<BTCDashboard user={user} setUser={setUser} authLoading={authLoading} freshLoginRef={freshLoginRef} />} />
+      <Route path="/" element={<Navigate to="/btc" replace />} />
     </Routes>
     </>
   )
