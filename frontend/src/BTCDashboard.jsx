@@ -799,10 +799,6 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     prevUserRef.current = user
   }, [user, loadAll])
 
-  useEffect(() => {
-    loadAll()
-  }, [loadAll])
-
 
 
   useEffect(() => {
