@@ -888,7 +888,7 @@ async def stripe_webhook(request: Request):
                     logger.info(f"[webhook] ✓ Credit pack delivered: +{credits} to {target_user_id[:8]}... — new balance: {rpc.data}")
                 except Exception as e:
                     # Stripe will retry on non-2xx; raise so we don't lose the grant
-                    logger.error(f"[webhook] ✗ add_bonus_credits RPC failed for {target_user_id}: {e!r}", exc_info=True)
+                    logger.error(f"[webhook] ✗ add_bonus_credits RPC failed for {target_user_id[:8]}...: {e!r}", exc_info=True)
                     raise HTTPException(500, "Failed to grant credits — Stripe will retry")
 
                 # Insert idempotency record only after credits are successfully granted

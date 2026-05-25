@@ -1028,7 +1028,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         }
         if (res.status === 429) {
           setDeepOpen(false); setDeepRunning(false); setDeepLogs([]); setDeepResult(null)
-          setBuyCreditsOpen(true)
+          showToast('Too many requests — wait a moment and try again', 'info')
           return
         }
         throw new Error(data?.detail?.message || 'Analysis failed')
