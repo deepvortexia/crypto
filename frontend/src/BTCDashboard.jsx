@@ -772,7 +772,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setTimeout(() => setLoadingBar(0), 400)
   }, [])
 
-  // Fetch subscription status when user changes; re-run loadAll on first login
+  // Fetch subscription status when user changes; run loadAll on mount regardless of auth state
   const prevUserRef = useRef(null)
   useEffect(() => {
     if (user) {
@@ -796,10 +796,14 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           daily_limit:     c.daily_limit ?? 2,
         })
       })
-      if (!prevUserRef.current) loadAll()
     } else {
       setIsPro(false)
       setCreditInfo({ daily_remaining: 0, bonus_remaining: 0, total_remaining: 0, is_pro: false, daily_limit: 2 })
+    }
+    if (!prevUserRef.current) {
+      (async () => {
+        try { await loadAll() } catch (e) { console.error(e) } finally { setLoading(false) }
+      })()
     }
     prevUserRef.current = user
   }, [user, loadAll])
