@@ -44,10 +44,26 @@ function EthDiamond() {
 
 function GoldBar() {
   return (
-    <svg width="66" height="50" viewBox="0 0 80 56" fill="none">
-      <polygon points="24,10 60,10 68,20 16,20" fill={G.gold} opacity="0.85" />
-      <polygon points="16,20 68,20 74,44 10,44" fill={G.gold} opacity="0.5" />
-      <text x="42" y="36" textAnchor="middle" fontFamily={MONO} fontSize="9" fontWeight="bold" fill={G.bg}>AU 999.9</text>
+    <svg width="80" height="60" viewBox="0 0 100 72" fill="none"
+      style={{ filter: 'drop-shadow(0 4px 12px rgba(245,158,11,0.5)) drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}>
+      {/* right side face — darkest */}
+      <polygon points="72,10 86,18 86,52 72,44" fill="#92400e" />
+      {/* front face — medium gold */}
+      <polygon points="14,18 72,10 72,44 14,52" fill="#d97706" />
+      {/* top face — brightest gold, slight trapezoid perspective */}
+      <polygon points="18,8 78,2 86,18 72,10 14,18" fill="#fbbf24" />
+      {/* top face inner bevel edge (slightly darker strip at rear) */}
+      <polygon points="18,8 78,2 72,6 14,12" fill="#f59e0b" opacity="0.6" />
+      {/* shine streak 1 — diagonal highlight on top */}
+      <polygon points="28,4 48,2 44,8 24,10" fill="white" opacity="0.18" />
+      {/* shine streak 2 — narrower glint */}
+      <polygon points="52,2 64,2 60,5 48,5" fill="white" opacity="0.12" />
+      {/* engraved text on front face */}
+      <text x="43" y="34" textAnchor="middle" fontFamily={MONO} fontSize="8" fontWeight="bold"
+        fill="#92400e" opacity="0.9" letterSpacing="1">AU 999.9</text>
+      {/* subtle text highlight (offset up-left for engraved look) */}
+      <text x="42.5" y="33.5" textAnchor="middle" fontFamily={MONO} fontSize="8" fontWeight="bold"
+        fill="#fbbf24" opacity="0.35" letterSpacing="1">AU 999.9</text>
     </svg>
   )
 }
