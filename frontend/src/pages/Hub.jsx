@@ -104,7 +104,7 @@ const enterBtn = {
   letterSpacing: '0.14em',
   color: '#000',
   background: `linear-gradient(135deg, ${G.gold}, #d97706)`,
-  border: 'none',
+  border: '1px solid #f59e0b',
   borderRadius: 6,
   padding: '11px 26px',
   cursor: 'pointer',
@@ -181,7 +181,7 @@ export default function Hub() {
   }, [])
 
   return (
-    <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: G.bg }}>
 
       {/* ── HEADER — identical structure to BTCDashboard ── */}
       <header className="header-inner" style={{
@@ -208,9 +208,11 @@ export default function Hub() {
         </div>
 
         {/* nav — desktop only */}
-        <Link to="/about" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
-        <Link to="/proof" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>PROOF</Link>
-        <a href="mailto:admin@predictalpha.app" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
+        <nav className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <Link to="/about" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
+          <Link to="/proof" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>PROOF</Link>
+          <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
+        </nav>
 
         {/* hamburger — mobile only */}
         <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', fontSize: 34, lineHeight: 1, padding: '10px', minWidth: 48, minHeight: 48 }}>☰</button>
