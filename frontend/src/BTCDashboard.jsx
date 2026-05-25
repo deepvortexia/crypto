@@ -1217,6 +1217,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* learn link — desktop only */}
         <Link to="/about" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
         <Link to="/proof" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>PROOF</Link>
+        <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>← HUB</Link>
         <a href="mailto:admin@predictalpha.app" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', cursor: 'pointer', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
 
         {/* auth — desktop only */}
@@ -1273,7 +1274,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         )}
 
         {/* hamburger — mobile only */}
-        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:34,lineHeight:1,padding:'10px',minWidth:48,minHeight:48}}>☰</button>
+        <button className="show-mobile-only" onClick={() => setMenuOpen(o => !o)} style={{background:'none',border:'none',cursor:'pointer',color:'#f59e0b',fontSize:34,lineHeight:1,padding:'10px',minWidth:48,minHeight:48}}>☰</button>
 
         {/* mobile dropdown */}
         {menuOpen && (
@@ -2437,6 +2438,8 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       )}
 
       <style>{`
+        .show-mobile-only { display: none; }
+        @media (max-width: 768px) { .show-mobile-only { display: flex !important; align-items: center !important; } }
         :root { --header-h: 68px; }
         @keyframes shimmer          { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes analysisShimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
