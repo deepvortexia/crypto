@@ -635,7 +635,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.get('subscription') === 'success') {
-      window.history.replaceState({}, '', '/dashboard')
+      window.history.replaceState({}, '', '/btc')
       fetchSubscriptionStatus()
         .then(data => {
           if (data) setIsPro(data.status === 'active')
@@ -645,17 +645,17 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     }
     if (urlParams.get('success') === 'true') {
       setProJustPurchased(true)
-      window.history.replaceState({}, '', '/')
+      window.history.replaceState({}, '', '/btc')
     }
     if (urlParams.get('credits_success') === 'true') {
       setCreditsJustPurchased(urlParams.get('pack') || 'pack')
-      window.history.replaceState({}, '', '/')
+      window.history.replaceState({}, '', '/btc')
     }
     if (urlParams.get('credits_canceled') === 'true') {
       window.history.replaceState({}, '', '/')
     }
     if (urlParams.get('subscription') === 'cancelled') {
-      window.history.replaceState({}, '', '/dashboard')
+      window.history.replaceState({}, '', '/btc')
       showToast('Payment cancelled.', 'info')
     }
   }, [])
@@ -1161,7 +1161,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://predictalpha.app'
+          redirectTo: 'https://predictalpha.app/btc'
         }
       })
       if (error) throw error

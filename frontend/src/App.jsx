@@ -37,10 +37,10 @@ export default function App() {
       <meta name="description" content="Real-time Bitcoin and crypto AI price predictions powered by LSTM, XGBoost and Prophet. 6 time horizons, live on-chain data, derivatives signals. Free to start." />
       <meta property="og:title" content="PredictAlpha — Bitcoin & Crypto AI Price Predictions" />
       <meta property="og:description" content="Real-time Bitcoin and crypto AI price predictions powered by LSTM, XGBoost and Prophet. 6 time horizons, live on-chain data, derivatives signals. Free to start." />
-      <meta property="og:url" content="https://predictalpha.app" />
+      <meta property="og:url" content="https://predictalpha.app/btc" />
       <meta property="og:type" content="website" />
       <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
-      <link rel="canonical" href="https://predictalpha.app" />
+      <link rel="canonical" href="https://predictalpha.app/btc" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="PredictAlpha — Bitcoin & Crypto AI Price Predictions" />
       <meta name="twitter:description" content="Real-time Bitcoin and crypto AI price predictions powered by LSTM, XGBoost and Prophet. 6 time horizons, live on-chain data, derivatives signals. Free to start." />
@@ -49,7 +49,7 @@ export default function App() {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "PredictAlpha",
-        "url": "https://predictalpha.app",
+        "url": "https://predictalpha.app/btc",
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
         "offers": [
@@ -60,7 +60,7 @@ export default function App() {
     </Helmet>
     <ScrollToTop />
     <Routes>
-      <Route path="/dashboard" element={<Navigate to="/" replace />} />
+      <Route path="/dashboard" element={<Navigate to="/btc" replace />} />
       <Route path="/about" element={<Suspense fallback={null}><About /></Suspense>} />
       <Route path="/proof" element={<Suspense fallback={null}><Proof /></Suspense>} />
       <Route path="/" element={<BTCDashboard user={user} setUser={setUser} authLoading={authLoading} freshLoginRef={freshLoginRef} />} />
