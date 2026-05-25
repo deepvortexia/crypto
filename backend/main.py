@@ -1557,6 +1557,8 @@ async def get_key_levels():
 # ── OHLC Candles (1H) ─────────────────────────────────────────────────────────
 @app.get("/api/ohlc-candles")
 async def get_ohlc_candles(limit: int = 100):
+    if limit < 1 or limit > 1000:
+        raise HTTPException(422, "limit must be between 1 and 1000")
     cache_key = f"ohlcc_{limit}"
     if cache_key in _ohlc_candles_cache:
         return _ohlc_candles_cache[cache_key]
