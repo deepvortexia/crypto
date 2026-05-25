@@ -55,8 +55,7 @@ export default function Proof() {
   const [data,     setData]     = useState(null)
   const [loading,  setLoading]  = useState(true)
   const [now,      setNow]      = useState(new Date())
-  const [logs,     setLogs]     = useState(null)
-  const [menuOpen, setMenuOpen] = useState(false)
+const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     fetch(`${BACKEND}/api/accuracy`)
@@ -71,18 +70,7 @@ export default function Proof() {
     return () => clearInterval(id)
   }, [])
 
-  useEffect(() => {
-    const fetchLogs = () =>
-      fetch(`${BACKEND}/api/logs`)
-        .then(r => r.json())
-        .then(d => setLogs(d.logs ?? []))
-        .catch(() => {})
-    fetchLogs()
-    const id = setInterval(fetchLogs, 8000)
-    return () => clearInterval(id)
-  }, [])
-
-  const hasData     = data && data.total_predictions > 0
+const hasData     = data && data.total_predictions > 0
   const predictions = data?.predictions ?? []
 
   return (
@@ -283,44 +271,12 @@ export default function Proof() {
           </div>
         </section>
 
-        {/* ── SECTION 5: LIVE RAILWAY LOGS ── */}
+        {/* ── SECTION 5: SYSTEM LOGS ── */}
         <section style={{ marginBottom: 60 }}>
-          <div style={{ ...sectionLabel, display: 'flex', alignItems: 'center', gap: 12 }}>
-            Live System Logs
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: mono, fontSize: 10, letterSpacing: '0.2em', color: '#00ff88' }}>
-              <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 6px #00ff88', animation: 'blink 1.2s ease-in-out infinite' }} />
-              RAILWAY — LIVE
-            </span>
+          <div style={sectionLabel}>Live System Logs</div>
+          <div style={{background:'#141414', border:'1px solid #2a1f00', borderRadius:8, padding:'16px 20px', fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:'rgba(245,158,11,0.5)'}}>
+            System logs are private. Operational status visible on Railway dashboard.
           </div>
-          <div style={{
-            background: '#050505',
-            border: `1px solid #00ff8833`,
-            borderRadius: 10,
-            padding: '14px 18px',
-            height: 320,
-            overflow: 'hidden',
-            fontFamily: mono,
-            fontSize: 11,
-            lineHeight: 1.75,
-          }}>
-            {logs === null || logs.length === 0 ? (
-              <span style={{ color: '#00ff8866' }}>Connecting to Railway...</span>
-            ) : (
-              logs.slice(0, 10).map((entry, i) => {
-                const levelColor = entry.level === 'ERROR' ? '#ef4444'
-                  : entry.level === 'WARNING' ? '#f59e0b'
-                  : '#00ff88'
-                return (
-                  <div key={i} className="proof-log-line" style={{ color: levelColor, marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    <span style={{ opacity: 0.5 }}>[{entry.time}]</span>
-                    {' '}<span style={{ opacity: 0.8 }}>{entry.level}</span>
-                    {' — '}{entry.message}
-                  </div>
-                )
-              })
-            )}
-          </div>
-          <style>{`@media (max-width: 480px) { .proof-log-line { font-size: 9px !important; } }`}</style>
         </section>
 
         {/* ── SECTION 4: DATA SOURCES FOOTER ── */}
