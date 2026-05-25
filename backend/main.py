@@ -618,7 +618,7 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
                 "status": "inactive"
             }).execute()
 
-        frontend_url = os.getenv("FRONTEND_URL", "https://predictalpha.app")
+        frontend_url = os.getenv("FRONTEND_URL", "https://predictalpha.app/btc")
         session = stripe.checkout.Session.create(
             customer=customer_id,
             payment_method_types=["card"],
@@ -650,7 +650,7 @@ async def create_billing_portal(user: dict = Depends(get_current_user)):
     try:
         session = stripe.billing_portal.Session.create(
             customer=customer_id,
-            return_url=os.getenv("FRONTEND_URL", "https://predictalpha.app"),
+            return_url=os.getenv("FRONTEND_URL", "https://predictalpha.app/btc"),
         )
         return {"url": session.url}
     except stripe.StripeError as e:
@@ -684,7 +684,7 @@ async def create_credit_pack_checkout(body: CreditPurchaseRequest, user: dict = 
                 "status":             "inactive",
             }).execute()
 
-        frontend_url = os.getenv("FRONTEND_URL", "https://predictalpha.app")
+        frontend_url = os.getenv("FRONTEND_URL", "https://predictalpha.app/btc")
         checkout_metadata = {
             "type":    "credit_pack",
             "user_id": user["id"],
