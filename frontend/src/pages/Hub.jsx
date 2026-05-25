@@ -323,10 +323,6 @@ export default function Hub() {
 
       </div>{/* end main content */}
 
-      {/* ── Footer ── */}
-      <div style={{ borderTop: '1px solid #2a1f00', padding: '20px 24px', display: 'flex', justifyContent: 'center' }}>
-        <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', opacity: 0.7, textDecoration: 'none', textTransform: 'uppercase' }}>← HUB</Link>
-      </div>
 
       <style>{`
         @keyframes hub-blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
