@@ -1217,7 +1217,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* learn link — desktop only */}
         <Link to="/about" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
         <Link to="/proof" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>PROOF</Link>
-        <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>← HUB</Link>
+        <Link to="/" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none', whiteSpace: 'nowrap' }}>← HUB</Link>
         <a href="mailto:admin@predictalpha.app" className="hide-mobile" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', cursor: 'pointer', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
 
         {/* auth — desktop only */}
@@ -1318,10 +1318,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 <button onClick={() => { setAuthTab('login'); setAuthOpen(true); setMenuOpen(false) }} style={{width:'100%',fontFamily:'"Share Tech Mono",monospace',fontSize:11,letterSpacing:'0.15em',color:G.gold,background:G.goldDim,border:`1px solid ${G.gold}44`,borderRadius:6,padding:'13px 16px',cursor:'pointer',textTransform:'uppercase',minHeight:48}}>LOGIN</button>
               </div>
             )}
+            <Link to="/" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: '#f59e0b', textDecoration: 'none', textTransform: 'uppercase' }}>← HUB</Link>
             {[
-              { label: 'Dashboard', to: '/', dim: false },
-              { label: 'Learn',     to: '/about', dim: false },
-              { label: 'Proof',     to: '/proof', dim: false },
+              { label: 'Learn', to: '/about' },
+              { label: 'Proof', to: '/proof' },
             ].map(({ label, to }) => (
               <Link key={label} to={to} onClick={() => setMenuOpen(false)} style={{display:'block',fontFamily:'"Share Tech Mono",monospace',fontSize:13,letterSpacing:'0.2em',color:'#f59e0b',textDecoration:'none',padding:'12px 24px',textTransform:'uppercase'}}>{label}</Link>
             ))}
@@ -2439,7 +2439,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
       <style>{`
         .show-mobile-only { display: none; }
-        @media (max-width: 768px) { .show-mobile-only { display: flex !important; align-items: center !important; } }
+        @media (max-width: 768px) { .show-mobile-only { display: flex !important; align-items: center !important; order: 3 !important; } }
         :root { --header-h: 68px; }
         @keyframes shimmer          { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes analysisShimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
