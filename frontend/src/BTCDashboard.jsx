@@ -643,7 +643,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         })
         .catch(() => {})
     }
-    if (urlParams.get('success') === 'true') {
+    if (urlParams.get('subscription') === 'success') {
       setProJustPurchased(true)
       window.history.replaceState({}, '', '/btc')
     }
