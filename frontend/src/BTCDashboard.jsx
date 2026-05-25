@@ -1444,7 +1444,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               [0,1,2,3].map(i => <Skel key={i} h={80} />)
             ) : (
               <>
-                <StatCard label={<>BTC Price<Tooltip text="Live price updated every 30s via Binance WebSocket"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
+                <StatCard label={<>BTC Price<Tooltip text="Live price updated every 30s via OKX + CoinMarketCap"/></>}   value={fmtPrice(price?.price)}          sub="USD · Last updated live" icon="₿" />
                 <StatCard label={<>24h Change<Tooltip text="Price change last 24h — positive means bullish momentum"/></>}  value={fmtPct(change)}                  sub={isUp ? 'Bullish momentum' : 'Bearish momentum'} valueColor={chgColor} icon={isUp ? '▲' : '▼'} />
                 <StatCard label={<>24h Volume<Tooltip text="Total trading volume spot + derivatives"/></>}  value={fmtLarge(price?.volume_24h)}     sub="Spot + derivatives" />
                 <StatCard label={<>Market Cap<Tooltip text="Total market value = price × circulating supply"/></>}  value={fmtLarge(price?.market_cap || null)} sub="USD market cap" />
