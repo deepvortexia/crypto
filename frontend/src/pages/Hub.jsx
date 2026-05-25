@@ -236,6 +236,12 @@ export default function Hub() {
         )}
       </header>
 
+      {/* ── AI BANNER ── */}
+      <div style={{padding:'10px 16px', borderBottom:'1px solid #1a1a1a', textAlign:'center', background:'#0a0a0a'}}>
+        <span style={{fontFamily:'"Share Tech Mono",monospace', fontSize:16, letterSpacing:'0.3em', color:'#f59e0b', opacity:0.8, animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
+        <div style={{fontFamily:'"Share Tech Mono",monospace', fontSize:9, color:'#6b7280', letterSpacing:'0.15em', opacity:0.6, marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
+      </div>
+
       {/* ── MAIN CONTENT ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px 64px', textAlign: 'center' }}>
         <img src="/logoegyptfinal.webp" alt="PredictAlpha" style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 22 }} />
@@ -327,6 +333,7 @@ export default function Hub() {
       <style>{`
         @keyframes hub-blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
         @keyframes tagline-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+        @keyframes textPulse { 0%,100%{opacity:0.8} 50%{opacity:1} }
 
         /* desktop: hamburger hidden */
         .show-mobile { display: none; }
