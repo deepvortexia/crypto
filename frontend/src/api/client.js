@@ -252,6 +252,8 @@ export async function fetchPrediction(horizon) {
   if (horizon === '1h') {
     return get(`${BACKEND_URL}/api/predict/1h`, { retries: 1 })
   }
+  const { data: { session: existing } } = await supabase.auth.getSession()
+  if (!existing) return null
   let session = null
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
