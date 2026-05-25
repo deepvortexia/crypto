@@ -1050,6 +1050,9 @@ async def deep_analysis_analyze(
     user_id = user["id"]
     is_pro  = _is_pro(user_id)
 
+    if not _ANTHROPIC_API_KEY:
+        raise HTTPException(503, "ANTHROPIC_API_KEY not configured")
+
     # ── Atomically consume one credit (daily first, then bonus) ─────────────
     credit_state = _consume_credit(user_id, is_pro)
     if not credit_state["allowed"]:
@@ -1063,14 +1066,12 @@ async def deep_analysis_analyze(
             },
         )
 
-    if not _ANTHROPIC_API_KEY:
-        raise HTTPException(503, "ANTHROPIC_API_KEY not configured")
-
     try:
         price_data = await fetch_live_price()
         current_price = price_data["price"]
     except Exception as e:
         logger.error(f"fetch_live_price failed in deep analysis: {e}")
+        _refund_credit(user_id, is_pro)
         raise HTTPException(502, "Failed to fetch live BTC price")
 
     def _fmt(v, unit=""):
