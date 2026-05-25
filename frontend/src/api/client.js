@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 
-const BACKEND_URL = 'https://crypto-production-f7c5.up.railway.app'
+const BACKEND_URL = import.meta.env.VITE_API_URL
 
 class ApiError extends Error {
   constructor(status, message) {

@@ -81,7 +81,7 @@ export default function AccuracyPanel() {
   const [stats, setStats] = useState(FALLBACK_STATS)
 
   useEffect(() => {
-    fetch('https://crypto-production-f7c5.up.railway.app/api/accuracy')
+    fetch(`${import.meta.env.VITE_API_URL}/api/accuracy`)
       .then(r => r.ok ? r.json() : null)
       .catch(() => null)
       .then(data => {
