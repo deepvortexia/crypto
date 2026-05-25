@@ -466,7 +466,7 @@ export default function Pricing() {
 
         {/* NAV */}
         <nav className="pricing-nav">
-          <a className="nav-logo" onClick={() => navigate('/')}>
+          <a className="nav-logo" onClick={() => navigate('/btc')}>
             <img src="/logoegyptfinal.webp" style={{width:'40px',height:'40px',objectFit:'contain',opacity:0.8}} alt="" />
             <span style={{fontFamily:'"Orbitron", sans-serif',fontSize:'1rem',fontWeight:700,color:'#f59e0b',letterSpacing:'0.08em'}}>PREDICT ALPHA</span>
           </a>
@@ -474,7 +474,7 @@ export default function Pricing() {
             <li><a onClick={() => navigate('/about')} style={{cursor:'pointer'}}>How it works</a></li>
             <li><a onClick={() => navigate('/proof')} style={{cursor:'pointer'}}>Proof</a></li>
           </ul>
-          <button className="nav-cta" onClick={() => navigate('/')}>Get Started</button>
+          <button className="nav-cta" onClick={() => navigate('/btc')}>Get Started</button>
         </nav>
 
         {/* HERO */}
@@ -495,7 +495,7 @@ export default function Pricing() {
               <span> / month</span>
             </div>
             <p className="plan-desc">Get a taste of the oracle. No credit card required.</p>
-            <button className="plan-btn free" onClick={() => navigate('/')}>Start for free</button>
+            <button className="plan-btn free" onClick={() => navigate('/btc')}>Start for free</button>
             <hr className="plan-divider"/>
             <ul className="feature-list">
               <li><span className="feat-check">✦</span> 2 predictions per day</li>
@@ -516,7 +516,7 @@ export default function Pricing() {
               <span className="currency">$</span>12<span>.99 / month</span>
             </div>
             <p className="plan-desc">Full access to every signal, every timeframe, every day.</p>
-            <button className="plan-btn pro" onClick={() => navigate('/')}>Upgrade to PRO</button>
+            <button className="plan-btn pro" onClick={() => navigate('/btc')}>Upgrade to PRO</button>
             <hr className="plan-divider"/>
             <ul className="feature-list">
               <li><span className="feat-check">✦</span> 20 deep analyses per day</li>
@@ -590,7 +590,7 @@ export default function Pricing() {
         {/* FOOTER */}
         <footer className="pricing-footer">
           <ul className="footer-links">
-            <li><a onClick={() => navigate('/')} style={{cursor:'pointer'}}>Home</a></li>
+            <li><a onClick={() => navigate('/btc')} style={{cursor:'pointer'}}>Home</a></li>
             <li><a onClick={() => navigate('/about')} style={{cursor:'pointer'}}>How it works</a></li>
             <li><a onClick={() => navigate('/proof')} style={{cursor:'pointer'}}>Proof</a></li>
           </ul>
