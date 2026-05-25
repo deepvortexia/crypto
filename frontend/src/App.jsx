@@ -11,6 +11,7 @@ function ScrollToTop() {
 }
 const About = lazy(() => import('./pages/About'))
 const Proof = lazy(() => import('./Proof'))
+const Hub = lazy(() => import('./pages/Hub'))
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -64,7 +65,7 @@ export default function App() {
       <Route path="/about" element={<Suspense fallback={null}><About /></Suspense>} />
       <Route path="/proof" element={<Suspense fallback={null}><Proof /></Suspense>} />
       <Route path="/btc" element={<BTCDashboard user={user} setUser={setUser} authLoading={authLoading} freshLoginRef={freshLoginRef} />} />
-      <Route path="/" element={<Navigate to="/btc" replace />} />
+      <Route path="/" element={<Suspense fallback={null}><Hub /></Suspense>} />
     </Routes>
     </>
   )
