@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Lock } from 'lucide-react'
 
@@ -17,6 +18,11 @@ const G = {
 
 const MONO    = '"Share Tech Mono", monospace'
 const DISPLAY = '"Orbitron", sans-serif'
+
+const PRICES_URL = 'https://crypto-production-f7c5.up.railway.app/api/hub/prices'
+
+const fmtUsd = n =>
+  n == null ? '···' : '$' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })
 
 const TAGLINE = 'AI · 6 TIMEFRAMES · LIVE DATA'
 
@@ -156,7 +162,27 @@ const comingBadge = {
   textTransform: 'uppercase',
 }
 
+const priceText = {
+  fontFamily: MONO,
+  fontSize: 22,
+  color: G.gold,
+  textShadow: `0 0 10px ${G.goldGlow}`,
+}
+
 export default function Hub() {
+  const [prices, setPrices] = useState({ btc: null, eth: null, gold: null })
+
+  useEffect(() => {
+    let active = true
+    fetch(PRICES_URL)
+      .then(r => r.json())
+      .then(data => {
+        if (active) setPrices({ btc: data.btc ?? null, eth: data.eth ?? null, gold: data.gold ?? null })
+      })
+      .catch(() => {})
+    return () => { active = false }
+  }, [])
+
   return (
     <div style={{
       position: 'relative',
@@ -210,7 +236,7 @@ export default function Hub() {
           <Symbol char="₿" />
           <div style={assetName}>Bitcoin</div>
           <div style={tagline}>{TAGLINE}</div>
-          <div style={{ fontFamily: MONO, fontSize: 26, color: G.gold, textShadow: `0 0 10px ${G.goldGlow}` }}>$77,180</div>
+          <div style={{ fontFamily: MONO, fontSize: 26, color: G.gold, textShadow: `0 0 10px ${G.goldGlow}` }}>{fmtUsd(prices.btc)}</div>
           <span style={liveBadge}>
             <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
             Live
@@ -223,6 +249,7 @@ export default function Hub() {
           <GoldBar />
           <div style={assetName}>Gold</div>
           <div style={tagline}>{TAGLINE}</div>
+          <div style={priceText}>{fmtUsd(prices.gold)}</div>
           <span style={comingBadge}>Coming Soon</span>
           <span style={lockedBtn}><Lock size={13} /> Locked</span>
         </div>
@@ -232,6 +259,7 @@ export default function Hub() {
           <EthDiamond />
           <div style={assetName}>Ethereum</div>
           <div style={tagline}>{TAGLINE}</div>
+          <div style={priceText}>{fmtUsd(prices.eth)}</div>
           <span style={comingBadge}>Coming Soon</span>
           <span style={lockedBtn}><Lock size={13} /> Locked</span>
         </div>

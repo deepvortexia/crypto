@@ -28,6 +28,7 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from supabase import create_client, Client
+import yfinance as yf
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -178,6 +179,10 @@ _liquidations_cache:  TTLCache = TTLCache(maxsize=1,  ttl=300)  # 5 min
 _order_book_cache:    TTLCache = TTLCache(maxsize=1,  ttl=30)   # 30 s
 _key_levels_cache:    TTLCache = TTLCache(maxsize=1,  ttl=300)  # 5 min
 _ohlc_candles_cache:  TTLCache = TTLCache(maxsize=10, ttl=60)   # 1 min per limit
+_hub_prices_cache:    TTLCache = TTLCache(maxsize=1,  ttl=60)   # 1 min
+
+_CMC_API_KEY    = os.getenv("CMC_API_KEY", "")
+_CMC_QUOTES_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
 
 # Shared dataframe cache (refreshed alongside indicators)
 _hourly_df = None
@@ -374,6 +379,57 @@ async def get_live_price():
     except Exception as exc:
         logger.error(f"Live price fetch failed: {exc}")
         raise HTTPException(502, "Failed to fetch live price from OKX")
+
+
+def _fetch_gold_price() -> float:
+    """Spot gold (COMEX front-month future) via yfinance. Blocking — call in a thread."""
+    return float(yf.Ticker("GC=F").fast_info["last_price"])
+
+
+@app.get("/api/hub/prices")
+async def get_hub_prices():
+    """Public: latest BTC, ETH (CoinMarketCap) and Gold (yfinance) prices for the hub page.
+
+    Each asset is resolved independently — a failure in one returns null for that
+    asset only, never a 5xx for the whole response.
+    """
+    if "prices" in _hub_prices_cache:
+        return _hub_prices_cache["prices"]
+
+    btc = eth = gold = None
+
+    # BTC + ETH from CoinMarketCap (same pattern as services.data_fetcher._fetch_cmc_data)
+    if _CMC_API_KEY:
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                resp = await client.get(
+                    _CMC_QUOTES_URL,
+                    params={"symbol": "BTC,ETH", "convert": "USD"},
+                    headers={"X-CMC_PRO_API_KEY": _CMC_API_KEY},
+                )
+                resp.raise_for_status()
+                data = resp.json()["data"]
+            try:
+                btc = round(data["BTC"]["quote"]["USD"]["price"], 2)
+            except Exception:
+                btc = None
+            try:
+                eth = round(data["ETH"]["quote"]["USD"]["price"], 2)
+            except Exception:
+                eth = None
+        except Exception as exc:
+            logger.error(f"Hub CMC price fetch failed: {exc}")
+
+    # Gold from yfinance (synchronous network call → offload to a thread)
+    try:
+        gold = round(await asyncio.to_thread(_fetch_gold_price), 2)
+    except Exception as exc:
+        logger.error(f"Hub gold price fetch failed: {exc}")
+
+    prices = {"btc": btc, "eth": eth, "gold": gold}
+    if any(v is not None for v in prices.values()):
+        _hub_prices_cache["prices"] = prices
+    return prices
 
 
 # ── Technical Indicators ──────────────────────────────────────────────────────
