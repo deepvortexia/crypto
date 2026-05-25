@@ -295,7 +295,7 @@ app.add_middleware(
 
 def _real_ip(request: Request) -> str:
     xff = request.headers.get("X-Forwarded-For")
-    return xff.split(",")[0].strip() if xff else request.client.host
+    return xff.split(",")[-1].strip() if xff else request.client.host
 
 limiter = Limiter(key_func=_real_ip, default_limits=["60/minute"])
 app.state.limiter = limiter
