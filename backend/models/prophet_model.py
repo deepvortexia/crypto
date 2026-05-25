@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 import pickle
 import time
@@ -124,13 +125,18 @@ class BTCProphetModel:
                 return cached[0]
 
             horizon_h = HORIZON_HOURS[horizon_key]
+            now = datetime.now(timezone.utc)
             if horizon_h < 24:
                 # Sub-24h: hourly model captures intraday seasonality
                 if self.model_hourly is None:
                     return None
-                future = self.model_hourly.make_future_dataframe(periods=horizon_h, freq="h")
+                last_train_ts = self.model_hourly.history["ds"].max()
+                if last_train_ts.tzinfo is None:
+                    last_train_ts = last_train_ts.replace(tzinfo=timezone.utc)
+                gap_h = max(0, math.ceil((now - last_train_ts).total_seconds() / 3600))
+                future = self.model_hourly.make_future_dataframe(periods=horizon_h + gap_h + 1, freq="h")
                 forecast = self.model_hourly.predict(future)
-                target_ts = datetime.now(timezone.utc) + timedelta(hours=horizon_h)
+                target_ts = now + timedelta(hours=horizon_h)
                 idx = (forecast["ds"].dt.tz_localize("UTC") - target_ts).abs().idxmin()
                 forecast_price = float(forecast.loc[idx, "yhat"])
             else:
@@ -139,9 +145,13 @@ class BTCProphetModel:
                 if self.model_daily is None:
                     return None
                 horizon_days = max(1, round(horizon_h / 24))
-                future = self.model_daily.make_future_dataframe(periods=horizon_days, freq="D")
+                last_train_ts = self.model_daily.history["ds"].max()
+                if last_train_ts.tzinfo is None:
+                    last_train_ts = last_train_ts.replace(tzinfo=timezone.utc)
+                gap_days = max(0, math.ceil((now - last_train_ts).total_seconds() / 86400))
+                future = self.model_daily.make_future_dataframe(periods=horizon_days + gap_days + 1, freq="D")
                 forecast = self.model_daily.predict(future)
-                target_ts = datetime.now(timezone.utc) + timedelta(days=horizon_days)
+                target_ts = now + timedelta(days=horizon_days)
                 idx = (forecast["ds"].dt.tz_localize("UTC") - target_ts).abs().idxmin()
                 forecast_price = float(forecast.loc[idx, "yhat"])
 
