@@ -2270,7 +2270,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
                 {[
-                  'All prediction horizons (1H, 4H, 8H, 12H, 24H, 1 Month)',
+                  'All prediction horizons (1H, 4H, 8H, 12H, 24H, 1 Week, 1 Month)',
                   'RSI, MACD, Bollinger Bands, EMA 50/200',
                   'Fear & Greed 7-day history',
                   'Media Sentiment Analysis (AI-powered)',
