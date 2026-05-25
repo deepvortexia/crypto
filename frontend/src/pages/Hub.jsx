@@ -242,11 +242,11 @@ export default function Hub() {
 
       <h1 style={{
         fontFamily: DISPLAY,
-        fontSize: 'clamp(20px, 6vw, 42px)',
+        fontSize: 'clamp(28px, 7vw, 56px)',
         fontWeight: 700,
         letterSpacing: '0.34em',
         color: G.gold,
-        textShadow: `0 0 8px ${G.gold}, 0 0 28px ${G.goldGlow}`,
+        textShadow: '0 0 20px #f59e0b, 0 0 60px rgba(245,158,11,0.4)',
         margin: 0,
         textTransform: 'uppercase',
       }}>
@@ -255,13 +255,26 @@ export default function Hub() {
 
       <p style={{
         fontFamily: MONO,
-        fontSize: 13,
-        letterSpacing: '0.3em',
-        color: 'rgba(245,158,11,0.55)',
+        fontSize: 'clamp(11px, 2vw, 16px)',
+        letterSpacing: '0.4em',
+        color: G.gold,
         marginTop: 14,
         textTransform: 'uppercase',
+        animation: 'tagline-pulse 3s ease-in-out infinite',
       }}>
         Select a Market to Enter
+      </p>
+
+      <p style={{
+        fontFamily: MONO,
+        fontSize: 'clamp(10px, 1.5vw, 13px)',
+        letterSpacing: '0.15em',
+        color: 'rgba(245,158,11,0.5)',
+        fontStyle: 'italic',
+        marginTop: 10,
+        marginBottom: 0,
+      }}>
+        We don't predict the future. We build the perception of it.
       </p>
 
       <div className="hub-cards" style={{
@@ -308,19 +321,6 @@ export default function Hub() {
         </div>
       </div>
 
-      <div style={{
-        fontFamily: MONO,
-        fontSize: 12,
-        letterSpacing: '0.12em',
-        color: G.text,
-        fontStyle: 'italic',
-        opacity: 0.75,
-        maxWidth: 480,
-        lineHeight: 1.6,
-      }}>
-        "We don't predict the future. We build the perception of it."
-      </div>
-
       </div>{/* end main content */}
 
       {/* ── Footer ── */}
@@ -330,6 +330,7 @@ export default function Hub() {
 
       <style>{`
         @keyframes hub-blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @keyframes tagline-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
         /* desktop: hamburger hidden */
         .show-mobile { display: none; }
