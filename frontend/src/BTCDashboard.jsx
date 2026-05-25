@@ -719,7 +719,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     // Phase 2: all secondary data fired simultaneously
     const otherHorizons = PRED_HORIZONS.filter(h => h !== '1h')
     const currentPrice = p.status === 'fulfilled' ? p.value?.price : null
-    const predPromises = otherHorizons.map(h => fetchPrediction(h))
+    const predPromises = otherHorizons.map(h =>
+      Promise.race([
+        fetchPrediction(h),
+        new Promise(resolve => setTimeout(() => resolve(null), 15000)),
+      ])
+    )
 
     // Mempool fired independently — non-blocking, fail-silent
     fetchMempool().then(v => { if (v) setMempool(v) }).catch(() => {})
