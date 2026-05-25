@@ -335,6 +335,7 @@ class BTCEnsemble:
                         "direction_correct": direction_correct,
                         "pct_error":         mean_error,
                         "model_name":        row.get("model_name"),
+                        "actual_price":      actual_price,
                     })
                     self._predictions = self._predictions[-1000:]
                     resolved_count += 1
@@ -344,6 +345,7 @@ class BTCEnsemble:
 
         if resolved_count:
             self._recompute_weights()
+            self._save_predictions()
         return resolved_count
 
     async def get_accuracy(self) -> dict:
