@@ -1919,6 +1919,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.12em', color: G.gold }}>PREDICT ALPHA</span>
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: '#f59e0bcc', letterSpacing: '0.2em' }}>NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY</span>
             <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '5px 12px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT US</a>
+            <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', opacity: 0.7, textDecoration: 'none', textTransform: 'uppercase' }}>← HUB</Link>
           </div>
           <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: '#f59e0bcc', letterSpacing: '0.2em' }}>POWERED BY PREDICT ALPHA</div>
           <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: '#f59e0bcc', letterSpacing: '0.2em' }}>AI predictions may be inaccurate · Past signals do not guarantee future results · Trade responsibly</div>

@@ -570,6 +570,7 @@ export default function About() {
         <div style={{ fontFamily: mono, fontSize: 10, color: '#6b7280', letterSpacing: '0.2em' }}>
           NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
         </div>
+        <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', opacity: 0.7, textDecoration: 'none', textTransform: 'uppercase' }}>← HUB</Link>
         <div style={{ width: '100%', fontFamily: mono, fontSize: 9, color: '#374151', letterSpacing: '0.12em', textAlign: 'center' }}>
           AI predictions may be inaccurate · Past signals do not guarantee future results · Trade responsibly
         </div>

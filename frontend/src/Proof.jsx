@@ -311,6 +311,11 @@ export default function Proof() {
           </div>
         </section>
 
+        {/* ── Footer ── */}
+        <div style={{ borderTop: '1px solid #2a1f00', marginTop: 32, paddingTop: 20, paddingBottom: 20, display: 'flex', justifyContent: 'center' }}>
+          <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', opacity: 0.7, textDecoration: 'none', textTransform: 'uppercase' }}>← HUB</Link>
+        </div>
+
       </main>
     </div>
   )
