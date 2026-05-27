@@ -62,11 +62,13 @@ const cardBase = {
   borderRadius: 12,
   padding: '34px 26px',
   width: 'min(280px, 90vw)',
+  minWidth: 0,
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   gap: 14,
   textAlign: 'center',
+  transition: 'all 0.25s ease',
 }
 
 const activeCard = {
@@ -274,86 +276,103 @@ export default function Hub() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px 64px', textAlign: 'center' }}>
         <img src="/logoegyptfinal.webp" alt="PredictAlpha" fetchpriority="high" decoding="async" style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 22 }} />
 
-      <h1 style={{
-        fontFamily: DISPLAY,
-        fontSize: 'clamp(28px, 7vw, 56px)',
-        fontWeight: 700,
-        letterSpacing: '0.34em',
-        color: G.gold,
-        textShadow: '0 0 20px #f59e0b, 0 0 60px rgba(245,158,11,0.4)',
-        margin: 0,
-        textTransform: 'uppercase',
-      }}>
-        Choose Your Asset
-      </h1>
+        <h1 className="hub-h1" style={{
+          fontFamily: DISPLAY,
+          fontSize: 'clamp(20px, 5vw, 48px)',
+          fontWeight: 700,
+          letterSpacing: '0.2em',
+          color: G.gold,
+          textShadow: '0 0 20px #f59e0b, 0 0 60px rgba(245,158,11,0.4)',
+          margin: 0,
+          textTransform: 'uppercase',
+          maxWidth: '90vw',
+          wordBreak: 'break-word',
+        }}>
+          AI Price Predictions — Bitcoin, Ethereum &amp; Gold
+        </h1>
 
-      <p style={{
-        fontFamily: MONO,
-        fontSize: 'clamp(11px, 2vw, 16px)',
-        letterSpacing: '0.4em',
-        color: G.gold,
-        marginTop: 14,
-        textTransform: 'uppercase',
-        animation: 'tagline-pulse 3s ease-in-out infinite',
-      }}>
-        Select a Market to Enter
-      </p>
+        <p style={{
+          fontFamily: MONO,
+          fontSize: 'clamp(11px, 2vw, 16px)',
+          letterSpacing: '0.4em',
+          color: G.gold,
+          marginTop: 14,
+          textTransform: 'uppercase',
+          animation: 'tagline-pulse 3s ease-in-out infinite',
+        }}>
+          Select a Market to Enter
+        </p>
 
-      <p style={{
-        fontFamily: MONO,
-        fontSize: 'clamp(10px, 1.5vw, 13px)',
-        letterSpacing: '0.15em',
-        color: 'rgba(245,158,11,0.5)',
-        fontStyle: 'italic',
-        marginTop: 10,
-        marginBottom: 0,
-      }}>
-        We don't predict the future. We build the perception of it.
-      </p>
+        <p style={{
+          fontFamily: MONO,
+          fontSize: 'clamp(10px, 1.5vw, 13px)',
+          letterSpacing: '0.15em',
+          color: 'rgba(245,158,11,0.5)',
+          fontStyle: 'italic',
+          marginTop: 10,
+          marginBottom: 0,
+        }}>
+          We don't predict the future. We build the perception of it.
+        </p>
 
-      <div className="hub-cards" style={{
-        display: 'flex',
-        gap: 24,
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        marginTop: 50,
-        marginBottom: 56,
-        width: '100%',
-        maxWidth: 1000,
-      }}>
-        {/* ── BITCOIN — active ── */}
-        <div style={activeCard}>
-          <Symbol char="₿" />
-          <h2 style={assetName}>Bitcoin</h2>
-          <div style={tagline}>{TAGLINE}</div>
-          <div style={{ fontFamily: MONO, fontSize: 26, color: G.gold, textShadow: `0 0 10px ${G.goldGlow}` }}>{fmtUsd(prices.btc)}</div>
-          <span style={liveBadge}>
-            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
-            Live
-          </span>
-          <Link to="/btc" style={enterBtn}>Enter →</Link>
+        <div className="hub-cards" style={{
+          display: 'flex',
+          gap: 24,
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          marginTop: 50,
+          marginBottom: 40,
+          width: '100%',
+          maxWidth: 1000,
+        }}>
+          {/* ── BITCOIN — active ── */}
+          <div className="hub-card-active" style={activeCard}>
+            <Symbol char="₿" />
+            <h2 style={assetName}>Bitcoin</h2>
+            <div style={tagline}>{TAGLINE}</div>
+            <div style={{ fontFamily: MONO, fontSize: 26, color: G.gold, textShadow: `0 0 10px ${G.goldGlow}` }}>{fmtUsd(prices.btc)}</div>
+            <span style={liveBadge}>
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
+              Live
+            </span>
+            <Link to="/btc" style={enterBtn}>Enter →</Link>
+          </div>
+
+          {/* ── GOLD — coming soon ── */}
+          <div className="hub-card-locked" style={lockedCard}>
+            <GoldBar />
+            <h2 style={assetName}>Gold</h2>
+            <div style={tagline}>{TAGLINE}</div>
+            <div style={priceText}>{fmtUsd(prices.gold)}</div>
+            <span style={comingBadge}>Coming Soon</span>
+            <span style={lockedBtn}><Lock size={13} /> Locked</span>
+          </div>
+
+          {/* ── ETHEREUM — coming soon ── */}
+          <div className="hub-card-locked" style={lockedCard}>
+            <EthDiamond />
+            <h2 style={assetName}>Ethereum</h2>
+            <div style={tagline}>{TAGLINE}</div>
+            <div style={priceText}>{fmtUsd(prices.eth)}</div>
+            <span style={comingBadge}>Coming Soon</span>
+            <span style={lockedBtn}><Lock size={13} /> Locked</span>
+          </div>
         </div>
 
-        {/* ── GOLD — coming soon ── */}
-        <div style={lockedCard}>
-          <GoldBar />
-          <h2 style={assetName}>Gold</h2>
-          <div style={tagline}>{TAGLINE}</div>
-          <div style={priceText}>{fmtUsd(prices.gold)}</div>
-          <span style={comingBadge}>Coming Soon</span>
-          <span style={lockedBtn}><Lock size={13} /> Locked</span>
-        </div>
-
-        {/* ── ETHEREUM — coming soon ── */}
-        <div style={lockedCard}>
-          <EthDiamond />
-          <h2 style={assetName}>Ethereum</h2>
-          <div style={tagline}>{TAGLINE}</div>
-          <div style={priceText}>{fmtUsd(prices.eth)}</div>
-          <span style={comingBadge}>Coming Soon</span>
-          <span style={lockedBtn}><Lock size={13} /> Locked</span>
-        </div>
-      </div>
+        {/* ── SEO paragraph ── */}
+        <p style={{
+          fontFamily: MONO,
+          fontSize: 'clamp(11px, 1.6vw, 13px)',
+          color: 'rgba(168,162,158,0.6)',
+          letterSpacing: '0.06em',
+          lineHeight: 1.7,
+          maxWidth: '90vw',
+          width: 680,
+          margin: '0 auto 8px',
+          textAlign: 'center',
+        }}>
+          PredictAlpha uses machine learning to forecast BTC, ETH and Gold price movements across 6 timeframes — 1H, 4H, 1D, 3D, 1W, 1M.
+        </p>
 
       </div>{/* end main content */}
 
@@ -366,12 +385,30 @@ export default function Hub() {
         /* desktop: hamburger hidden */
         .show-mobile { display: none; }
 
+        /* hover effects — only on true pointer devices (not sticky on touch) */
+        @media (hover: hover) {
+          .hub-card-active:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 1px rgba(245,158,11,0.6), 0 0 28px rgba(245,158,11,0.45), 0 4px 32px rgba(0,0,0,0.6);
+            animation: none;
+          }
+          .hub-card-locked:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(245,158,11,0.25), 0 4px 32px rgba(0,0,0,0.6);
+          }
+        }
+
         @media (max-width: 768px) {
           .header-inner { padding: 0 12px !important; }
           .navbar-brand  { font-size: 14px !important; white-space: nowrap !important; }
           .hide-mobile   { display: none !important; }
           .show-mobile   { display: flex !important; align-items: center !important; }
-          .hub-cards     { flex-direction: column !important; align-items: center !important; }
+          .hub-cards     { flex-direction: column !important; align-items: center !important; gap: 16px !important; }
+          .hub-h1        { letter-spacing: 0.08em !important; }
+        }
+
+        @media (max-width: 414px) {
+          .hub-cards { gap: 14px !important; }
         }
       `}</style>
     </div>
