@@ -161,7 +161,7 @@ export default function Hub() {
   }, [])
 
   return (
-    <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
       <Helmet>
         <title>PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions</title>
         <meta name="description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models. Real-time signals, deep analysis, and market intelligence." />
