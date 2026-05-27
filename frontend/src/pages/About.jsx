@@ -81,16 +81,16 @@ export default function About() {
   return (
     <div style={{ background: G.bg, minHeight: '100vh', color: G.bright, fontFamily: mono, position: 'relative', zIndex: 1 }}>
       <Helmet>
-        <title>How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Prediction Engine</title>
+        <title>How PredictAlpha Works — AI Crypto Prediction Engine</title>
         <meta name="description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
-        <meta property="og:title" content="How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Prediction Engine" />
+        <meta property="og:title" content="How PredictAlpha Works — AI Crypto Prediction Engine" />
         <meta property="og:description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
         <meta property="og:url" content="https://predictalpha.app/about" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
         <link rel="canonical" href="https://predictalpha.app/about" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Prediction Engine" />
+        <meta name="twitter:title" content="How PredictAlpha Works — AI Crypto Prediction Engine" />
         <meta name="twitter:description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
         <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
         <script type="application/ld+json">{JSON.stringify({

@@ -77,17 +77,17 @@ const hasData     = data && data.total_predictions > 0
   return (
     <div style={{ minHeight: '100vh', background: G.bg, paddingBottom: 80 }}>
       <Helmet>
-        <title>Proof of Work — PredictAlpha</title>
-        <meta name="description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, LSTM XGBoost Prophet model performance — every prediction logged and verified on PredictAlpha." />
-        <meta property="og:title" content="Proof of Work — PredictAlpha" />
-        <meta property="og:description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, LSTM XGBoost Prophet model performance — every prediction logged and verified on PredictAlpha." />
+        <title>PredictAlpha Proof of Work — AI Prediction Track Record</title>
+        <meta name="description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, ML model performance — every prediction logged and verified on PredictAlpha." />
+        <meta property="og:title" content="PredictAlpha Proof of Work — AI Prediction Track Record" />
+        <meta property="og:description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, ML model performance — every prediction logged and verified on PredictAlpha." />
         <meta property="og:url" content="https://predictalpha.app/proof" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
         <link rel="canonical" href="https://predictalpha.app/proof" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Proof of Work — PredictAlpha" />
-        <meta name="twitter:description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, LSTM XGBoost Prophet model performance — every prediction logged and verified on PredictAlpha." />
+        <meta name="twitter:title" content="PredictAlpha Proof of Work — AI Prediction Track Record" />
+        <meta name="twitter:description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, ML model performance — every prediction logged and verified on PredictAlpha." />
         <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",

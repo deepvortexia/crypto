@@ -324,7 +324,7 @@ export default function Hub() {
         {/* ── BITCOIN — active ── */}
         <div style={activeCard}>
           <Symbol char="₿" />
-          <div style={assetName}>Bitcoin</div>
+          <h2 style={assetName}>Bitcoin</h2>
           <div style={tagline}>{TAGLINE}</div>
           <div style={{ fontFamily: MONO, fontSize: 26, color: G.gold, textShadow: `0 0 10px ${G.goldGlow}` }}>{fmtUsd(prices.btc)}</div>
           <span style={liveBadge}>
@@ -337,7 +337,7 @@ export default function Hub() {
         {/* ── GOLD — coming soon ── */}
         <div style={lockedCard}>
           <GoldBar />
-          <div style={assetName}>Gold</div>
+          <h2 style={assetName}>Gold</h2>
           <div style={tagline}>{TAGLINE}</div>
           <div style={priceText}>{fmtUsd(prices.gold)}</div>
           <span style={comingBadge}>Coming Soon</span>
@@ -347,7 +347,7 @@ export default function Hub() {
         {/* ── ETHEREUM — coming soon ── */}
         <div style={lockedCard}>
           <EthDiamond />
-          <div style={assetName}>Ethereum</div>
+          <h2 style={assetName}>Ethereum</h2>
           <div style={tagline}>{TAGLINE}</div>
           <div style={priceText}>{fmtUsd(prices.eth)}</div>
           <span style={comingBadge}>Coming Soon</span>
