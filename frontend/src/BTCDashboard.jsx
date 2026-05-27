@@ -575,6 +575,53 @@ function Skel({ h = 80 }) {
   return <div style={{ height: h, borderRadius: 10, background: 'linear-gradient(90deg, #111 25%, #1a1a1a 50%, #111 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
 }
 
+const GoldXIntro = () => {
+  const [visible, setVisible] = React.useState(true)
+  React.useEffect(() => {
+    const t = setTimeout(() => setVisible(false), 1200)
+    return () => clearTimeout(t)
+  }, [])
+  if (!visible) return null
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none', overflow: 'hidden' }}>
+      <style>{`
+        @keyframes line1-sweep {
+          0%   { transform: translate(-100%, -100%) rotate(45deg) scaleX(0); opacity: 0; }
+          20%  { opacity: 1; }
+          60%  { transform: translate(0%, 0%) rotate(45deg) scaleX(1); opacity: 1; }
+          100% { transform: translate(100%, 100%) rotate(45deg) scaleX(1); opacity: 0; }
+        }
+        @keyframes line2-sweep {
+          0%   { transform: translate(100%, -100%) rotate(-45deg) scaleX(0); opacity: 0; }
+          20%  { opacity: 1; }
+          60%  { transform: translate(0%, 0%) rotate(-45deg) scaleX(1); opacity: 1; }
+          100% { transform: translate(-100%, 100%) rotate(-45deg) scaleX(1); opacity: 0; }
+        }
+        .gold-line-1 {
+          position: absolute;
+          top: 50%; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(245,166,35,0.9), rgba(255,200,50,1), rgba(245,166,35,0.9), transparent);
+          box-shadow: 0 0 8px rgba(245,166,35,0.8), 0 0 20px rgba(245,166,35,0.4);
+          transform-origin: center center;
+          animation: line1-sweep 1.0s cubic-bezier(0.4,0,0.2,1) forwards;
+        }
+        .gold-line-2 {
+          position: absolute;
+          top: 50%; left: 0; right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(245,166,35,0.9), rgba(255,200,50,1), rgba(245,166,35,0.9), transparent);
+          box-shadow: 0 0 8px rgba(245,166,35,0.8), 0 0 20px rgba(245,166,35,0.4);
+          transform-origin: center center;
+          animation: line2-sweep 1.0s cubic-bezier(0.4,0,0.2,1) forwards;
+        }
+      `}</style>
+      <div className="gold-line-1" />
+      <div className="gold-line-2" />
+    </div>
+  )
+}
+
 export default function BTCDashboard({ user, setUser, authLoading, freshLoginRef }) {
   const [price,       setPrice]       = useState(null)
   const [sentiment,   setSentiment]   = useState(null)
@@ -1194,6 +1241,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0a', paddingBottom: 64 }}>
+      <GoldXIntro />
 
       <div style={{position:'fixed',top:0,left:'-2px',width:'2px',height:'100vh',zIndex:999,pointerEvents:'none',background:`linear-gradient(180deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScan 1.2s linear 1 forwards'}} />
       <div style={{position:'fixed',top:'-2px',left:0,width:'100vw',height:'2px',zIndex:999,pointerEvents:'none',background:`linear-gradient(90deg,transparent,#f59e0b,transparent)`,boxShadow:'0 0 8px #f59e0b',animation:'introScanH 1.2s linear 1 forwards',animationDelay:'0.3s'}} />
