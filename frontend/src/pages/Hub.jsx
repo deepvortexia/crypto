@@ -403,7 +403,27 @@ export default function Hub() {
         @media (max-width: 414px) {
           .hub-cards { gap: 14px !important; }
         }
+
+        @media (max-width: 768px) {
+          .hub-site-footer  { padding-bottom: 20px !important; gap: 12px !important; }
+          .hub-footer-row   { flex-direction: column !important; align-items: center !important; gap: 12px !important; width: 100% !important; }
+          .hub-footer-row span, .hub-footer-row a { width: 100% !important; text-align: center !important; font-size: 10px !important; }
+        }
       `}</style>
+
+      {/* ── FOOTER ── */}
+      <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: 'rgba(168,162,158,0.4)', textAlign: 'center', maxWidth: 800, margin: '0 auto', padding: '24px 16px 0' }}>
+        PredictAlpha is an AI-powered price prediction platform for Bitcoin, Ethereum, and Gold. Real-time forecasts across 6 time horizons powered by a stacked ensemble of LSTM, XGBoost, and Prophet models. Currently covering BTC. ETH and Gold coming soon.
+      </div>
+      <div className="hub-site-footer" style={{ borderTop: `1px solid ${G.border}`, paddingTop: 28, paddingBottom: 20, marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
+        <div className="hub-footer-row" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          <span style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 13, letterSpacing: '0.12em', color: G.gold }}>PREDICT ALPHA</span>
+          <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: '#f59e0bcc', letterSpacing: '0.2em' }}>NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY</span>
+          <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '5px 12px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT US</a>
+        </div>
+        <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: '#f59e0bcc', letterSpacing: '0.2em' }}>POWERED BY PREDICT ALPHA</div>
+        <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: '#f59e0bcc', letterSpacing: '0.2em', maxWidth: '90vw' }}>AI predictions may be inaccurate · Past signals do not guarantee future results · Trade responsibly</div>
+      </div>
     </div>
   )
 }
