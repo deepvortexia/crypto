@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Lock } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 
-// ── tokens (identical values to BTCDashboard.jsx) ─────────────────────────────
+// ── tokens ────────────────────────────────────────────────────────────────────
 const G = {
   bg:       '#0a0a0a',
   card:     '#1a1500',
@@ -27,17 +26,14 @@ const fmtUsd = n =>
 
 const TAGLINE = 'AI · 6 TIMEFRAMES · LIVE DATA'
 
+// ── icons ─────────────────────────────────────────────────────────────────────
 function EthDiamond() {
   return (
     <svg width="60" height="80" viewBox="0 0 60 80" fill="none"
       style={{ filter: `drop-shadow(0 0 16px ${G.goldGlow})` }}>
-      {/* upper-left facet */}
       <polygon points="30,2 4,38 30,50" fill={G.gold} />
-      {/* upper-right facet (darker) */}
       <polygon points="30,2 56,38 30,50" fill={G.gold} opacity="0.6" />
-      {/* lower-left facet (darker) */}
       <polygon points="4,38 30,50 30,78" fill={G.gold} opacity="0.6" />
-      {/* lower-right facet */}
       <polygon points="56,38 30,50 30,78" fill={G.gold} />
     </svg>
   )
@@ -45,7 +41,8 @@ function EthDiamond() {
 
 function GoldBar() {
   return (
-    <img src="/goldbar.webp" alt="Gold bar" style={{ width: 90, height: 65, objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(245,158,11,0.6))' }} />
+    <img src="/goldbar.webp" alt="Gold bar"
+      style={{ width: 90, height: 65, objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(245,158,11,0.6))' }} />
   )
 }
 
@@ -57,34 +54,26 @@ function Symbol({ char }) {
   )
 }
 
-const cardBase = {
+// ── shared card style (all 3 equally premium) ─────────────────────────────────
+const premiumCard = {
   background: G.card,
   borderRadius: 12,
   padding: '34px 26px',
   width: 'min(280px, 90vw)',
   minWidth: 0,
+  position: 'relative',
+  overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   gap: 14,
   textAlign: 'center',
-  transition: 'all 0.25s ease',
+  border: '1px solid rgba(245,166,35,0.5)',
+  boxShadow: 'inset 0 0 20px rgba(245,166,35,0.07), 0 4px 32px rgba(0,0,0,0.6)',
+  transition: 'all 0.3s ease',
 }
 
-const activeCard = {
-  ...cardBase,
-  border: '1px solid rgba(245,158,11,0.6)',
-  boxShadow: '0 0 0 1px rgba(245,158,11,0.15), 0 4px 32px rgba(0,0,0,0.6)',
-  animation: 'card-gold-pulse 2.5s ease-in-out infinite',
-}
-
-const lockedCard = {
-  ...cardBase,
-  border: `1px solid ${G.border}`,
-  boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
-  opacity: 0.55,
-}
-
+// ── text / badge styles ───────────────────────────────────────────────────────
 const assetName = {
   fontFamily: DISPLAY,
   fontSize: 20,
@@ -94,7 +83,7 @@ const assetName = {
   textTransform: 'uppercase',
 }
 
-const tagline = {
+const taglineStyle = {
   fontFamily: MONO,
   fontSize: 9,
   letterSpacing: '0.18em',
@@ -118,23 +107,6 @@ const enterBtn = {
   marginTop: 4,
 }
 
-const lockedBtn = {
-  fontFamily: MONO,
-  fontSize: 11,
-  letterSpacing: '0.14em',
-  color: G.gold,
-  background: 'none',
-  border: `1px solid ${G.gold}44`,
-  borderRadius: 6,
-  padding: '11px 22px',
-  textTransform: 'uppercase',
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 7,
-  cursor: 'not-allowed',
-  marginTop: 4,
-}
-
 const liveBadge = {
   fontFamily: MONO,
   fontSize: 9,
@@ -150,15 +122,19 @@ const liveBadge = {
   textTransform: 'uppercase',
 }
 
-const comingBadge = {
+const comingSoonTag = {
   fontFamily: MONO,
-  fontSize: 9,
-  letterSpacing: '0.25em',
-  color: G.text,
-  border: `1px solid ${G.border}`,
-  borderRadius: 4,
-  padding: '3px 9px',
+  fontSize: 10,
+  letterSpacing: '0.22em',
+  color: G.gold,
+  background: 'rgba(245,158,11,0.1)',
+  border: '1px solid rgba(245,158,11,0.35)',
+  borderRadius: 20,
+  padding: '6px 16px',
   textTransform: 'uppercase',
+  textShadow: '0 0 10px rgba(245,158,11,0.6)',
+  boxShadow: '0 0 12px rgba(245,158,11,0.1)',
+  marginTop: 4,
 }
 
 const priceText = {
@@ -168,10 +144,10 @@ const priceText = {
   textShadow: `0 0 10px ${G.goldGlow}`,
 }
 
+// ── component ─────────────────────────────────────────────────────────────────
 export default function Hub() {
-  const [prices, setPrices] = useState({ btc: null, eth: null, gold: null })
+  const [prices, setPrices]   = useState({ btc: null, eth: null, gold: null })
   const [menuOpen, setMenuOpen] = useState(false)
-
 
   useEffect(() => {
     let active = true
@@ -213,7 +189,7 @@ export default function Hub() {
         })}</script>
       </Helmet>
 
-      {/* ── HEADER — identical structure to BTCDashboard ── */}
+      {/* ── HEADER ── */}
       <header className="header-inner" style={{
         position: 'sticky', top: 0, zIndex: 50,
         background: 'rgba(10,10,10,0.85)',
@@ -223,12 +199,13 @@ export default function Hub() {
         height: 68,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        {/* logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="40" height="40" style={{ height: 40, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
+          <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="40" height="40"
+            style={{ height: 40, width: 'auto', objectFit: 'contain', flexShrink: 0 }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <span className="navbar-brand" style={{ fontFamily: '"Orbitron",sans-serif', letterSpacing: '0.05em', opacity: 0.9, whiteSpace: 'nowrap' }}>
-              <span style={{ color: '#f59e0b', fontWeight: 400 }}>PREDICT</span>{' '}<span style={{ color: '#f59e0b', fontWeight: 700, textShadow: '0 0 8px rgba(245,158,11,0.4)' }}>ALPHA</span>
+              <span style={{ color: '#f59e0b', fontWeight: 400 }}>PREDICT</span>{' '}
+              <span style={{ color: '#f59e0b', fontWeight: 700, textShadow: '0 0 8px rgba(245,158,11,0.4)' }}>ALPHA</span>
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
@@ -237,25 +214,24 @@ export default function Hub() {
           </div>
         </div>
 
-        {/* nav — desktop only */}
         <nav className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
           <Link to="/about" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>LEARN</Link>
           <Link to="/proof" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.25em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase', opacity: 0.8 }}>PROOF</Link>
           <a href="mailto:admin@predictalpha.app" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: G.gold, background: G.goldDim, border: `1px solid ${G.gold}44`, borderRadius: 4, padding: '6px 14px', textTransform: 'uppercase', textDecoration: 'none' }}>CONTACT</a>
         </nav>
 
-        {/* hamburger — mobile only */}
-        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', fontSize: 34, lineHeight: 1, padding: '10px', minWidth: 48, minHeight: 48 }}>☰</button>
+        <button className="show-mobile" onClick={() => setMenuOpen(o => !o)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f59e0b', fontSize: 34, lineHeight: 1, padding: '10px', minWidth: 48, minHeight: 48 }}>☰</button>
 
-        {/* mobile backdrop */}
         {menuOpen && (
-          <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 998 }} />
+          <div onClick={() => setMenuOpen(false)}
+            style={{ position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 998 }} />
         )}
-        {/* mobile dropdown */}
         {menuOpen && (
           <div style={{ position: 'absolute', top: 68, left: 0, right: 0, background: 'rgba(10,10,10,0.97)', borderBottom: '1px solid #2a1f00', zIndex: 999 }}>
             <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '6px 8px 0' }}>
-              <button onClick={() => setMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#f59e0b', fontSize: 28, cursor: 'pointer', padding: 8, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+              <button onClick={() => setMenuOpen(false)}
+                style={{ background: 'none', border: 'none', color: '#f59e0b', fontSize: 28, cursor: 'pointer', padding: 8, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', padding: '8px 0 20px' }}>
               <Link to="/about" onClick={() => setMenuOpen(false)} style={{ padding: '14px 24px', fontFamily: '"Share Tech Mono",monospace', fontSize: 13, letterSpacing: '0.2em', color: G.gold, textDecoration: 'none', textTransform: 'uppercase' }}>LEARN</Link>
@@ -267,14 +243,15 @@ export default function Hub() {
       </header>
 
       {/* ── AI BANNER ── */}
-      <div style={{padding:'10px 16px', borderBottom:'1px solid #1a1a1a', textAlign:'center', background:'#0a0a0a'}}>
-        <span style={{fontFamily:'"Share Tech Mono",monospace', fontSize:16, letterSpacing:'0.3em', color:'#f59e0b', opacity:0.8, animation:'textPulse 2.5s ease-in-out infinite'}}>AI PREDICTING FUTURE</span>
-        <div style={{fontFamily:'"Share Tech Mono",monospace', fontSize:9, color:'#6b7280', letterSpacing:'0.15em', opacity:0.6, marginTop:3}}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
+      <div style={{ padding: '10px 16px', borderBottom: '1px solid #1a1a1a', textAlign: 'center', background: '#0a0a0a' }}>
+        <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 16, letterSpacing: '0.3em', color: '#f59e0b', opacity: 0.8, animation: 'textPulse 2.5s ease-in-out infinite' }}>AI PREDICTING FUTURE</span>
+        <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, color: '#6b7280', letterSpacing: '0.15em', opacity: 0.6, marginTop: 3 }}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
       </div>
 
       {/* ── MAIN CONTENT ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px 64px', textAlign: 'center' }}>
-        <img src="/logoegyptfinal.webp" alt="PredictAlpha" fetchpriority="high" decoding="async" style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 22 }} />
+        <img src="/logoegyptfinal.webp" alt="PredictAlpha" fetchpriority="high" decoding="async"
+          style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 22 }} />
 
         <h1 className="hub-h1" style={{
           fontFamily: DISPLAY,
@@ -315,6 +292,7 @@ export default function Hub() {
           We don't predict the future. We build the perception of it.
         </p>
 
+        {/* ── CARDS ── */}
         <div className="hub-cards" style={{
           display: 'flex',
           gap: 24,
@@ -325,11 +303,12 @@ export default function Hub() {
           width: '100%',
           maxWidth: 1000,
         }}>
-          {/* ── BITCOIN — active ── */}
-          <div className="hub-card-active" style={activeCard}>
+
+          {/* BITCOIN — live */}
+          <div className="hub-card" style={premiumCard}>
             <Symbol char="₿" />
             <h2 style={assetName}>Bitcoin</h2>
-            <div style={tagline}>{TAGLINE}</div>
+            <div style={taglineStyle}>{TAGLINE}</div>
             <div style={{ fontFamily: MONO, fontSize: 26, color: G.gold, textShadow: `0 0 10px ${G.goldGlow}` }}>{fmtUsd(prices.btc)}</div>
             <span style={liveBadge}>
               <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
@@ -338,25 +317,24 @@ export default function Hub() {
             <Link to="/btc" style={enterBtn}>Enter →</Link>
           </div>
 
-          {/* ── GOLD — coming soon ── */}
-          <div className="hub-card-locked" style={lockedCard}>
+          {/* GOLD — coming soon */}
+          <div className="hub-card" style={premiumCard}>
             <GoldBar />
             <h2 style={assetName}>Gold</h2>
-            <div style={tagline}>{TAGLINE}</div>
+            <div style={taglineStyle}>{TAGLINE}</div>
             <div style={priceText}>{fmtUsd(prices.gold)}</div>
-            <span style={comingBadge}>Coming Soon</span>
-            <span style={lockedBtn}><Lock size={13} /> Locked</span>
+            <span style={comingSoonTag}>✦ Coming Soon</span>
           </div>
 
-          {/* ── ETHEREUM — coming soon ── */}
-          <div className="hub-card-locked" style={lockedCard}>
+          {/* ETHEREUM — coming soon */}
+          <div className="hub-card" style={premiumCard}>
             <EthDiamond />
             <h2 style={assetName}>Ethereum</h2>
-            <div style={tagline}>{TAGLINE}</div>
+            <div style={taglineStyle}>{TAGLINE}</div>
             <div style={priceText}>{fmtUsd(prices.eth)}</div>
-            <span style={comingBadge}>Coming Soon</span>
-            <span style={lockedBtn}><Lock size={13} /> Locked</span>
+            <span style={comingSoonTag}>✦ Coming Soon</span>
           </div>
+
         </div>
 
         {/* ── SEO paragraph ── */}
@@ -374,27 +352,42 @@ export default function Hub() {
           PredictAlpha uses machine learning to forecast BTC, ETH and Gold price movements across 6 timeframes — 1H, 4H, 1D, 3D, 1W, 1M.
         </p>
 
-      </div>{/* end main content */}
-
+      </div>
 
       <style>{`
-        @keyframes hub-blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @keyframes hub-blink    { 0%,100%{opacity:1}  50%{opacity:0.4} }
         @keyframes tagline-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-        @keyframes textPulse { 0%,100%{opacity:0.8} 50%{opacity:1} }
+        @keyframes textPulse    { 0%,100%{opacity:0.8} 50%{opacity:1}  }
 
-        /* desktop: hamburger hidden */
+        /* hamburger hidden on desktop */
         .show-mobile { display: none; }
 
-        /* hover effects — only on true pointer devices (not sticky on touch) */
+        /* shimmer sweep placeholder — activates on hover below */
+        .hub-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 60%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        /* hover: pointer devices only — no sticky touch */
         @media (hover: hover) {
-          .hub-card-active:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 0 1px rgba(245,158,11,0.6), 0 0 28px rgba(245,158,11,0.45), 0 4px 32px rgba(0,0,0,0.6);
-            animation: none;
+          .hub-card:hover {
+            transform: scale(1.03);
+            border-color: rgba(245,166,35,0.8) !important;
+            box-shadow:
+              0 0 30px rgba(245,166,35,0.4),
+              0 0 60px rgba(245,166,35,0.15),
+              inset 0 0 40px rgba(245,166,35,0.08) !important;
           }
-          .hub-card-locked:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(245,158,11,0.25), 0 4px 32px rgba(0,0,0,0.6);
+          .hub-card:hover::before {
+            left: 150%;
+            transition: left 0.6s ease;
           }
         }
 
