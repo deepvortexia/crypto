@@ -81,16 +81,16 @@ export default function About() {
   return (
     <div style={{ background: G.bg, minHeight: '100vh', color: G.bright, fontFamily: mono, position: 'relative', zIndex: 1 }}>
       <Helmet>
-        <title>How PredictAlpha Works — AI Crypto Prediction Engine</title>
+        <title>How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Prediction Engine</title>
         <meta name="description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
-        <meta property="og:title" content="How PredictAlpha Works — AI Crypto Prediction Engine" />
+        <meta property="og:title" content="How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Prediction Engine" />
         <meta property="og:description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
         <meta property="og:url" content="https://predictalpha.app/about" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
         <link rel="canonical" href="https://predictalpha.app/about" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="How PredictAlpha Works — AI Crypto Prediction Engine" />
+        <meta name="twitter:title" content="How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Prediction Engine" />
         <meta name="twitter:description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
         <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
         <script type="application/ld+json">{JSON.stringify({
@@ -185,7 +185,7 @@ export default function About() {
 
         {/* ── SEO meta hint (visible heading for crawlers) ── */}
         <h1 style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}>
-          PREDICT ALPHA — How It Works — AI Bitcoin Price Prediction Engine
+          How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Price Prediction Engine
         </h1>
 
         {/* ══════════════════════════════════════════════════════════════════ */}
@@ -196,7 +196,7 @@ export default function About() {
             <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="120" height="120" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} />
           </div>
           <h2 className="about-hero-title" style={{ fontFamily: orb, fontSize: 'clamp(20px,5vw,42px)', letterSpacing: '0.18em', ...goldText, marginBottom: 18, lineHeight: 1.2 }}>
-            PREDICT ALPHA — HOW IT WORKS
+            How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Price Prediction Engine
           </h2>
           <p className="about-body" style={{ fontFamily: mono, fontSize: 14, color: G.text, maxWidth: 660, margin: '0 auto 28px', lineHeight: 1.9, letterSpacing: '0.05em' }}>
             We don't predict the future. We build the perception of it. PredictAlpha is a real-time market intelligence platform built for traders who need more than a price chart. Every prediction, every signal, every metric reflects the current state of the market — updated continuously, never cached beyond 5 minutes. Currently covering Bitcoin. Ethereum and Gold coming soon.

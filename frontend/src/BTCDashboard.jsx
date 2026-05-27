@@ -102,9 +102,10 @@ const sectionLabel = {
   letterSpacing: '0.2em',
   color: '#f59e0bcc',
   textTransform: 'uppercase',
-  marginBottom: 14,
+  margin: '0 0 14px',
   borderLeft: '3px solid #f59e0b',
   paddingLeft: 10,
+  fontWeight: 'normal',
 }
 
 // ── sub-components ────────────────────────────────────────────────────────────
@@ -800,7 +801,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       setIsPro(false)
       setCreditInfo({ daily_remaining: 0, bonus_remaining: 0, total_remaining: 0, is_pro: false, daily_limit: 2 })
     }
-    if (!prevUserRef.current) {
+    if (!prevUserRef.current || (!prevUserRef.current && user)) {
       (async () => {
         try { await loadAll() } catch (e) { console.error(e) } finally { setLoading(false) }
       })()
@@ -1443,11 +1444,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
       {/* ── BODY ── */}
       <main className="main-pad" style={{ maxWidth: 1400, margin: '0 auto', padding: '32px 32px' }}>
-        <h1 style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, overflow: 'hidden' }}>Bitcoin AI Price Predictions — PredictAlpha</h1>
+        <h1 className="sr-only">Bitcoin AI Price Predictions — PredictAlpha</h1>
 
         {/* row 1 — market overview */}
         <div style={{ marginBottom: 40 }}>
-          <div style={sectionLabel}>Market Overview</div>
+          <h2 style={sectionLabel}>Market Overview</h2>
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
             {!priceLoaded ? (
               [0,1,2,3].map(i => <Skel key={i} h={80} />)
@@ -1464,7 +1465,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* row 2 — AI predictions */}
         <div style={{ marginBottom: 40 }}>
-          <div style={sectionLabel}>AI Price Predictions</div>
+          <h2 style={sectionLabel}>AI Price Predictions</h2>
           <div className="grid-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
 
             {/* 1H — always free */}
@@ -1517,7 +1518,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* row 3 — sentiment (full-width) + indicators */}
         <div style={{ marginBottom: 40 }}>
-          <div style={sectionLabel}>Market Sentiment & Technical Indicators</div>
+          <h2 style={sectionLabel}>Market Sentiment & Technical Indicators</h2>
           {!slowLoaded ? <Skel h={220} /> : <>
           {/* Fear & Greed: non-logged-in sees today only, logged-in sees history */}
           <SentimentMeter value={sentiment?.value} label={sentiment?.classification} history={user ? sentiment?.history : []} />
@@ -1655,10 +1656,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         </div>
 
         {/* row 4 — onchain (Pro only) */}
-        {!slowLoaded && <div style={{ marginBottom: 40 }}><div style={sectionLabel}>On-Chain Data</div><Skel h={100} /></div>}
+        {!slowLoaded && <div style={{ marginBottom: 40 }}><h2 style={sectionLabel}>On-Chain Data</h2><Skel h={100} /></div>}
         {onchain && (
           <div style={{ marginBottom: 40, position: 'relative' }}>
-            <div style={sectionLabel}>On-Chain Data {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+            <h2 style={sectionLabel}>On-Chain Data {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</h2>
             <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
               <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
                 {onchain.n_tx       != null && <IndCard label="Transactions"    value={Number(onchain.n_tx).toLocaleString()}       sub="Last 24h" />}
@@ -1678,7 +1679,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* row 5 — futures market (Pro only) */}
         <div style={{ marginBottom: 40, position: 'relative' }}>
-          <div style={sectionLabel}>Futures Market {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+          <h2 style={sectionLabel}>Futures Market {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</h2>
           <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
             <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
               <IndCard
@@ -1724,7 +1725,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* row 6 — order book (Pro only) */}
         <div style={{ marginBottom: 40, position: 'relative' }}>
-          <div style={sectionLabel}>Order Book {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+          <h2 style={sectionLabel}>Order Book {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</h2>
           <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
             <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               <IndCard
@@ -1762,7 +1763,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 7 — key levels (Pro only) */}
         {keyLevels && (
           <div style={{ marginBottom: 40, position: 'relative' }}>
-            <div style={sectionLabel}>Key Levels {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+            <h2 style={sectionLabel}>Key Levels {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</h2>
             <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
             <div style={{ ...cardStyle, padding: '20px 24px' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
 
@@ -1826,7 +1827,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* row 8 — mempool (Pro only) */}
         <div style={{ marginBottom: 40, position: 'relative' }}>
-          <div style={sectionLabel}>Mempool {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</div>
+          <h2 style={sectionLabel}>Mempool {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</h2>
           <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
             <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
               <IndCard
@@ -1856,11 +1857,11 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
         {/* row 9 — market tensions */}
         <div style={{ marginBottom: 40, position: 'relative' }}>
-          <div style={{ ...sectionLabel, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h2 style={{ ...sectionLabel, display: 'flex', alignItems: 'center', gap: 8 }}>
             <span>Market Tensions &amp; Divergences</span>
             <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 8, letterSpacing: '0.12em', color: '#fff', background: '#a855f7', borderRadius: 3, padding: '2px 7px', fontWeight: 700, textTransform: 'uppercase' }}>AI</span>
             {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}
-          </div>
+          </h2>
           {tensionsUpdatedAt && (
             <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, color: '#666', marginBottom: 10 }}>
               Last updated {Math.floor((Date.now() - tensionsUpdatedAt) / 60000) < 1 ? 'just now' : `${Math.floor((Date.now() - tensionsUpdatedAt) / 60000)} min ago`}
@@ -2446,6 +2447,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       <style>{`
         .show-mobile-only { display: none; }
         @media (max-width: 768px) { .show-mobile-only { display: flex !important; align-items: center !important; order: 3 !important; } }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
         :root { --header-h: 68px; }
         @keyframes shimmer          { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
         @keyframes analysisShimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }

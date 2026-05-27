@@ -14,32 +14,62 @@ export default function Pricing() {
     <>
       <Helmet>
         <title>Pricing — PredictAlpha</title>
-        <meta name="description" content="PredictAlpha pricing plans. Free tier with 2 daily predictions, or go PRO at $12.99/month for unlimited timeframes, 20 deep analyses/day, and real-time signals." />
+        <meta name="description" content="PredictAlpha pricing plans. Free tier with 2 daily predictions, or go PRO at $12.99/month for unlimited timeframes, 20 deep AI analyses/day, and real-time signals for Bitcoin, Ethereum and Gold." />
         <meta property="og:title" content="Pricing — PredictAlpha" />
-        <meta property="og:description" content="Free vs PRO. Transparent pricing for AI-powered crypto predictions." />
+        <meta property="og:description" content="PredictAlpha pricing plans — free tier with 2 daily predictions, or go PRO at $12.99/month for unlimited Bitcoin, Ethereum &amp; Gold AI forecasts, all timeframes, and 20 deep analyses per day." />
         <meta property="og:url" content="https://predictalpha.app/pricing" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
         <link rel="canonical" href="https://predictalpha.app/pricing" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Pricing — PredictAlpha" />
+        <meta name="twitter:description" content="PredictAlpha pricing plans — free tier with 2 daily predictions, or go PRO at $12.99/month for unlimited Bitcoin, Ethereum &amp; Gold AI forecasts, all timeframes, and 20 deep analyses per day." />
+        <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "WebPage",
-          "name": "PredictAlpha Pricing",
+          "@type": "Product",
+          "name": "PredictAlpha PRO",
           "url": "https://predictalpha.app/pricing",
-          "description": "Compare Free and PRO plans for PredictAlpha AI crypto prediction platform.",
+          "description": "AI-powered price prediction platform covering Bitcoin, Ethereum, and Gold. LSTM + XGBoost + Prophet ensemble. All timeframes, 20 deep analyses per day.",
           "offers": [
             {
               "@type": "Offer",
-              "name": "Free",
-              "price": "0",
+              "name": "PRO — Bitcoin",
+              "price": "12.99",
               "priceCurrency": "USD",
-              "description": "2 predictions per day, 1H timeframe only"
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "12.99",
+                "priceCurrency": "USD",
+                "billingDuration": "P1M"
+              },
+              "description": "Full BTC dashboard: all timeframes, 20 deep analyses/day, on-chain data, derivatives signals"
             },
             {
               "@type": "Offer",
-              "name": "PRO",
-              "price": "12.99",
+              "name": "PRO — Gold",
+              "price": "7.99",
               "priceCurrency": "USD",
-              "billingIncrement": "P1M",
-              "description": "20 deep analyses per day, all timeframes, priority signals"
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "7.99",
+                "priceCurrency": "USD",
+                "billingDuration": "P1M"
+              },
+              "description": "Full Gold dashboard with AI predictions (coming soon)"
+            },
+            {
+              "@type": "Offer",
+              "name": "PRO — Combo (BTC + ETH + Gold)",
+              "price": "17.99",
+              "priceCurrency": "USD",
+              "priceSpecification": {
+                "@type": "UnitPriceSpecification",
+                "price": "17.99",
+                "priceCurrency": "USD",
+                "billingDuration": "P1M"
+              },
+              "description": "Access to all assets: Bitcoin, Ethereum, and Gold AI predictions"
             }
           ]
         })}</script>

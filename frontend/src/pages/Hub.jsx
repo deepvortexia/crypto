@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Lock } from 'lucide-react'
+import { Helmet } from 'react-helmet-async'
 
 // ── tokens (identical values to BTCDashboard.jsx) ─────────────────────────────
 const G = {
@@ -169,6 +170,7 @@ export default function Hub() {
   const [prices, setPrices] = useState({ btc: null, eth: null, gold: null })
   const [menuOpen, setMenuOpen] = useState(false)
 
+
   useEffect(() => {
     let active = true
     fetch(PRICES_URL)
@@ -182,6 +184,32 @@ export default function Hub() {
 
   return (
     <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: G.bg }}>
+      <Helmet>
+        <title>PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions</title>
+        <meta name="description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models. Real-time signals, deep analysis, and market intelligence." />
+        <meta property="og:title" content="PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions" />
+        <meta property="og:description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models. Real-time signals, deep analysis, and market intelligence." />
+        <meta property="og:url" content="https://predictalpha.app/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
+        <link rel="canonical" href="https://predictalpha.app/" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions" />
+        <meta name="twitter:description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models. Real-time signals, deep analysis, and market intelligence." />
+        <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "PredictAlpha",
+          "url": "https://predictalpha.app",
+          "description": "AI-powered price predictions for Bitcoin, Ethereum, and Gold using LSTM, XGBoost and Prophet ensemble models.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": { "@type": "EntryPoint", "urlTemplate": "https://predictalpha.app/btc" },
+            "query-input": "required name=search_term_string"
+          }
+        })}</script>
+      </Helmet>
 
       {/* ── HEADER — identical structure to BTCDashboard ── */}
       <header className="header-inner" style={{

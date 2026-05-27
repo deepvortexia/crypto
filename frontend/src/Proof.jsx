@@ -45,9 +45,10 @@ const sectionLabel = {
   letterSpacing: '0.2em',
   color: '#f59e0bcc',
   textTransform: 'uppercase',
-  marginBottom: 18,
+  margin: '0 0 18px',
   borderLeft: '3px solid #f59e0b',
   paddingLeft: 10,
+  fontWeight: 'normal',
 }
 
 
@@ -77,17 +78,33 @@ const hasData     = data && data.total_predictions > 0
     <div style={{ minHeight: '100vh', background: G.bg, paddingBottom: 80 }}>
       <Helmet>
         <title>Proof of Work — PredictAlpha</title>
-        <meta name="description" content="PredictAlpha's full prediction track record. Every AI prediction logged, every result verified." />
+        <meta name="description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, LSTM XGBoost Prophet model performance — every prediction logged and verified on PredictAlpha." />
         <meta property="og:title" content="Proof of Work — PredictAlpha" />
-        <meta property="og:description" content="PredictAlpha's full prediction track record. Every AI prediction logged, every result verified." />
+        <meta property="og:description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, LSTM XGBoost Prophet model performance — every prediction logged and verified on PredictAlpha." />
         <meta property="og:url" content="https://predictalpha.app/proof" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
         <link rel="canonical" href="https://predictalpha.app/proof" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Proof of Work — PredictAlpha" />
-        <meta name="twitter:description" content="PredictAlpha's full prediction track record. Every AI prediction logged, every result verified." />
+        <meta name="twitter:description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, LSTM XGBoost Prophet model performance — every prediction logged and verified on PredictAlpha." />
         <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Article",
+          "headline": "PredictAlpha Proof of Work — AI Prediction Track Record",
+          "description": "Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, LSTM XGBoost Prophet model performance — every prediction logged and verified.",
+          "url": "https://predictalpha.app/proof",
+          "image": "https://predictalpha.app/og-image.webp",
+          "author": { "@type": "Organization", "name": "PredictAlpha", "url": "https://predictalpha.app" },
+          "publisher": { "@type": "Organization", "name": "PredictAlpha", "url": "https://predictalpha.app", "logo": { "@type": "ImageObject", "url": "https://predictalpha.app/logoegyptfinal.webp" } },
+          "about": [
+            { "@type": "Thing", "name": "Bitcoin price prediction" },
+            { "@type": "Thing", "name": "Ethereum price prediction" },
+            { "@type": "Thing", "name": "Gold price prediction" },
+            { "@type": "Thing", "name": "Machine learning model accuracy" }
+          ]
+        })}</script>
       </Helmet>
 
       {/* ── HEADER ── */}
@@ -163,7 +180,7 @@ const hasData     = data && data.total_predictions > 0
 
         {/* ── SECTION 2: MODEL ACCURACY ── */}
         <section style={{ marginBottom: 60 }}>
-          <div style={sectionLabel}>Model Accuracy</div>
+          <h2 style={sectionLabel}>Model Accuracy</h2>
 
           {loading && (
             <div style={{ fontFamily: mono, color: G.text, fontSize: 13, opacity: 0.6, paddingLeft: 4 }}>
@@ -221,7 +238,7 @@ const hasData     = data && data.total_predictions > 0
 
         {/* ── SECTION 3: PAST PREDICTIONS TABLE ── */}
         <section style={{ marginBottom: 60 }}>
-          <div style={sectionLabel}>Past Predictions</div>
+          <h2 style={sectionLabel}>Past Predictions</h2>
           <div style={cardStyle}>
             {predictions.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px 0' }}>
@@ -273,7 +290,7 @@ const hasData     = data && data.total_predictions > 0
 
         {/* ── SECTION 5: SYSTEM LOGS ── */}
         <section style={{ marginBottom: 60 }}>
-          <div style={sectionLabel}>Live System Logs</div>
+          <h2 style={sectionLabel}>Live System Logs</h2>
           <div style={{background:'#141414', border:'1px solid #2a1f00', borderRadius:8, padding:'16px 20px', fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:'rgba(245,158,11,0.5)'}}>
             System logs are private. Operational status visible on Railway dashboard.
           </div>
