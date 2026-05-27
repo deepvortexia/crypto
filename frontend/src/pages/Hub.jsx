@@ -164,29 +164,16 @@ export default function Hub() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
       <Helmet>
         <title>PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions</title>
-        <meta name="description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models. Real-time signals, deep analysis, and market intelligence." />
+        <meta name="description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models across 6 timeframes: 1H, 4H, 1D, 3D, 1W, 1M. Real-time on-chain signals and deep market analysis." />
+        <meta name="keywords" content="bitcoin price prediction, ethereum price prediction, gold price prediction, AI crypto prediction, BTC forecast, ETH forecast, gold forecast, machine learning trading, crypto AI, LSTM bitcoin" />
+        <link rel="canonical" href="https://predictalpha.app/" />
         <meta property="og:title" content="PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions" />
-        <meta property="og:description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models. Real-time signals, deep analysis, and market intelligence." />
+        <meta property="og:description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. Real-time forecasts across 6 timeframes powered by LSTM, XGBoost and Prophet." />
         <meta property="og:url" content="https://predictalpha.app/" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
-        <link rel="canonical" href="https://predictalpha.app/" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions" />
-        <meta name="twitter:description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models. Real-time signals, deep analysis, and market intelligence." />
-        <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
-        <script type="application/ld+json">{JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "WebSite",
-          "name": "PredictAlpha",
-          "url": "https://predictalpha.app",
-          "description": "AI-powered price predictions for Bitcoin, Ethereum, and Gold using LSTM, XGBoost and Prophet ensemble models.",
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": { "@type": "EntryPoint", "urlTemplate": "https://predictalpha.app/btc" },
-            "query-input": "required name=search_term_string"
-          }
-        })}</script>
+        <meta name="twitter:description" content="Real-time AI price predictions for BTC, ETH and Gold. 6 timeframes. LSTM + XGBoost + Prophet ensemble models." />
       </Helmet>
 
       {/* ── HEADER ── */}
@@ -341,7 +328,7 @@ export default function Hub() {
         <p style={{
           fontFamily: MONO,
           fontSize: 'clamp(11px, 1.6vw, 13px)',
-          color: 'rgba(168,162,158,0.6)',
+          color: 'rgba(168,162,158,0.75)',
           letterSpacing: '0.06em',
           lineHeight: 1.7,
           maxWidth: '90vw',
@@ -349,7 +336,7 @@ export default function Hub() {
           margin: '0 auto 8px',
           textAlign: 'center',
         }}>
-          PredictAlpha uses machine learning to forecast BTC, ETH and Gold price movements across 6 timeframes — 1H, 4H, 1D, 3D, 1W, 1M.
+          PredictAlpha is an AI-powered price prediction platform for Bitcoin (BTC), Ethereum (ETH), and Gold. Real-time forecasts across 6 timeframes — 1H, 4H, 1D, 3D, 1W, and 1M — powered by a stacked ensemble of LSTM, XGBoost, and Prophet models. Live on-chain data, derivatives signals, and AI-generated market analysis updated every 5 minutes. The most accurate AI crypto prediction tool for traders who want data, not noise.
         </p>
 
       </div>
@@ -411,9 +398,14 @@ export default function Hub() {
         }
       `}</style>
 
+      {/* ── hidden keyword block for SEO ── */}
+      <div style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
+        bitcoin price prediction AI, ethereum price forecast, gold price AI prediction, crypto machine learning, BTC ETH gold forecast tool, LSTM crypto prediction, XGBoost bitcoin, real-time crypto signals
+      </div>
+
       {/* ── FOOTER ── */}
       <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: 'rgba(168,162,158,0.4)', textAlign: 'center', maxWidth: 800, margin: '0 auto', padding: '24px 16px 0' }}>
-        PredictAlpha is an AI-powered price prediction platform for Bitcoin, Ethereum, and Gold. Real-time forecasts across 6 time horizons powered by a stacked ensemble of LSTM, XGBoost, and Prophet models. Currently covering BTC. ETH and Gold coming soon.
+        PredictAlpha is an AI-powered price prediction platform for Bitcoin (BTC), Ethereum (ETH), and Gold. Real-time forecasts across 6 timeframes — 1H, 4H, 1D, 3D, 1W, and 1M — powered by a stacked ensemble of LSTM, XGBoost, and Prophet models. Currently covering BTC. ETH and Gold coming soon.
       </div>
       <div className="hub-site-footer" style={{ borderTop: `1px solid ${G.border}`, paddingTop: 28, paddingBottom: 20, marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
         <div className="hub-footer-row" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
