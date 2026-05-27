@@ -1532,15 +1532,27 @@ async def get_key_levels():
         P = (H + L + current) / 3
         r = H - L
 
+        R1 = round(2 * P - L)
+        R2 = round(P + r)
+        R3 = round(H + 2 * (P - L))
+        S1 = round(2 * P - H)
+        S2 = round(P - r)
+        S3 = round(L - 2 * (H - P))
+
+        if R1 <= P:
+            print(f"WARNING: Pivot logic anomaly — R1({R1:.0f}) <= Pivot({P:.0f}) | H={H} L={L} close={current}")
+        if S1 >= P:
+            print(f"WARNING: Pivot logic anomaly — S1({S1:.0f}) >= Pivot({P:.0f}) | H={H} L={L} close={current}")
+
         near_level = next((f for f in fib if abs(f["price"] - current) / current < 0.008), None)
         result = {
             "pivot": round(P),
-            "r1": round(2 * P - L),
-            "r2": round(P + r),
-            "r3": round(H + 2 * (P - L)),
-            "s1": round(2 * P - H),
-            "s2": round(P - r),
-            "s3": round(L - 2 * (H - P)),
+            "r1": R1,
+            "r2": R2,
+            "r3": R3,
+            "s1": S1,
+            "s2": S2,
+            "s3": S3,
             "fib": fib,
             "nearLevel": near_level,
             "range": {"high": round(H), "low": round(L)},
