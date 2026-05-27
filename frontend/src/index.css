@@ -31,8 +31,8 @@
   --font-mono:          'Share Tech Mono', monospace;
 
   --grid-size:          60px;
-  --grid-color:         rgba(245, 158, 11, 0.08);
-  --grid-color-strong:  rgba(245, 158, 11, 0.18);
+  --grid-color:         rgba(245, 158, 11, 0.05);
+  --grid-color-strong:  rgba(245, 158, 11, 0.10);
 }
 
 /* ─── Base reset ────────────────────────────────────────────────────────────── */
