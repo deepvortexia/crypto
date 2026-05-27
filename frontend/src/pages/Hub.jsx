@@ -174,6 +174,8 @@ export default function Hub() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions" />
         <meta name="twitter:description" content="Real-time AI price predictions for BTC, ETH and Gold. 6 timeframes. LSTM + XGBoost + Prophet ensemble models." />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Helmet>
 
       {/* ── HEADER ── */}
