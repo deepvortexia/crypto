@@ -161,7 +161,7 @@ export default function Hub() {
   }, [])
 
   return (
-    <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: G.bg }}>
+    <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'transparent' }}>
       <Helmet>
         <title>PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions</title>
         <meta name="description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. LSTM, XGBoost and Prophet ensemble models. Real-time signals, deep analysis, and market intelligence." />
@@ -243,7 +243,7 @@ export default function Hub() {
       </header>
 
       {/* ── AI BANNER ── */}
-      <div style={{ padding: '10px 16px', borderBottom: '1px solid #1a1a1a', textAlign: 'center', background: '#0a0a0a' }}>
+      <div style={{ padding: '10px 16px', borderBottom: '1px solid #1a1a1a', textAlign: 'center', background: 'rgba(10,10,10,0.85)' }}>
         <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 16, letterSpacing: '0.3em', color: '#f59e0b', opacity: 0.8, animation: 'textPulse 2.5s ease-in-out infinite' }}>AI PREDICTING FUTURE</span>
         <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, color: '#6b7280', letterSpacing: '0.15em', opacity: 0.6, marginTop: 3 }}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
       </div>
