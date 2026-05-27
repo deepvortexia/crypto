@@ -193,7 +193,7 @@ export default function About() {
         {/* ══════════════════════════════════════════════════════════════════ */}
         <section className="about-section" style={{ textAlign: 'center', marginBottom: 80, paddingTop: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
-            <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="120" height="120" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} />
+            <img src="/logoegyptfinal.webp" alt="PREDICT ALPHA" width="120" height="120" fetchpriority="high" decoding="async" style={{ width: 120, height: 120, objectFit: 'contain', filter: `drop-shadow(0 0 18px ${G.goldGlow})` }} />
           </div>
           <h2 className="about-hero-title" style={{ fontFamily: orb, fontSize: 'clamp(20px,5vw,42px)', letterSpacing: '0.18em', ...goldText, marginBottom: 18, lineHeight: 1.2 }}>
             How PredictAlpha Works — AI Bitcoin, Ethereum &amp; Gold Price Prediction Engine

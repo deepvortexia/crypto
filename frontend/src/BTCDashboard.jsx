@@ -1402,7 +1402,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 onMouseEnter={e => { if (!outOfCredits) e.currentTarget.style.boxShadow = '0 0 24px rgba(245,158,11,0.7)' }}
                 onMouseLeave={e => { if (!outOfCredits) e.currentTarget.style.boxShadow = '0 0 12px rgba(245,158,11,0.4)' }}
               >
-                  <img src="/logoegyptfinal.webp" alt="" width="22" height="22" style={{ height: 22, width: 'auto', objectFit: 'contain', opacity: outOfCredits ? 0.4 : 1 }} />
+                  <img src="/logoegyptfinal.webp" alt="" width="22" height="22" loading="lazy" style={{ height: 22, width: 'auto', objectFit: 'contain', opacity: outOfCredits ? 0.4 : 1 }} />
                   DEEP ANALYSIS
                 </button>
 
@@ -1505,7 +1505,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                     border: `1px solid ${G.gold}33`,
                     gap: 6,
                   }}>
-                    <img src="/logoegyptfinal.webp" alt="" width="40" height="40" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+                    <img src="/logoegyptfinal.webp" alt="" width="40" height="40" loading="lazy" style={{ width: 40, height: 40, objectFit: 'contain' }} />
                     <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center', lineHeight: 1.5 }}>PRO<br/>$12.99/mo</span>
                   </div>
                 )}
@@ -1642,7 +1642,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
             {!isPro && (
               <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-                <img src="/logoegyptfinal.webp" alt="" width="40" height="40" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+                <img src="/logoegyptfinal.webp" alt="" width="40" height="40" loading="lazy" style={{ width: 40, height: 40, objectFit: 'contain' }} />
                 <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
               </div>
             )}
@@ -1670,7 +1670,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
             {!isPro && (
               <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-                <img src="/logoegyptfinal.webp" alt="" width="40" height="40" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+                <img src="/logoegyptfinal.webp" alt="" width="40" height="40" loading="lazy" style={{ width: 40, height: 40, objectFit: 'contain' }} />
                 <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
               </div>
             )}
@@ -1818,7 +1818,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             </div>
             {!isPro && (
               <div onClick={() => setPricingOpen(true)} style={{ position: 'absolute', top: 30, left: 0, right: 0, bottom: 0, zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(10,10,10,0.55)', borderRadius: 10, cursor: 'pointer', gap: 6 }}>
-                <img src="/logoegyptfinal.webp" alt="" width="40" height="40" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+                <img src="/logoegyptfinal.webp" alt="" width="40" height="40" loading="lazy" style={{ width: 40, height: 40, objectFit: 'contain' }} />
                 <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, letterSpacing: '0.15em', color: G.gold, textAlign: 'center' }}>PRO ONLY<br/>$12.99/mo</span>
               </div>
             )}
@@ -1944,7 +1944,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               boxShadow:`0 0 60px ${G.goldGlow}`,
               animation:'authSuccessPulse 2s ease-in-out infinite',
             }}>
-              <img src="/logoegyptfinal.webp" alt="" width="80" height="80" style={{ width:80, height:80, objectFit:'contain', marginBottom:24 }} />
+              <img src="/logoegyptfinal.webp" alt="" width="80" height="80" loading="lazy" style={{ width:80, height:80, objectFit:'contain', marginBottom:24 }} />
               <h2 style={{ fontFamily:'"Orbitron",sans-serif', fontSize:18, letterSpacing:'0.2em', color:G.gold, textShadow:`0 0 12px ${G.goldGlow}`, marginBottom:16 }}>
                 CHECK YOUR EMAIL
               </h2>
@@ -2164,7 +2164,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 padding:'24px 28px', overflow:'hidden',
               }}>
                 {deepRunning && (<>
-                  <img src="/egyptian-dial.webp" alt="" className="deep-dial-img" style={{ width:260, height:260, objectFit:'contain', display:'block', opacity:0.78, animation:'dialGlow 2s ease-in-out infinite' }} />
+                  <img src="/egyptian-dial.webp" alt="" className="deep-dial-img" loading="lazy" style={{ width:260, height:260, objectFit:'contain', display:'block', opacity:0.78, animation:'dialGlow 2s ease-in-out infinite' }} />
                   <div style={{ marginTop:16, fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:G.gold, letterSpacing:'0.12em', animation:'textPulse 2s ease-in-out infinite', textAlign:'center' }}>
                     {DEEP_MSGS[deepMsgIdx]}
                   </div>
@@ -2261,7 +2261,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
             maxHeight: '90vh', overflowY: 'auto',
           }}>
             <div style={{ padding: '24px 28px', borderBottom: `1px solid ${G.border}`, textAlign: 'center' }}>
-              <img src="/logoegyptfinal.webp" alt="Predict Alpha" width="80" height="80" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 8 }} />
+              <img src="/logoegyptfinal.webp" alt="Predict Alpha" width="80" height="80" loading="lazy" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 8 }} />
               <div style={{ fontFamily: '"Orbitron",sans-serif', fontSize: 20, color: G.gold, letterSpacing: '0.15em', marginBottom: 8 }}>
                 PREDICT ALPHA PRO
               </div>

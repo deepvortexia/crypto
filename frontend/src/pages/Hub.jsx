@@ -45,7 +45,7 @@ function EthDiamond() {
 
 function GoldBar() {
   return (
-    <img src="/goldbar.png" alt="Gold bar" style={{ width: 90, height: 65, objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(245,158,11,0.6))' }} />
+    <img src="/goldbar.webp" alt="Gold bar" style={{ width: 90, height: 65, objectFit: 'contain', filter: 'drop-shadow(0 4px 16px rgba(245,158,11,0.6))' }} />
   )
 }
 
@@ -272,7 +272,7 @@ export default function Hub() {
 
       {/* ── MAIN CONTENT ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px 64px', textAlign: 'center' }}>
-        <img src="/logoegyptfinal.webp" alt="PredictAlpha" style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 22 }} />
+        <img src="/logoegyptfinal.webp" alt="PredictAlpha" fetchpriority="high" decoding="async" style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 22 }} />
 
       <h1 style={{
         fontFamily: DISPLAY,

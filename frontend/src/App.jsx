@@ -1,35 +1,48 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { supabase } from './lib/supabase'
-import BTCDashboard from './BTCDashboard'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => { window.scrollTo(0, 0) }, [pathname])
   return null
 }
-const About = lazy(() => import('./pages/About'))
-const Pricing = lazy(() => import('./pages/Pricing'))
-const Proof = lazy(() => import('./Proof'))
-const Hub = lazy(() => import('./pages/Hub'))
+
+const BTCDashboard = lazy(() => import('./BTCDashboard'))
+const About        = lazy(() => import('./pages/About'))
+const Pricing      = lazy(() => import('./pages/Pricing'))
+const Proof        = lazy(() => import('./Proof'))
+const Hub          = lazy(() => import('./pages/Hub'))
+
+const PageShell = <div style={{ minHeight: '100vh' }} />
 
 export default function App() {
-  const [user, setUser] = useState(null)
+  const [user, setUser]             = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const freshLoginRef = useRef(false)
+  const freshLoginRef               = useRef(false)
 
-  // Supabase auth session
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setAuthLoading(false)
+    let sub = null
+    let cancelled = false
+    import('./lib/supabase').then(({ supabase }) => {
+      if (cancelled) return
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!cancelled) {
+          setUser(session?.user ?? null)
+          setAuthLoading(false)
+        }
+      })
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (cancelled) return
+        if (event === 'SIGNED_IN') freshLoginRef.current = true
+        setUser(session?.user ?? null)
+      })
+      sub = subscription
     })
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') freshLoginRef.current = true
-      setUser(session?.user ?? null)
-    })
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      sub?.unsubscribe()
+    }
   }, [])
 
   return (
@@ -63,11 +76,11 @@ export default function App() {
     <ScrollToTop />
     <Routes>
       <Route path="/dashboard" element={<Navigate to="/btc" replace />} />
-      <Route path="/about" element={<Suspense fallback={null}><About /></Suspense>} />
-      <Route path="/pricing" element={<Suspense fallback={null}><Pricing /></Suspense>} />
-      <Route path="/proof" element={<Suspense fallback={null}><Proof /></Suspense>} />
-      <Route path="/btc" element={<BTCDashboard user={user} setUser={setUser} authLoading={authLoading} freshLoginRef={freshLoginRef} />} />
-      <Route path="/" element={<Suspense fallback={null}><Hub /></Suspense>} />
+      <Route path="/about"   element={<Suspense fallback={PageShell}><About /></Suspense>} />
+      <Route path="/pricing" element={<Suspense fallback={PageShell}><Pricing /></Suspense>} />
+      <Route path="/proof"   element={<Suspense fallback={PageShell}><Proof /></Suspense>} />
+      <Route path="/btc"     element={<Suspense fallback={PageShell}><BTCDashboard user={user} setUser={setUser} authLoading={authLoading} freshLoginRef={freshLoginRef} /></Suspense>} />
+      <Route path="/"        element={<Suspense fallback={PageShell}><Hub /></Suspense>} />
     </Routes>
     </>
   )
