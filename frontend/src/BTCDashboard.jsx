@@ -58,15 +58,16 @@ const fmtNum = (n, dec = 2) =>
   n == null ? '—' : Number(n).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec })
 
 // ── shared styles ─────────────────────────────────────────────────────────────
-const cardStyle = {
+const CARD_BOX_SHADOW = '0 0 0 1px rgba(245,158,11,0.15), 0 4px 32px rgba(0,0,0,0.6)'
+const cardStyle = (loaded = true) => ({
   background: G.card,
   border: '1px solid rgba(245,158,11,0.6)',
   borderRadius: 10,
   padding: '18px 22px',
-  boxShadow: '0 0 0 1px rgba(245,158,11,0.15), 0 4px 32px rgba(0,0,0,0.6)',
+  boxShadow: CARD_BOX_SHADOW,
   transition: 'border-color 0.2s, box-shadow 0.2s',
-  animation: 'card-gold-pulse 2.5s ease-in-out infinite',
-}
+  animation: loaded ? 'card-gold-pulse 2.5s ease-in-out infinite' : 'none',
+})
 
 const cardHoverStyle = {
   borderColor: 'rgba(245,158,11,0.95)',
@@ -109,9 +110,9 @@ const sectionLabel = {
 }
 
 // ── sub-components ────────────────────────────────────────────────────────────
-function StatCard({ label, value, sub, valueColor, icon }) {
+function StatCard({ label, value, sub, valueColor, icon, loaded = true }) {
   return (
-    <div style={cardStyle} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+    <div style={cardStyle(loaded)} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
         <div style={labelStyle}>{label}</div>
         {icon && <span style={{ fontSize: 16, opacity: 0.5 }}>{icon}</span>}
@@ -165,11 +166,11 @@ function PredCard({ horizon, horizonKey, data, loading }) {
 
   return (
     <div style={{
-      ...cardStyle,
+      ...cardStyle(!!data),
       borderColor: data ? (up ? `rgba(16,185,129,0.3)` : `rgba(239,68,68,0.3)`) : G.border,
       boxShadow: data
         ? `0 0 12px ${up ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)'}, 0 4px 32px rgba(0,0,0,0.6)`
-        : cardStyle.boxShadow,
+        : CARD_BOX_SHADOW,
     }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div className="pred-horizon" style={labelStyle}>{horizon}</div>
 
@@ -231,10 +232,10 @@ function getBarValue(name, value) {
   }
 }
 
-function IndCard({ label, value, sub, barName, barRaw }) {
+function IndCard({ label, value, sub, barName, barRaw, loaded = true }) {
   const bar = barName ? getBarValue(barName, barRaw ?? value) : null
   return (
-    <div className="ind-card" style={{ ...cardStyle, padding: '14px 18px', display: 'flex', flexDirection: 'column' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+    <div className="ind-card" style={{ ...cardStyle(loaded), padding: '14px 18px', display: 'flex', flexDirection: 'column' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.1em', color: '#9ca3af', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center' }}>{label}</span>
       </div>
@@ -253,7 +254,7 @@ function IndCard({ label, value, sub, barName, barRaw }) {
 
 function NewsSentimentWidget({ data }) {
   if (!data) return (
-    <div style={{ ...cardStyle, width: '100%', marginTop: 16 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+    <div style={{ ...cardStyle(), width: '100%', marginTop: 16 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={labelStyle}>Media Sentiment<Tooltip text="AI-scored crypto headlines from CoinTelegraph, CoinDesk, Decrypt — last 24h"/></div>
       <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text, opacity: 0.5 }}>Loading…</div>
     </div>
@@ -279,7 +280,7 @@ function NewsSentimentWidget({ data }) {
   }
 
   return (
-    <div style={{ ...cardStyle, width: '100%', marginTop: 16 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+    <div style={{ ...cardStyle(), width: '100%', marginTop: 16 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={labelStyle}>Media Sentiment<Tooltip text="AI-scored crypto headlines from CoinTelegraph, CoinDesk, Decrypt — updated every 30 min"/></div>
 
       {/* Score bar */}
@@ -358,7 +359,7 @@ function SentimentMeter({ value, label, history }) {
   const dayLabels = ['TODAY', 'YDAY', '2D', '3D', '4D', '5D', '6D']
 
   return (
-    <div className="sentiment-card" style={{ ...cardStyle, minWidth: 0, width: '100%' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+    <div className="sentiment-card" style={{ ...cardStyle(), minWidth: 0, width: '100%' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={labelStyle}>Fear & Greed<Tooltip text="0-25 Extreme Fear — 26-45 Fear — 46-55 Neutral — 56-75 Greed — 76-100 Extreme Greed"/></div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
 
@@ -426,7 +427,7 @@ function SentimentMeter({ value, label, history }) {
 
               return (
                 <div key={i} className={i >= 4 ? 'hide-mobile' : ''} style={{
-                  ...cardStyle,
+                  ...cardStyle(),
                   flex: '1 1 0',
                   minWidth: 52,
                   minHeight: 70,
@@ -435,7 +436,7 @@ function SentimentMeter({ value, label, history }) {
                   border: isToday ? `2px solid ${G.gold}` : `1px solid ${G.border}`,
                   borderRadius: 6,
                   textAlign: 'center',
-                  boxShadow: isToday ? `0 0 10px ${G.goldGlow}` : cardStyle.boxShadow,
+                  boxShadow: isToday ? `0 0 10px ${G.goldGlow}` : CARD_BOX_SHADOW,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -508,7 +509,7 @@ function TensionCard({ setup }) {
   const { color, Icon: TIcon } = cfg
   const confColor = CONF_COLOR[setup.confidence] || CONF_COLOR.low
   return (
-    <div style={{ ...cardStyle, borderLeft: `4px solid ${color}`, position: 'relative', paddingBottom: 38 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+    <div style={{ ...cardStyle(), borderLeft: `4px solid ${color}`, position: 'relative', paddingBottom: 38 }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
         <TIcon size={24} color={color} strokeWidth={1.5} style={{ flexShrink: 0 }} />
         <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, letterSpacing: '0.1em', color, textTransform: 'uppercase', lineHeight: 1.3 }}>
@@ -707,14 +708,15 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
   const loadAll = useCallback(async () => {
     setLoadingBar(10)
-    // Phase 1: price + 1h prediction — unblocks hero stats and 1h card immediately
-    const [p, pred1h] = await Promise.allSettled([
-      fetch('https://crypto-production-f7c5.up.railway.app/api/price/live').then(r => r.json()),
-      fetchPrediction('1h'),
-    ])
-    if (p.status      === 'fulfilled') setPrice(p.value)
-    if (pred1h.status === 'fulfilled') setPreds(prev => ({ ...prev, '1h': pred1h.value }))
-    setPriceLoaded(true)
+    // Phase 1: fire price fetch independently — setPriceLoaded as soon as price responds,
+    // without waiting for pred1h. This unblocks Market Overview cards earlier.
+    fetch('https://crypto-production-f7c5.up.railway.app/api/price/live')
+      .then(r => r.json())
+      .then(v => { setPrice(v); setPriceLoaded(true) })
+      .catch(() => setPriceLoaded(true))
+
+    const [pred1h] = await Promise.allSettled([fetchPrediction('1h')])
+    if (pred1h.status === 'fulfilled' && pred1h.value) setPreds(prev => ({ ...prev, '1h': pred1h.value }))
     setLoadingBar(50)
 
     // Phase 2: all secondary data fired simultaneously
@@ -802,9 +804,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       setCreditInfo({ daily_remaining: 0, bonus_remaining: 0, total_remaining: 0, is_pro: false, daily_limit: 2 })
     }
     if (!prevUserRef.current || (!prevUserRef.current && user)) {
-      (async () => {
+      setTimeout(async () => {
         try { await loadAll() } catch (e) { console.error(e) } finally { setLoading(false) }
-      })()
+      }, 0)
     }
     prevUserRef.current = user
   }, [user, loadAll])
@@ -1545,7 +1547,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                   barName="rsi" barRaw={rsi}
                 />
                 {/* Unified MACD card */}
-                <div className="ind-card" style={{ ...cardStyle, padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+                <div className="ind-card" style={{ ...cardStyle(), padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
                   <span style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 10, letterSpacing: '0.1em', color: '#9ca3af', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', marginBottom: 10 }}>
                     MACD<Tooltip text="MACD above signal line = bullish momentum"/>
                   </span>
@@ -1765,7 +1767,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <div style={{ marginBottom: 40, position: 'relative' }}>
             <h2 style={sectionLabel}>Key Levels {!isPro && <span style={{ color: G.gold, fontSize: 9 }}>👑 PRO</span>}</h2>
             <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none' }}>
-            <div style={{ ...cardStyle, padding: '20px 24px' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+            <div style={{ ...cardStyle(), padding: '20px 24px' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
 
               {/* Pivot */}
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
@@ -1870,7 +1872,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
           {/* Not logged in — teaser only */}
           {!user && (
-            <div onClick={() => setAuthOpen(true)} style={{ ...cardStyle, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '28px 24px' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+            <div onClick={() => setAuthOpen(true)} style={{ ...cardStyle(), cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '28px 24px' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
               <span style={{ fontSize: 20 }}>🔒</span>
               <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: G.text, letterSpacing: '0.1em' }}>
                 AI detected market setups —{' '}
@@ -1904,7 +1906,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               ) : (
                 <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
                   {[0, 1].map(i => (
-                    <div key={i} style={{ ...cardStyle, borderLeft: '4px solid #333', minHeight: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
+                    <div key={i} style={{ ...cardStyle(), borderLeft: '4px solid #333', minHeight: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}>
                       <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: G.text, opacity: 0.4 }}>
                         {tensions === null ? 'Loading…' : 'No data'}
                       </span>
@@ -2467,6 +2469,12 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         @keyframes dialGlow { 0%,100%{filter:drop-shadow(0 0 10px #f59e0b66) drop-shadow(0 0 20px #f59e0b22)} 50%{filter:drop-shadow(0 0 28px #f59e0bcc) drop-shadow(0 0 55px #f59e0b77)} }
         @keyframes badgeGlowBull { 0%,100%{box-shadow:0 0 8px #10b981,0 0 20px #10b98144} 50%{box-shadow:0 0 18px #10b981,0 0 40px #10b98177} }
         @keyframes badgeGlowBear { 0%,100%{box-shadow:0 0 8px #ef4444,0 0 20px #ef444444} 50%{box-shadow:0 0 18px #ef4444,0 0 40px #ef444477} }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+          }
+        }
         .deep-results-scroll::-webkit-scrollbar { width:4px }
         .deep-results-scroll::-webkit-scrollbar-track { background:#0d0d0d }
         .deep-results-scroll::-webkit-scrollbar-thumb { background:#f59e0b88; border-radius:2px }

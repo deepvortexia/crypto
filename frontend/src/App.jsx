@@ -14,7 +14,7 @@ const Pricing      = lazy(() => import('./pages/Pricing'))
 const Proof        = lazy(() => import('./Proof'))
 const Hub          = lazy(() => import('./pages/Hub'))
 
-const PageShell = <div style={{ minHeight: '100vh' }} />
+const PageShell = <div style={{ minHeight: '100vh', background: '#0a0a0a' }} />
 
 export default function App() {
   const [user, setUser]             = useState(null)

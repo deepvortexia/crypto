@@ -116,8 +116,14 @@ body {
 }
 
 @keyframes grid-drift {
-  0%   { background-position: 0 0, 0 0, 0 0, 0 0; }
-  100% { background-position: 300px 300px, 300px 300px, 60px 60px, 60px 60px; }
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root::before {
+    animation: none;
+  }
 }
 
 @keyframes scan {
