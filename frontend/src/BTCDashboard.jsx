@@ -1452,7 +1452,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
         {/* row 1 — market overview */}
         <div style={{ marginBottom: 40 }}>
           <h2 style={sectionLabel}>Market Overview</h2>
-          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+          <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, minHeight: 80 }}>
             {!priceLoaded ? (
               [0,1,2,3].map(i => <Skel key={i} h={80} />)
             ) : (
