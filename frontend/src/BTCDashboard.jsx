@@ -710,9 +710,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
     setLoadingBar(10)
     // Phase 1: fire price fetch independently — setPriceLoaded as soon as price responds,
     // without waiting for pred1h. This unblocks Market Overview cards earlier.
+    let capturedPrice = null
     fetch('https://crypto-production-f7c5.up.railway.app/api/price/live')
       .then(r => r.json())
-      .then(v => { setPrice(v); setPriceLoaded(true) })
+      .then(v => { capturedPrice = v; setPrice(v); setPriceLoaded(true) })
       .catch(() => setPriceLoaded(true))
 
     const [pred1h] = await Promise.allSettled([fetchPrediction('1h')])
@@ -721,7 +722,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
 
     // Phase 2: all secondary data fired simultaneously
     const otherHorizons = PRED_HORIZONS.filter(h => h !== '1h')
-    const currentPrice = p.status === 'fulfilled' ? p.value?.price : null
+    const currentPrice = capturedPrice?.price ?? null
     const predPromises = otherHorizons.map(h =>
       Promise.race([
         fetchPrediction(h),
