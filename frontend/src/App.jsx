@@ -22,6 +22,10 @@ export default function App() {
   const freshLoginRef               = useRef(false)
 
   useEffect(() => {
+    fetch('https://crypto-production-f7c5.up.railway.app/health').catch(() => {})
+  }, [])
+
+  useEffect(() => {
     let sub = null
     let cancelled = false
     import('./lib/supabase').then(({ supabase }) => {
