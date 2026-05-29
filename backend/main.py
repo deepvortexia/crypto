@@ -1627,12 +1627,13 @@ async def get_market_tensions(request: Request):
 
     try:
         # ── Use the exact same cached data the UI cards read from ──────────────
-        # Price: _price_cache (1-min TTL) — same as /api/price/live
+        # Price: read OKX cache if warm; fall back to CCXT fetch but do NOT write
+        # back into _price_cache — that slot is owned by /api/price/live (OKX-based)
+        # and writing CCXT data here would poison change_24h_pct for the frontend.
         if "price" in _price_cache:
             price_data = _price_cache["price"]
         else:
             price_data = await fetch_live_price()
-            _price_cache["price"] = price_data
 
         # Fear & Greed: _sentiment_cache (30-min TTL) — same as /api/sentiment
         if "sentiment" in _sentiment_cache:

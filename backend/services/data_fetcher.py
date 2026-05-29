@@ -51,9 +51,12 @@ async def fetch_live_price() -> dict:
                 exchange.fetch_ticker(symbol),
                 _fetch_cmc_data(),
             )
+            pct = cmc.get("percent_change_24h")
+            if pct is None:
+                pct = ticker.get("percentage")
             return {
                 "price": ticker["last"],
-                "change_24h_pct": cmc.get("percent_change_24h") or ticker.get("percentage") or 0,
+                "change_24h_pct": pct if pct is not None else 0,
                 "market_cap": cmc["market_cap"],
                 "volume_24h": cmc["volume_24h"],
                 "last_updated": int((ticker["timestamp"] or time.time() * 1000) / 1000),
