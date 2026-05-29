@@ -199,6 +199,14 @@ async def fetch_onchain() -> dict:
                 else:
                     await asyncio.sleep(2 ** attempt)
 
+    total_btc_sent = round(stats.get("total_btc_sent", 0) / 1e8, 2)
+    if total_btc_sent > 21_000_000:
+        logger.warning(f"total_btc_sent={total_btc_sent} exceeds total BTC supply — setting to 0")
+        total_btc_sent = 0
+    elif total_btc_sent > 500_000:
+        logger.warning(f"total_btc_sent={total_btc_sent} exceeds 24h realistic cap — capping at 500,000")
+        total_btc_sent = 500_000
+
     return {
         "hash_rate": round(stats.get("hash_rate", 0) / 1e9, 2) if stats.get("hash_rate") else None,
         "difficulty": stats.get("difficulty", 0),
@@ -209,6 +217,6 @@ async def fetch_onchain() -> dict:
         "minutes_between_blocks": round(stats.get("minutes_between_blocks", 10), 2),
         "market_price_usd": stats.get("market_price_usd", 0),
         "trade_volume_usd": round(stats.get("trade_volume_usd", 0), 2),
-        "total_btc_sent": round(stats.get("total_btc_sent", 0) / 1e8, 2),
+        "total_btc_sent": total_btc_sent,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }

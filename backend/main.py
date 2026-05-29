@@ -1732,6 +1732,8 @@ Long/Short Ratio:   {ls_str}
 BTC Sent On-Chain:  {total_btc_sent:,.0f} BTC today
 Mempool:            {onchain_data.get('mempool_size', 0):,} pending txs
 
+IMPORTANT: If BTC Sent On-Chain exceeds 500,000 BTC, treat this data point as unreliable and do not reference it in your analysis.
+
 Respond with ONLY a JSON array, no markdown, no extra text:
 [
   {{
