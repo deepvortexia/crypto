@@ -705,11 +705,13 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
         else:
             customer = stripe.Customer.create(email=user["email"], metadata={"supabase_user_id": user["id"]})
             customer_id = customer.id
-            supabase.table("subscriptions").upsert({
-                "user_id": user["id"],
-                "stripe_customer_id": customer_id,
-                "status": "inactive"
-            }, on_conflict="user_id").execute()
+
+        # Always write stripe_customer_id so webhook handlers can find this row
+        supabase.table("subscriptions").upsert({
+            "user_id": user["id"],
+            "stripe_customer_id": customer_id,
+            "status": "inactive"
+        }, on_conflict="user_id").execute()
 
         frontend_url = os.getenv("FRONTEND_URL", "https://predictalpha.app/btc")
         session = stripe.checkout.Session.create(
@@ -828,13 +830,33 @@ async def stripe_webhook(request: Request):
     now_iso = datetime.now(timezone.utc).isoformat()
 
     if event_type == "customer.subscription.created":
-        supabase.table("subscriptions").update({
-            "stripe_subscription_id": data["id"],
-            "status": "active" if data["status"] == "active" else data["status"],
-            "current_period_end": unix_to_iso(data.get("current_period_end")) if data.get("current_period_end") else None,
-            "updated_at": now_iso
-        }).eq("stripe_customer_id", data["customer"]).execute()
-        logger.info(f"Subscription created for customer {data['customer']}")
+        try:
+            sub_status = "active" if data["status"] == "active" else data["status"]
+            sub_payload = {
+                "stripe_subscription_id": data["id"],
+                "status": sub_status,
+                "current_period_end": unix_to_iso(data.get("current_period_end")) if data.get("current_period_end") else None,
+                "updated_at": now_iso,
+            }
+            res = supabase.table("subscriptions").update(sub_payload).eq("stripe_customer_id", data["customer"]).execute()
+            if not res.data:
+                # stripe_customer_id not written yet — fall back to user_id from customer metadata
+                cus = stripe.Customer.retrieve(data["customer"])
+                fallback_uid = (cus.get("metadata") or {}).get("supabase_user_id")
+                if fallback_uid:
+                    supabase.table("subscriptions").upsert({
+                        **sub_payload,
+                        "user_id": fallback_uid,
+                        "stripe_customer_id": data["customer"],
+                    }, on_conflict="user_id").execute()
+                    logger.info(f"[webhook] subscription.created — activated via user_id fallback for customer {data['customer']} user={fallback_uid}")
+                else:
+                    logger.error(f"[webhook] subscription.created — no row matched stripe_customer_id={data['customer']} and no fallback user_id in Stripe metadata")
+            else:
+                logger.info(f"Subscription created for customer {data['customer']}")
+        except Exception as exc:
+            logger.error(f"[webhook] subscription.created failed for customer {data['customer']}: {exc!r}", exc_info=True)
+            raise HTTPException(500, "Webhook handler error — Stripe will retry")
 
     elif event_type == "customer.subscription.updated":
         status = "active" if data["status"] == "active" else data["status"]
@@ -880,17 +902,44 @@ async def stripe_webhook(request: Request):
         if metadata.get("type") != "credit_pack":
             if session_mode == "subscription":
                 # Fallback: ensure the row goes active even if customer.subscription.created
-                # fires late or is missed. Mirrors the existing subscription handlers.
-                stripe_sub_id = data.get("subscription")
-                supabase.table("subscriptions").update({
-                    "status": "active",
-                    **({"stripe_subscription_id": stripe_sub_id} if stripe_sub_id else {}),
-                    "updated_at": now_iso,
-                }).eq("stripe_customer_id", data["customer"]).execute()
-                logger.info(
-                    f"[webhook] checkout.session.completed (subscription) — set active for "
-                    f"customer={data['customer']} sub_id={stripe_sub_id} session={session_id}"
-                )
+                # fires late or is missed.
+                try:
+                    stripe_sub_id = data.get("subscription")
+                    session_payload = {
+                        "status": "active",
+                        **({"stripe_subscription_id": stripe_sub_id} if stripe_sub_id else {}),
+                        "updated_at": now_iso,
+                    }
+                    res = supabase.table("subscriptions").update(session_payload).eq("stripe_customer_id", data["customer"]).execute()
+                    if not res.data:
+                        # stripe_customer_id not written yet — fall back to user_id from session metadata
+                        fallback_uid = metadata.get("user_id") or metadata.get("supabase_user_id")
+                        if not fallback_uid:
+                            cus = stripe.Customer.retrieve(data["customer"])
+                            fallback_uid = (cus.get("metadata") or {}).get("supabase_user_id")
+                        if fallback_uid:
+                            supabase.table("subscriptions").upsert({
+                                **session_payload,
+                                "user_id": fallback_uid,
+                                "stripe_customer_id": data["customer"],
+                            }, on_conflict="user_id").execute()
+                            logger.info(
+                                f"[webhook] checkout.session.completed (subscription) — activated via user_id fallback "
+                                f"customer={data['customer']} user={fallback_uid} sub_id={stripe_sub_id} session={session_id}"
+                            )
+                        else:
+                            logger.error(
+                                f"[webhook] checkout.session.completed — no row matched stripe_customer_id={data['customer']} "
+                                f"and no fallback user_id available (session={session_id})"
+                            )
+                    else:
+                        logger.info(
+                            f"[webhook] checkout.session.completed (subscription) — set active for "
+                            f"customer={data['customer']} sub_id={stripe_sub_id} session={session_id}"
+                        )
+                except Exception as exc:
+                    logger.error(f"[webhook] checkout.session.completed subscription handler failed (session={session_id}): {exc!r}", exc_info=True)
+                    raise HTTPException(500, "Webhook handler error — Stripe will retry")
             else:
                 logger.info(f"[webhook] Skipping session {session_id} — metadata.type is '{metadata.get('type')}', not 'credit_pack'")
         elif payment_status != "paid":
