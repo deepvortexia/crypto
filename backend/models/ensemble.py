@@ -1,3 +1,4 @@
+import asyncio
 import concurrent.futures
 import json
 import logging
@@ -286,6 +287,26 @@ class BTCEnsemble:
         if not unresolved:
             return 0
 
+        okx_sem = asyncio.Semaphore(1)  # one OKX request at a time
+
+        async def _fetch_okx_candle(client: httpx.AsyncClient, bar: str, after_ms: int) -> list:
+            """Fetch a single OKX candle with exponential backoff on 429."""
+            async with okx_sem:
+                for attempt in range(3):
+                    resp = await client.get(
+                        "https://www.okx.com/api/v5/market/candles",
+                        params={"instId": "BTC-USDT", "bar": bar, "limit": "1", "after": str(after_ms)},
+                    )
+                    if resp.status_code == 429:
+                        wait = 2 ** (attempt + 1)  # 2s, 4s, 8s
+                        logger.warning(f"[Ensemble] OKX 429 on candle fetch, retrying in {wait}s (attempt {attempt+1}/3)")
+                        await asyncio.sleep(wait)
+                        continue
+                    resp.raise_for_status()
+                    await asyncio.sleep(0.5)  # polite delay after every successful request
+                    return resp.json().get("data", [])
+                raise httpx.HTTPStatusError("OKX 429 after 3 retries", request=resp.request, response=resp)
+
         async with httpx.AsyncClient(timeout=10.0) as client:
             for row in unresolved:
                 try:
@@ -294,17 +315,7 @@ class BTCEnsemble:
                     target_ms = int(target_dt.timestamp() * 1000)
 
                     bar = self._HORIZON_BAR.get(row["horizon"], "1H")
-                    okx_resp = await client.get(
-                        "https://www.okx.com/api/v5/market/candles",
-                        params={
-                            "instId": "BTC-USDT",
-                            "bar":    bar,
-                            "limit":  "1",
-                            "after":  str(target_ms),
-                        },
-                    )
-                    okx_resp.raise_for_status()
-                    candles = okx_resp.json().get("data", [])
+                    candles = await _fetch_okx_candle(client, bar, target_ms)
                     if not candles:
                         logger.warning(f"[Ensemble] No OKX candle for {row['horizon']} target={target_time_str}")
                         continue
