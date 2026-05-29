@@ -143,7 +143,7 @@ function PredCardSkeleton() {
   )
 }
 
-function PredCard({ horizon, horizonKey, data, loading }) {
+function PredCard({ horizon, horizonKey, data, loading, livePrice }) {
   const gold = G.gold
   const timedOut = useRef(false)
   const isMobile = useRef(typeof window !== 'undefined' && window.innerWidth < 768)
@@ -155,7 +155,10 @@ function PredCard({ horizon, horizonKey, data, loading }) {
     return () => clearTimeout(id)
   }, [data])
 
-  const up = data != null ? (data.change_pct ?? 0) >= 0 : false
+  const livePct = (data?.predicted_price != null && livePrice)
+    ? (data.predicted_price - livePrice) / livePrice * 100
+    : (data?.change_pct ?? 0)
+  const up = data != null ? livePct >= 0 : false
   const dirColor = up ? G.green : G.red
   const conf = data
     ? (data.confidence != null ? Math.round(data.confidence > 1 ? data.confidence : data.confidence * 100) : 60)
@@ -187,7 +190,7 @@ function PredCard({ horizon, horizonKey, data, loading }) {
               {up ? 'UP' : 'DOWN'}
             </span>
             <span className="pred-pct" style={{ fontFamily: '"Share Tech Mono", monospace', fontSize: 11, color: dirColor }}>
-              {fmtPct(data.change_pct)}
+              {fmtPct(livePct)}
             </span>
           </div>
           {/* confidence bar */}
@@ -1476,7 +1479,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               {!priceLoaded ? <Skel h={120} /> : (
                 <>
                   <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 2, background: '#10b981', color: '#000', fontFamily: '"Share Tech Mono",monospace', fontSize: 9, fontWeight: 700, letterSpacing: '0.15em', padding: '2px 7px', borderRadius: 4 }}>FREE</div>
-                  <PredCard key="1h" horizonKey="1h" horizon={<>1H<Tooltip text="Shortest horizon — highest confidence intraday signal"/></>} data={preds['1h']} loading={loading} />
+                  <PredCard key="1h" horizonKey="1h" horizon={<>1H<Tooltip text="Shortest horizon — highest confidence intraday signal"/></>} data={preds['1h']} loading={loading} livePrice={price?.price} />
                 </>
               )}
             </div>
@@ -1495,7 +1498,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 <>
                 {/* blurred card underneath */}
                 <div style={{ filter: isPro ? 'none' : 'blur(5px)', pointerEvents: isPro ? 'auto' : 'none', userSelect: 'none' }}>
-                  <PredCard horizonKey={k} horizon={<>{label}<Tooltip text={tip}/></>} data={preds[k]} loading={loading} />
+                  <PredCard horizonKey={k} horizon={<>{label}<Tooltip text={tip}/></>} data={preds[k]} loading={loading} livePrice={price?.price} />
                 </div>
                 {/* lock overlay */}
                 {!isPro && (
