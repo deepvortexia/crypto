@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
+import { supabase } from './lib/supabase'
 
 const BACKEND = 'https://crypto-production-f7c5.up.railway.app'
 
@@ -53,10 +54,12 @@ const sectionLabel = {
 
 
 export default function Proof() {
-  const [data,     setData]     = useState(null)
-  const [loading,  setLoading]  = useState(true)
-  const [now,      setNow]      = useState(new Date())
-const [menuOpen, setMenuOpen] = useState(false)
+  const [data,        setData]        = useState(null)
+  const [loading,     setLoading]     = useState(true)
+  const [now,         setNow]         = useState(new Date())
+  const [menuOpen,    setMenuOpen]    = useState(false)
+  const [resolvedRows, setResolvedRows] = useState([])
+  const [logsLoading,  setLogsLoading]  = useState(true)
 
   useEffect(() => {
     fetch(`${BACKEND}/api/accuracy`)
@@ -69,6 +72,20 @@ const [menuOpen, setMenuOpen] = useState(false)
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    supabase
+      .from('predictions')
+      .select('id, created_at, horizon, predicted_price, actual_price, direction_correct, resolved_at, target_time')
+      .eq('resolved', true)
+      .order('resolved_at', { ascending: false })
+      .limit(10)
+      .then(({ data: rows }) => {
+        setResolvedRows(rows ?? [])
+        setLogsLoading(false)
+      })
+      .catch(() => setLogsLoading(false))
   }, [])
 
 const hasData     = data && data.total_predictions > 0
@@ -288,11 +305,63 @@ const hasData     = data && data.total_predictions > 0
           </div>
         </section>
 
-        {/* ── SECTION 5: SYSTEM LOGS ── */}
+        {/* ── SECTION 5: RESOLVED PREDICTIONS (LIVE) ── */}
         <section style={{ marginBottom: 60 }}>
-          <h2 style={sectionLabel}>Live System Logs</h2>
-          <div style={{background:'#141414', border:'1px solid #2a1f00', borderRadius:8, padding:'16px 20px', fontFamily:'"Share Tech Mono",monospace', fontSize:12, color:'rgba(245,158,11,0.5)'}}>
-            System logs are private. Operational status visible on Railway dashboard.
+          <h2 style={sectionLabel}>Last 10 Resolved Predictions</h2>
+          <div style={{ ...cardStyle }}>
+            {logsLoading ? (
+              <div style={{ fontFamily: mono, color: G.text, fontSize: 13, opacity: 0.6, padding: '12px 4px' }}>
+                Fetching resolved predictions…
+              </div>
+            ) : resolvedRows.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <span style={{ fontFamily: mono, fontSize: 12, letterSpacing: '0.3em', color: G.gold, textTransform: 'uppercase', opacity: 0.5 }}>
+                  𓂀&nbsp;&nbsp;NO RESOLVED PREDICTIONS YET&nbsp;&nbsp;𓂀
+                </span>
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: mono, fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      {['Date', 'Timeframe', 'Predicted Price', 'Real Price', 'Error %', 'Result'].map(h => (
+                        <th key={h} style={{ textAlign: 'left', color: G.text, letterSpacing: '0.15em', textTransform: 'uppercase', fontSize: 10, padding: '6px 12px', borderBottom: `1px solid ${G.border}` }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resolvedRows.map((p) => {
+                      const dateStr = p.resolved_at ?? p.target_time ?? p.created_at
+                      const errPct = p.predicted_price != null && p.actual_price != null
+                        ? Math.abs((p.actual_price - p.predicted_price) / p.actual_price) * 100
+                        : null
+                      return (
+                        <tr key={p.id} style={{ borderBottom: `1px solid ${G.border}22` }}>
+                          <td style={{ padding: '8px 12px', color: G.text }}>
+                            {dateStr ? new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                          </td>
+                          <td style={{ padding: '8px 12px', color: G.gold, letterSpacing: '0.1em' }}>
+                            {(p.horizon ?? '—').toUpperCase()}
+                          </td>
+                          <td style={{ padding: '8px 12px', color: G.bright }}>
+                            {p.predicted_price != null ? `$${Number(p.predicted_price).toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '—'}
+                          </td>
+                          <td style={{ padding: '8px 12px', color: G.bright }}>
+                            {p.actual_price != null ? `$${Number(p.actual_price).toLocaleString('en-US', { maximumFractionDigits: 0 })}` : '—'}
+                          </td>
+                          <td style={{ padding: '8px 12px', color: errPct != null && errPct < 2 ? G.green : G.gold }}>
+                            {errPct != null ? `${errPct.toFixed(2)}%` : '—'}
+                          </td>
+                          <td style={{ padding: '8px 12px', fontSize: 16 }}>
+                            {p.direction_correct == null ? '—' : p.direction_correct ? '✅' : '❌'}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </section>
 
