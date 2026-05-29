@@ -176,6 +176,12 @@ class BTCEnsemble:
 
         change_pct = (ensemble_price - current_price) / current_price * 100
 
+        # Highest-weighted model among those that actually returned a prediction.
+        # Stored on the prediction row so _recompute_weights can attribute outcomes
+        # to the dominant contributor instead of skipping every row.
+        contributing = {m: w for m, w in weights_used.items() if m in valid and w > 0}
+        dominant_model = max(contributing, key=contributing.get) if contributing else None
+
         result = {
             "horizon": horizon_key,
             "current_price": round(current_price, 2),
@@ -183,6 +189,7 @@ class BTCEnsemble:
             "change_pct": round(change_pct, 4),
             "direction": "up" if change_pct >= 0 else "down",
             "confidence": self._confidence_score(horizon_key, list(valid.values())),
+            "model_name": dominant_model,
             "model_predictions": {
                 "lstm": round(lstm_pred, 2) if lstm_pred else None,
                 "xgboost": round(xgb_pred, 2) if xgb_pred else None,

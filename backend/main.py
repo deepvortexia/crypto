@@ -900,11 +900,22 @@ async def stripe_webhook(request: Request):
             if not target_user_id or credits <= 0:
                 logger.error(f"[webhook] Credit-pack session {session_id} has bad metadata: user_id={target_user_id!r} credits={credits}")
             else:
-                # ── Idempotency guard: skip if this session was already processed ──
-                existing = supabase.table("processed_webhook_sessions").select("session_id").eq("session_id", session_id).execute()
-                if existing.data:
-                    logger.warning(f"[webhook] Duplicate session {session_id} — already processed, skipping credit grant")
-                    return {"status": "ok"}
+                # ── Idempotency guard: lock the session BEFORE granting credits ──
+                # Inserting the dedupe row first means a duplicate Stripe delivery
+                # hits a unique-key violation here and skips the grant entirely.
+                # If the grant later fails, we roll back this row so Stripe's
+                # next retry can take the lock cleanly.
+                try:
+                    supabase.table("processed_webhook_sessions").insert(
+                        {"session_id": session_id}
+                    ).execute()
+                except Exception as e:
+                    err_str = str(e).lower()
+                    if "duplicate" in err_str or "unique" in err_str or "23505" in err_str:
+                        logger.warning(f"[webhook] Duplicate session {session_id} — already processed, skipping credit grant")
+                        return {"status": "ok"}
+                    logger.error(f"[webhook] Idempotency insert failed for {session_id}: {e!r}", exc_info=True)
+                    raise HTTPException(500, "Failed to record session — Stripe will retry")
 
                 # Pick daily_limit so the row is seeded correctly if it doesn't exist yet
                 daily_lim = PRO_DAILY_LIMIT if _is_pro(target_user_id) else FREE_DAILY_LIMIT
@@ -916,18 +927,18 @@ async def stripe_webhook(request: Request):
                     ).execute()
                     logger.info(f"[webhook] ✓ Credit pack delivered: +{credits} to {target_user_id[:8]}... — new balance: {rpc.data}")
                 except Exception as e:
-                    # Stripe will retry on non-2xx; raise so we don't lose the grant
+                    # Credits failed but the idempotency row is locked. Roll it back
+                    # so Stripe's retry can re-acquire the lock and re-attempt the grant.
                     logger.error(f"[webhook] ✗ add_bonus_credits RPC failed for {target_user_id[:8]}...: {e!r}", exc_info=True)
+                    try:
+                        supabase.table("processed_webhook_sessions").delete().eq("session_id", session_id).execute()
+                        logger.info(f"[webhook] Rolled back idempotency row for {session_id} to allow Stripe retry")
+                    except Exception as rollback_err:
+                        logger.error(
+                            f"[webhook] CRITICAL: failed to roll back idempotency for {session_id}: "
+                            f"{rollback_err!r} — credit grant lost, manual intervention required"
+                        )
                     raise HTTPException(500, "Failed to grant credits — Stripe will retry")
-
-                # Insert idempotency record only after credits are successfully granted
-                try:
-                    supabase.table("processed_webhook_sessions").insert(
-                        {"session_id": session_id}
-                    ).execute()
-                except Exception:
-                    # Unique-key violation means a concurrent replay just beat us; credits already granted above
-                    logger.warning(f"[webhook] Idempotency insert conflict for {session_id} — credits already granted, ignoring")
     else:
         # Catch-all log so we can see what events Stripe sends that we don't handle
         logger.info(f"[webhook] Unhandled event type: {event_type}")
