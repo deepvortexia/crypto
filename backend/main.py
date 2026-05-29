@@ -645,6 +645,26 @@ async def get_logs(x_admin_secret: str = Header(None)):
     return {"logs": entries[-50:][::-1]}
 
 
+# ── Public log feed (no auth — predictions / API calls / resolutions only) ────
+_LOG_PUBLIC_ALLOW = (
+    "predict", "resolv", "fetch", "price", "horizon",
+    "startup", "retrain", "train", "scheduled", "cron",
+    "btc", "eth", "gold", "accuracy", "resolved",
+)
+_LOG_PUBLIC_DENY = ("error", "exception", "traceback", "warning", "fail", "critical")
+
+@app.get("/api/logs/public")
+async def get_public_logs():
+    """Last 20 safe operational log lines — predictions, resolutions, API calls only."""
+    safe = [
+        e for e in _mem_handler._buf
+        if e["level"] == "INFO"
+        and not any(w in e["message"].lower() for w in _LOG_PUBLIC_DENY)
+        and any(w in e["message"].lower() for w in _LOG_PUBLIC_ALLOW)
+    ]
+    return {"logs": safe[-20:][::-1]}
+
+
 # ── Training status ───────────────────────────────────────────────────────────
 @app.get("/api/status")
 async def get_status():
