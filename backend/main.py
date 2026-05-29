@@ -142,9 +142,12 @@ def _apply_temporal_coherence(horizon: str, prediction: dict) -> dict:
     if not (prev_pred and next_pred):
         return prediction  # can only validate when both neighbors are cached
 
-    prev_chg = prev_pred.get("change_pct") or 0
-    next_chg = next_pred.get("change_pct") or 0
-    curr_chg = prediction.get("change_pct") or 0
+    _prev = prev_pred.get("change_pct")
+    _next = next_pred.get("change_pct")
+    _curr = prediction.get("change_pct")
+    prev_chg = _prev if _prev is not None else 0
+    next_chg = _next if _next is not None else 0
+    curr_chg = _curr if _curr is not None else 0
 
     incoherent = (prev_chg > 0 and next_chg > 0 and curr_chg < 0) or \
                  (prev_chg < 0 and next_chg < 0 and curr_chg > 0)
@@ -250,11 +253,11 @@ async def lifespan(app: FastAPI):
 async def _resolve_loop():
     while True:
         try:
-            await asyncio.sleep(900)
             count = await ensemble.resolve_predictions(None)
             logger.info(f"[cron] resolved {count} predictions")
         except Exception as exc:
             logger.error(f"[cron] resolve loop error: {exc}")
+        await asyncio.sleep(900)
 
 
 async def _reset_daily_credits_job() -> None:
@@ -1570,9 +1573,9 @@ async def get_key_levels():
         S3 = round(L - 2 * (H - P))
 
         if R1 <= P:
-            print(f"WARNING: Pivot logic anomaly — R1({R1:.0f}) <= Pivot({P:.0f}) | H={H} L={L} close={current}")
+            logger.warning(f"Pivot logic anomaly — R1({R1:.0f}) <= Pivot({P:.0f}) | H={H} L={L} close={current}")
         if S1 >= P:
-            print(f"WARNING: Pivot logic anomaly — S1({S1:.0f}) >= Pivot({P:.0f}) | H={H} L={L} close={current}")
+            logger.warning(f"Pivot logic anomaly — S1({S1:.0f}) >= Pivot({P:.0f}) | H={H} L={L} close={current}")
 
         near_level = next((f for f in fib if abs(f["price"] - current) / current < 0.008), None)
         result = {
