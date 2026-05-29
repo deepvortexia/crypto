@@ -251,6 +251,7 @@ async def lifespan(app: FastAPI):
 
 
 async def _resolve_loop():
+    await asyncio.sleep(60)  # wait 60s on startup only
     while True:
         try:
             count = await ensemble.resolve_predictions(None)
