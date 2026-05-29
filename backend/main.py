@@ -708,7 +708,7 @@ async def create_checkout_session(user: dict = Depends(get_current_user)):
                 "user_id": user["id"],
                 "stripe_customer_id": customer_id,
                 "status": "inactive"
-            }).execute()
+            }, on_conflict="user_id").execute()
 
         frontend_url = os.getenv("FRONTEND_URL", "https://predictalpha.app/btc")
         session = stripe.checkout.Session.create(
