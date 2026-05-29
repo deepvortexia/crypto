@@ -1004,10 +1004,9 @@ def _consume_credit(user_id: str, is_pro: bool) -> dict:
         rpc = supabase.rpc("consume_credit", {"p_user_id": user_id, "p_daily_limit": daily_lim}).execute()
         data = rpc.data or {}
     except Exception as e:
-        is_cached_pro = user_id in _pro_cache
-        logger.error(f"consume_credit RPC failed for {user_id}: {e} — {'failing open (pro)' if is_cached_pro else 'failing closed'}")
-        if is_cached_pro:
-            return {"allowed": True, "daily_remaining": daily_lim - 1, "bonus_remaining": 0, "daily_limit": daily_lim}
+        # Fail closed unconditionally — never authorize Anthropic spend on a stale
+        # PRO cache entry while Supabase is unreachable.
+        logger.error(f"consume_credit RPC failed for {user_id}: {e} — failing closed")
         return {"allowed": False, "daily_remaining": 0, "bonus_remaining": 0, "daily_limit": daily_lim}
 
     return {
