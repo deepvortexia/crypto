@@ -57,6 +57,7 @@ export default function Proof() {
   const [loading,     setLoading]     = useState(true)
   const [now,         setNow]         = useState(new Date())
   const [menuOpen,    setMenuOpen]    = useState(false)
+  const [logs,        setLogs]        = useState([])
 
   useEffect(() => {
     fetch(`${BACKEND}/api/accuracy`)
@@ -68,6 +69,17 @@ export default function Proof() {
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    const fetchLogs = () =>
+      fetch(`${BACKEND}/api/logs/public`)
+        .then(r => r.json())
+        .then(d => setLogs(d.logs ?? []))
+        .catch(() => {})
+    fetchLogs()
+    const id = setInterval(fetchLogs, 30000)
     return () => clearInterval(id)
   }, [])
 
@@ -290,7 +302,52 @@ const hasData     = data && data.total_predictions > 0
         </section>
 
 
-        {/* ── SECTION 4: DATA SOURCES FOOTER ── */}
+        {/* ── SECTION 4: LIVE SYSTEM LOGS ── */}
+        <section style={{ marginBottom: 60 }}>
+          <h2 style={sectionLabel}>Live System Logs</h2>
+          <div style={{
+            background: '#0d0d0d',
+            border: '1px solid rgba(245,158,11,0.4)',
+            borderRadius: 8,
+            padding: '16px 0 0',
+            boxShadow: '0 0 0 1px rgba(245,158,11,0.08), 0 4px 32px rgba(0,0,0,0.7)',
+            overflow: 'hidden',
+          }}>
+            {/* terminal title bar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 16px 12px', borderBottom: '1px solid #1a1500' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+              <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.2em', color: 'rgba(245,158,11,0.4)', marginLeft: 8, textTransform: 'uppercase' }}>predictalpha@system ~ logs/public</span>
+            </div>
+            {/* log lines */}
+            <div style={{ height: 280, overflowY: 'auto', padding: '12px 16px', scrollbarWidth: 'thin', scrollbarColor: '#2a1f00 transparent' }}>
+              {logs.length === 0 ? (
+                <span style={{ fontFamily: mono, fontSize: 12, color: 'rgba(245,158,11,0.3)', letterSpacing: '0.15em' }}>
+                  waiting for log stream…
+                </span>
+              ) : (
+                logs.map((entry, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 5, lineHeight: 1.5 }}>
+                    <span style={{ fontFamily: mono, fontSize: 11, color: 'rgba(245,158,11,0.45)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                      {entry.time}
+                    </span>
+                    <span style={{ fontFamily: mono, fontSize: 11, color: '#10b981', letterSpacing: '0.02em', wordBreak: 'break-word' }}>
+                      {entry.message}
+                    </span>
+                  </div>
+                ))
+              )}
+              {/* blinking cursor */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                <span style={{ fontFamily: mono, fontSize: 11, color: 'rgba(245,158,11,0.45)' }}>$</span>
+                <span style={{ display: 'inline-block', width: 7, height: 13, background: G.gold, animation: 'log-cursor 1.1s step-end infinite' }} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 5: DATA SOURCES FOOTER ── */}
         <section>
           <div style={{
             ...cardStyle,
@@ -320,6 +377,7 @@ const hasData     = data && data.total_predictions > 0
 
       <style>{`
         @keyframes hub-blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @keyframes log-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
         .show-mobile { display: none; }
         @media (max-width: 768px) {
           .header-inner { padding: 0 12px !important; }
