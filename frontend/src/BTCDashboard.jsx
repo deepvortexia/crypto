@@ -2501,8 +2501,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           .grid-3       { grid-template-columns: 1fr 1fr !important; gap: 14px !important; }
           .grid-6       { grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; }
           .navbar-brand { font-size: 18px !important; }
-          .hide-mobile  { display: none !important; }
-          .show-mobile  { display: flex !important; align-items: center !important; order: 3 !important; }
+          .hide-mobile       { display: none !important; }
+          .show-mobile       { display: flex !important; align-items: center !important; order: 3 !important; }
+          .show-mobile-only  { display: flex !important; }
           .header-right { order: 2 !important; }
           .mobile-dropdown { width: 320px !important; left: auto !important; right: 0 !important;
                              border-bottom-left-radius: 8px !important; border-left: 1px solid #2a1f00 !important; }
