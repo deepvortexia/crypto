@@ -214,8 +214,8 @@ body {
 }
 
 @keyframes card-gold-pulse {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.002); }
+  0%, 100% { box-shadow: 0 0 12px rgba(212, 175, 55, 0.25), 0 0 24px rgba(212, 175, 55, 0.1), inset 0 0 12px rgba(212, 175, 55, 0.05); }
+  50%       { box-shadow: 0 0 20px rgba(212, 175, 55, 0.45), 0 0 40px rgba(212, 175, 55, 0.2), inset 0 0 18px rgba(212, 175, 55, 0.1); }
 }
 
 /* ─── Card component ────────────────────────────────────────────────────────── */
@@ -223,17 +223,19 @@ body {
   .card {
     @apply relative bg-surface-card rounded-lg;
     padding: 0.75rem;
-    border: 1px solid rgba(245, 158, 11, 0.6);
-    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.15), 0 4px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.6);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.25), 0 0 24px rgba(212, 175, 55, 0.1), inset 0 0 12px rgba(212, 175, 55, 0.05);
+    background: rgba(20, 16, 8, 0.85);
     transition: border-color 0.2s, box-shadow 0.2s;
-    animation: card-gold-pulse 2.5s ease-in-out infinite;
+    animation: card-gold-pulse 3s ease-in-out infinite;
   }
   @media (min-width: 640px) {
     .card { padding: 1.25rem; }
   }
   .card:hover {
-    border-color: rgba(255, 215, 0, 0.25);
-    box-shadow: 0 4px 32px rgba(255, 215, 0, 0.08), 0 0 0 1px rgba(255, 215, 0, 0.1);
+    border-color: rgba(212, 175, 55, 0.9);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.45), 0 0 40px rgba(212, 175, 55, 0.2);
+    animation: none;
   }
   .card-active {
     @apply card border-glow-cyan;
@@ -271,6 +273,30 @@ body {
   .scrollbar-thin::-webkit-scrollbar       { width: 4px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+}
+
+/* ─── Golden glow — broad card/prediction/indicator selectors ──────────────── */
+[class*="card"]:not(.card),
+[class*="Card"],
+[class*="prediction"],
+[class*="Prediction"],
+[class*="indicator"],
+[class*="Indicator"] {
+  border: 1px solid rgba(212, 175, 55, 0.6);
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.25), 0 0 24px rgba(212, 175, 55, 0.1), inset 0 0 12px rgba(212, 175, 55, 0.05);
+  background: rgba(20, 16, 8, 0.85);
+  animation: card-gold-pulse 3s ease-in-out infinite;
+}
+
+[class*="card"]:not(.card):hover,
+[class*="Card"]:hover,
+[class*="prediction"]:hover,
+[class*="Prediction"]:hover,
+[class*="indicator"]:hover,
+[class*="Indicator"]:hover {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.45), 0 0 40px rgba(212, 175, 55, 0.2);
+  border-color: rgba(212, 175, 55, 0.9);
+  animation: none;
 }
 
 /* ─── Typography helpers ────────────────────────────────────────────────────── */
