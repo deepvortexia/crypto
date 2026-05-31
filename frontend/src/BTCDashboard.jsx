@@ -1935,6 +1935,9 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           </div>
           <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: '#f59e0bcc', letterSpacing: '0.2em' }}>POWERED BY PREDICT ALPHA</div>
           <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 12, color: '#f59e0bcc', letterSpacing: '0.2em' }}>AI predictions may be inaccurate · Past signals do not guarantee future results · Trade responsibly</div>
+          <a href="https://www.producthunt.com/products/predictalpha?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-predictalpha" target="_blank" rel="noopener noreferrer" style={{display:'inline-block',marginTop:8}}>
+            <img alt="PredictAlpha on Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1157532&theme=light&t=1780265090248" />
+          </a>
         </div>
       </main>
 
