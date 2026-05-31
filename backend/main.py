@@ -1562,14 +1562,14 @@ async def get_order_book():
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
                 f"{_OKX_BASE}/api/v5/market/books",
-                params={"instId": "BTC-USDT", "sz": 5},
+                params={"instId": "BTC-USDT", "sz": 20},
             )
             resp.raise_for_status()
             book = resp.json()["data"][0]  # bids/asks: [[price, size, ...], ...]
         best_bid = float(book["bids"][0][0])
         best_ask = float(book["asks"][0][0])
-        bid_vol = sum(float(b[0]) * float(b[1]) for b in book["bids"])
-        ask_vol = sum(float(a[0]) * float(a[1]) for a in book["asks"])
+        bid_vol = sum(float(b[1]) for b in book["bids"])
+        ask_vol = sum(float(a[1]) for a in book["asks"])
         ratio = round(bid_vol / ask_vol, 2) if ask_vol else 1.0
         result = {
             "topBid": best_bid,
