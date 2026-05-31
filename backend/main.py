@@ -1501,13 +1501,19 @@ async def get_open_interest():
             )
             resp.raise_for_status()
             items = resp.json().get("data", [])
-        if items:
-            result = {"value": float(items[0]["oi"]) * 100}
-            _open_interest_cache["oi"] = result
-            return result
+        oi_ccy = float(items[0]["oiCcy"]) if items else 0.0
+        # oiCcy > 1_000_000 means OKX already returned a USD value; otherwise it's BTC units
+        if oi_ccy > 1_000_000:
+            dollar_value = oi_ccy
+        else:
+            btc_price = float((_price_cache.get("price") or {}).get("price") or 0)
+            dollar_value = oi_ccy * btc_price
+        result = {"value": dollar_value}
+        _open_interest_cache["oi"] = result
+        return result
     except Exception as exc:
         logger.warning(f"Open interest fetch failed: {exc}")
-    return {"value": None}
+    return {"value": 0}
 
 
 # ── Liquidations (OI history) ─────────────────────────────────────────────────
@@ -1566,8 +1572,8 @@ async def get_order_book():
             "topAsk": best_ask,
             "ratio": ratio,
             "signal": (
-                "Strong buy wall"  if ratio > 1.3
-                else "Strong sell wall" if ratio < 0.7
+                "Strong buy wall"  if ratio > 1.5
+                else "Strong sell wall" if ratio < 0.67
                 else "Balanced"
             ),
         }
