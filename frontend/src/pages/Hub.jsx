@@ -233,16 +233,21 @@ export default function Hub() {
         )}
       </header>
 
-      {/* ── AI BANNER ── */}
-      <div style={{ padding: '10px 16px', borderBottom: '1px solid #1a1a1a', textAlign: 'center', background: 'rgba(10,10,10,0.85)' }}>
-        <span style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 16, letterSpacing: '0.3em', color: '#f59e0b', opacity: 0.8, animation: 'textPulse 2.5s ease-in-out infinite' }}>AI PREDICTING FUTURE</span>
-        <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 9, color: '#6b7280', letterSpacing: '0.15em', opacity: 0.6, marginTop: 3 }}>Predictions may be inaccurate · Not financial advice · For educational purposes only</div>
+      {/* ── LIVE TICKER ── */}
+      <div style={{ overflow: 'hidden', borderBottom: '1px solid #1a1a1a', background: 'rgba(10,10,10,0.85)', padding: '7px 0' }}>
+        <div className="hub-ticker">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <span key={i} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.28em', color: '#f59e0b', whiteSpace: 'nowrap', paddingRight: '4rem' }}>
+              ● LIVE · BTC · ETH · GOLD
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px 64px', textAlign: 'center' }}>
-        <img src="/logoegyptfinal.webp" alt="PredictAlpha" fetchpriority="high" decoding="async"
-          style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 22 }} />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 20px 48px', textAlign: 'center' }}>
+        <img src="/logoegyptfinal.webp" alt="PredictAlpha" fetchpriority="high" decoding="async" className="hub-logo"
+          style={{ width: 120, height: 120, objectFit: 'contain', marginBottom: 22, filter: 'drop-shadow(0 0 20px rgba(212,175,55,0.6))', animation: 'logo-pulse 3s ease-in-out infinite' }} />
 
         <h1 className="hub-h1" style={{
           fontFamily: DISPLAY,
@@ -261,21 +266,23 @@ export default function Hub() {
 
         <p style={{
           fontFamily: MONO,
-          fontSize: 'clamp(11px, 2vw, 16px)',
-          letterSpacing: '0.4em',
+          fontSize: 'clamp(10px, 1.8vw, 13px)',
+          letterSpacing: '0.35em',
           color: G.gold,
           marginTop: 14,
           textTransform: 'uppercase',
-          animation: 'tagline-pulse 3s ease-in-out infinite',
+          opacity: 0.9,
         }}>
-          Select a Market to Enter
+          Choose Your Market
         </p>
+
+        <span style={{ display: 'inline-block', fontSize: 18, color: G.gold, marginTop: 6, animation: 'arrow-bounce 1.6s ease-in-out infinite' }}>↓</span>
 
         <p style={{
           fontFamily: MONO,
           fontSize: 'clamp(10px, 1.5vw, 13px)',
           letterSpacing: '0.15em',
-          color: 'rgba(245,158,11,0.5)',
+          color: 'rgba(245,158,11,0.85)',
           fontStyle: 'italic',
           marginTop: 10,
           marginBottom: 0,
@@ -335,6 +342,15 @@ export default function Hub() {
         @keyframes hub-blink    { 0%,100%{opacity:1}  50%{opacity:0.4} }
         @keyframes tagline-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
         @keyframes textPulse    { 0%,100%{opacity:0.8} 50%{opacity:1}  }
+        @keyframes logo-pulse   { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+        @keyframes arrow-bounce { 0%,100%{transform:translateY(0);opacity:1} 50%{transform:translateY(5px);opacity:0.5} }
+        @keyframes ticker-scroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+        .hub-ticker {
+          display: inline-flex;
+          animation: ticker-scroll 18s linear infinite;
+          will-change: transform;
+        }
 
         /* hamburger hidden on desktop */
         .show-mobile { display: none; }
@@ -393,6 +409,7 @@ export default function Hub() {
           .hub-cards     { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 1.5rem !important; }
           .hub-card      { width: 100% !important; max-width: 420px !important; margin: 0 auto !important; padding: 2rem !important; }
           .hub-h1        { letter-spacing: 0.08em !important; }
+          .hub-logo      { width: 160px !important; height: 160px !important; }
         }
 
         @media (max-width: 767px) {
