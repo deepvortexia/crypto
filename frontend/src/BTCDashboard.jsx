@@ -1938,6 +1938,10 @@ const [deepOpen,      setDeepOpen]      = useState(false)
           <a href="https://www.producthunt.com/products/predictalpha?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-predictalpha" target="_blank" rel="noopener noreferrer" style={{display:'inline-block',marginTop:8}}>
             <img alt="PredictAlpha on Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1157532&theme=light&t=1780265090248" />
           </a>
+          <a href="https://www.reddit.com/user/Excellent-Storm-5201" target="_blank" rel="noopener noreferrer" style={{display:'inline-flex', alignItems:'center', gap:6, marginTop:8, textDecoration:'none', opacity:0.75}}>
+            <img src="https://www.redditstatic.com/desktop2x/img/favicon/android-icon-192x192.png" alt="Reddit" width="20" height="20" style={{borderRadius:'50%'}} />
+            <span style={{fontFamily:'"Share Tech Mono",monospace', fontSize:11, color:'#f59e0b', letterSpacing:'0.1em'}}>Reddit</span>
+          </a>
         </div>
       </main>
 
