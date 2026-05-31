@@ -285,14 +285,13 @@ export default function Hub() {
 
         {/* ── CARDS ── */}
         <div className="hub-cards" style={{
-          display: 'flex',
-          flexDirection: 'column',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
           gap: '1.5rem',
-          alignItems: 'center',
           marginTop: 50,
           marginBottom: 40,
           width: '100%',
-          maxWidth: 480,
+          maxWidth: 1100,
         }}>
 
           {/* BITCOIN — live */}
@@ -304,6 +303,9 @@ export default function Hub() {
             <span style={liveBadge}>
               <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
               Live
+            </span>
+            <span className="hub-enter-cta" style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.22em', color: G.gold, marginTop: 6, animation: 'enter-pulse 2s ease-in-out infinite' }}>
+              ENTER →
             </span>
           </Link>
 
@@ -350,14 +352,18 @@ export default function Hub() {
           z-index: 1;
         }
 
+        @keyframes enter-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
         /* hover: pointer devices only — no sticky touch */
         @media (hover: hover) {
           .hub-card:hover {
-            transform: scale(1.02);
+            transform: scale(1.03);
             border-color: rgba(212,175,55,0.9) !important;
             box-shadow:
-              0 0 20px rgba(212,175,55,0.45),
-              0 0 40px rgba(212,175,55,0.2) !important;
+              0 0 24px rgba(212,175,55,0.55),
+              0 0 48px rgba(212,175,55,0.25),
+              inset 0 0 20px rgba(212,175,55,0.08) !important;
+            cursor: pointer;
           }
           .hub-card:hover::before {
             left: 150%;
@@ -368,21 +374,28 @@ export default function Hub() {
         /* remove default Link underline/color on the BTC card */
         .hub-card-link { color: inherit !important; }
 
-        @media (max-width: 768px) {
+        /* desktop: 3-col grid */
+        @media (min-width: 768px) {
+          .hub-cards {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            align-items: stretch !important;
+          }
+          .hub-card { width: auto !important; margin: 0 !important; }
+        }
+
+        /* mobile: single column */
+        @media (max-width: 767px) {
           .header-inner { padding: 0 12px !important; }
           .navbar-brand  { font-size: 14px !important; white-space: nowrap !important; }
           .hide-mobile   { display: none !important; }
           .show-mobile   { display: flex !important; align-items: center !important; }
-          .hub-cards     { flex-direction: column !important; align-items: center !important; gap: 1.5rem !important; }
+          .hub-cards     { display: flex !important; flex-direction: column !important; align-items: center !important; gap: 1.5rem !important; }
           .hub-card      { width: 100% !important; max-width: 420px !important; margin: 0 auto !important; padding: 2rem !important; }
           .hub-h1        { letter-spacing: 0.08em !important; }
         }
 
-        @media (max-width: 414px) {
-          .hub-cards { gap: 1.5rem !important; }
-        }
-
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .hub-site-footer  { padding-bottom: 20px !important; gap: 12px !important; }
           .hub-footer-row   { flex-direction: column !important; align-items: center !important; gap: 12px !important; width: 100% !important; }
           .hub-footer-row span, .hub-footer-row a { width: 100% !important; text-align: center !important; font-size: 10px !important; }
