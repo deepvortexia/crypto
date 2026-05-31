@@ -221,7 +221,8 @@ export async function fetchOnchain() {
   try {
     const data = await get(`${BACKEND_URL}/api/onchain`, {
       timeout: 10000,
-      retries: 2
+      retries: 2,
+      headers: await getProAuthHeaders()
     })
 
     return data
@@ -295,7 +296,7 @@ export async function fetchIndicators() {
 
 export async function fetchFundingRate() {
   try {
-    return await get(`${BACKEND_URL}/api/funding-rate`, { timeout: 10000, retries: 2 })
+    return await get(`${BACKEND_URL}/api/funding-rate`, { timeout: 10000, retries: 2, headers: await getProAuthHeaders() })
   } catch (err) {
     console.error('[fetchFundingRate] Failed:', err.message)
     return { rate: 0, signal: 'Unknown' }
@@ -304,7 +305,7 @@ export async function fetchFundingRate() {
 
 export async function fetchLongShortRatio() {
   try {
-    return await get(`${BACKEND_URL}/api/long-short-ratio`, { timeout: 10000, retries: 2 })
+    return await get(`${BACKEND_URL}/api/long-short-ratio`, { timeout: 10000, retries: 2, headers: await getProAuthHeaders() })
   } catch (err) {
     console.error('[fetchLongShortRatio] Failed:', err.message)
     return { ratio: 1.0, longPct: 50, shortPct: 50, signal: 'Unknown' }
@@ -313,7 +314,7 @@ export async function fetchLongShortRatio() {
 
 export async function fetchOpenInterest() {
   try {
-    return await get(`${BACKEND_URL}/api/open-interest`, { timeout: 10000, retries: 2 })
+    return await get(`${BACKEND_URL}/api/open-interest`, { timeout: 10000, retries: 2, headers: await getProAuthHeaders() })
   } catch (err) {
     console.error('[fetchOpenInterest] Failed:', err.message)
     return { value: null }
@@ -322,7 +323,7 @@ export async function fetchOpenInterest() {
 
 export async function fetchWhales() {
   try {
-    return await get(`${BACKEND_URL}/api/whales`, { timeout: 10000, retries: 2 })
+    return await get(`${BACKEND_URL}/api/whales`, { timeout: 10000, retries: 2, headers: await getProAuthHeaders() })
   } catch (err) {
     console.error('[fetchWhales] Failed:', err.message)
     return { largeCount: '50% buy / 50% sell', buyVol: 0, sellVol: 0, signal: 'Unknown' }
@@ -331,7 +332,7 @@ export async function fetchWhales() {
 
 export async function fetchLiquidations() {
   try {
-    return await get(`${BACKEND_URL}/api/liquidations`, { timeout: 10000, retries: 2 })
+    return await get(`${BACKEND_URL}/api/liquidations`, { timeout: 10000, retries: 2, headers: await getProAuthHeaders() })
   } catch (err) {
     console.error('[fetchLiquidations] Failed:', err.message)
     return { current: null, change: 0, signal: 'Unknown' }
@@ -340,7 +341,7 @@ export async function fetchLiquidations() {
 
 export async function fetchOrderBook() {
   try {
-    return await get(`${BACKEND_URL}/api/order-book`, { timeout: 10000, retries: 2 })
+    return await get(`${BACKEND_URL}/api/order-book`, { timeout: 10000, retries: 2, headers: await getProAuthHeaders() })
   } catch (err) {
     console.error('[fetchOrderBook] Failed:', err.message)
     return { topBid: null, topAsk: null, ratio: 1.0, signal: 'Unknown' }
@@ -381,7 +382,7 @@ export async function fetchNews() {
 
 export async function fetchKeyLevels(_currentPrice) {
   try {
-    return await get(`${BACKEND_URL}/api/key-levels`, { timeout: 10000, retries: 2 })
+    return await get(`${BACKEND_URL}/api/key-levels`, { timeout: 10000, retries: 2, headers: await getProAuthHeaders() })
   } catch (err) {
     console.error('[fetchKeyLevels] Failed:', err.message)
     return null
@@ -398,7 +399,22 @@ export async function fetchOHLCCandles(limit = 100) {
 }
 
 export async function fetchMarketTensions() {
-  return await get(`${BACKEND_URL}/api/market-tensions`, { timeout: 30000, retries: 1 })
+  try {
+    return await get(`${BACKEND_URL}/api/market-tensions`, { timeout: 30000, retries: 1, headers: await getProAuthHeaders() })
+  } catch (err) {
+    console.error('[fetchMarketTensions] Failed:', err.message)
+    return null
+  }
+}
+
+export async function getProAuthHeaders() {
+  try {
+    const session = await getProSession()
+    if (!session?.access_token) return {}
+    return { Authorization: `Bearer ${session.access_token}` }
+  } catch {
+    return {}
+  }
 }
 
 // ── Subscription API ────────────────────────────────────────────────────────

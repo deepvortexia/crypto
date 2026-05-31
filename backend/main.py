@@ -596,7 +596,20 @@ async def get_news_sentiment():
 
 # ── On-Chain ──────────────────────────────────────────────────────────────────
 @app.get("/api/onchain")
-async def get_onchain():
+async def get_onchain(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     """On-chain metrics from Blockchain.com: hash rate, difficulty, mempool, fees."""
     if "onchain" in _onchain_cache:
         cached = _onchain_cache["onchain"]
@@ -1413,7 +1426,20 @@ async def _fetch_long_short_ratio() -> dict:
 
 # ── Funding Rate ──────────────────────────────────────────────────────────────
 @app.get("/api/funding-rate")
-async def get_funding_rate():
+async def get_funding_rate(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     if "fr" in _funding_rate_cache:
         return _funding_rate_cache["fr"]
     data = await _fetch_funding_rate()
@@ -1432,7 +1458,20 @@ async def get_funding_rate():
 
 # ── Long/Short Ratio ──────────────────────────────────────────────────────────
 @app.get("/api/long-short-ratio")
-async def get_long_short_ratio():
+async def get_long_short_ratio(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     if "lsr" in _ls_ratio_cache:
         return _ls_ratio_cache["lsr"]
     data = await _fetch_long_short_ratio()
@@ -1453,7 +1492,20 @@ async def get_long_short_ratio():
 
 # ── Whales (taker volume) ─────────────────────────────────────────────────────
 @app.get("/api/whales")
-async def get_whales():
+async def get_whales(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     if "whales" in _whales_cache:
         return _whales_cache["whales"]
     try:
@@ -1490,7 +1542,20 @@ async def get_whales():
 
 # ── Open Interest ─────────────────────────────────────────────────────────────
 @app.get("/api/open-interest")
-async def get_open_interest():
+async def get_open_interest(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     if "oi" in _open_interest_cache:
         return _open_interest_cache["oi"]
     try:
@@ -1522,7 +1587,20 @@ async def get_open_interest():
 
 # ── Liquidations (OI history) ─────────────────────────────────────────────────
 @app.get("/api/liquidations")
-async def get_liquidations():
+async def get_liquidations(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     if "liq" in _liquidations_cache:
         return _liquidations_cache["liq"]
     try:
@@ -1555,7 +1633,20 @@ async def get_liquidations():
 
 # ── Order Book ────────────────────────────────────────────────────────────────
 @app.get("/api/order-book")
-async def get_order_book():
+async def get_order_book(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     if "ob" in _order_book_cache:
         return _order_book_cache["ob"]
     try:
@@ -1590,7 +1681,20 @@ async def get_order_book():
 
 # ── Key Levels (Fibonacci + Pivots) ──────────────────────────────────────────
 @app.get("/api/key-levels")
-async def get_key_levels():
+async def get_key_levels(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     if "kl" in _key_levels_cache:
         return _key_levels_cache["kl"]
     try:
@@ -1688,7 +1792,20 @@ async def get_ohlc_candles(limit: int = 100):
 
 @app.get("/api/market-tensions")
 @limiter.limit("10/minute")
-async def get_market_tensions(request: Request):
+async def get_market_tensions(request: Request, authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required")
+    try:
+        response = supabase.auth.get_user(authorization.split(" ")[1])
+        user = response.user
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    if not _is_pro(str(user.id)):
+        raise HTTPException(status_code=403, detail="PRO subscription required")
     """AI-detected BTC trading setups from live market conditions (Claude Haiku, cached 5 min)."""
     if "tensions" in _tensions_cache:
         return _tensions_cache["tensions"]
