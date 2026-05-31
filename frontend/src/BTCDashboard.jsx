@@ -1705,7 +1705,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               <IndCard
                 label={<>Open Interest<Tooltip text="Rising OI = strong trend confirmation"/></>}
                 value={fmtLarge(openInterest?.value ?? null)}
-                sub="BTC futures open"
+                sub="OKX perpetuals"
               />
               <IndCard
                 label={<>Whale Activity<Tooltip text="Large wallet moves — whales buying is bullish signal"/></>}
