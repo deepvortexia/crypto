@@ -992,7 +992,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
       'Funding: '+(fundingRate?.signal ?? 'N/A'),
       'Order Book: '+(orderBook?.signal ?? 'N/A'),
       'Bollinger: $'+(indics?.bollinger_bands?.middle ?? 'N/A'),
-      'Open Interest: '+fmtLarge((openInterest?.value||0)*(price?.price||0)),
+      'Open Interest: '+fmtLarge(openInterest?.value ?? 0),
       'Long/Short: '+(longShort?.ratio?.toFixed(2) ?? 'N/A'),
       'Mempool: '+(mempool?.signal ?? 'N/A'),
       'News Sentiment: '+(newsSentiment?.label??'N/A')+' ('+((newsSentiment?.score??0).toFixed(2))+')',
@@ -1704,7 +1704,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
               />
               <IndCard
                 label={<>Open Interest<Tooltip text="Rising OI = strong trend confirmation"/></>}
-                value={openInterest?.value && price?.price ? fmtLarge(openInterest.value * price.price) : '—'}
+                value={fmtLarge(openInterest?.value ?? null)}
                 sub="BTC futures open"
               />
               <IndCard

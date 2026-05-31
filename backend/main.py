@@ -1502,11 +1502,7 @@ async def get_open_interest():
             resp.raise_for_status()
             items = resp.json().get("data", [])
         if items:
-            oi_raw    = float(items[0]["oi"])
-            oi_ccy    = float(items[0]["oiCcy"])
-            btc_price = (_price_cache.get("price") or {}).get("price", 0)
-            logger.info(f"[DEBUG OI] oi={oi_raw} oiCcy={oi_ccy} btc_price={btc_price}")
-            result = {"value": oi_ccy, "oi_contracts": oi_raw}
+            result = {"value": float(items[0]["oi"]) * 100}
             _open_interest_cache["oi"] = result
             return result
     except Exception as exc:
