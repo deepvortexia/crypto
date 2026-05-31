@@ -1507,6 +1507,10 @@ async def get_open_interest():
             dollar_value = oi_ccy
         else:
             btc_price = float((_price_cache.get("price") or {}).get("price") or 0)
+            if not btc_price:
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    tr = await client.get(f"{_OKX_BASE}/api/v5/market/ticker", params={"instId": "BTC-USDT"})
+                    btc_price = float(tr.json()["data"][0]["last"])
             dollar_value = oi_ccy * btc_price
         result = {"value": dollar_value}
         _open_interest_cache["oi"] = result
