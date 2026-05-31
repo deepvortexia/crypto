@@ -48,7 +48,7 @@ function GoldBar() {
 
 function Symbol({ char }) {
   return (
-    <span style={{ fontFamily: DISPLAY, fontSize: 52, fontWeight: 700, color: G.gold, lineHeight: 1, textShadow: `0 0 18px ${G.goldGlow}` }}>
+    <span style={{ fontFamily: DISPLAY, fontSize: '3rem', fontWeight: 700, color: G.gold, lineHeight: 1, textShadow: `0 0 18px ${G.goldGlow}` }}>
       {char}
     </span>
   )
@@ -56,10 +56,11 @@ function Symbol({ char }) {
 
 // ── shared card style (all 3 equally premium) ─────────────────────────────────
 const premiumCard = {
-  background: G.card,
+  background: 'rgba(20,16,8,0.9)',
   borderRadius: 12,
-  padding: '34px 26px',
-  width: 'min(280px, 90vw)',
+  padding: '2rem',
+  width: 'min(420px, 100%)',
+  minHeight: 280,
   minWidth: 0,
   position: 'relative',
   overflow: 'hidden',
@@ -68,15 +69,16 @@ const premiumCard = {
   alignItems: 'center',
   gap: 14,
   textAlign: 'center',
-  border: '1px solid rgba(245,166,35,0.5)',
-  boxShadow: 'inset 0 0 20px rgba(245,166,35,0.07), 0 4px 32px rgba(0,0,0,0.6)',
+  border: '1px solid rgba(212,175,55,0.6)',
+  boxShadow: '0 0 12px rgba(212,175,55,0.25), 0 0 24px rgba(212,175,55,0.1), inset 0 0 12px rgba(212,175,55,0.05)',
   transition: 'all 0.3s ease',
+  margin: '0 auto',
 }
 
 // ── text / badge styles ───────────────────────────────────────────────────────
 const assetName = {
   fontFamily: DISPLAY,
-  fontSize: 20,
+  fontSize: '2rem',
   fontWeight: 700,
   letterSpacing: '0.28em',
   color: G.bright,
@@ -139,7 +141,7 @@ const comingSoonTag = {
 
 const priceText = {
   fontFamily: MONO,
-  fontSize: 22,
+  fontSize: '1.5rem',
   color: G.gold,
   textShadow: `0 0 10px ${G.goldGlow}`,
 }
@@ -284,27 +286,26 @@ export default function Hub() {
         {/* ── CARDS ── */}
         <div className="hub-cards" style={{
           display: 'flex',
-          gap: 24,
-          flexWrap: 'wrap',
-          justifyContent: 'center',
+          flexDirection: 'column',
+          gap: '1.5rem',
+          alignItems: 'center',
           marginTop: 50,
           marginBottom: 40,
           width: '100%',
-          maxWidth: 1000,
+          maxWidth: 480,
         }}>
 
           {/* BITCOIN — live */}
-          <div className="hub-card" style={premiumCard}>
+          <Link to="/btc" className="hub-card hub-card-link" style={{ ...premiumCard, cursor: 'pointer', textDecoration: 'none' }}>
             <Symbol char="₿" />
             <h2 style={assetName}>Bitcoin</h2>
             <div style={taglineStyle}>{TAGLINE}</div>
-            <div style={{ fontFamily: MONO, fontSize: 26, color: G.gold, textShadow: `0 0 10px ${G.goldGlow}` }}>{fmtUsd(prices.btc)}</div>
+            <div style={priceText}>{fmtUsd(prices.btc)}</div>
             <span style={liveBadge}>
               <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: G.green, boxShadow: `0 0 8px ${G.green}`, animation: 'hub-blink 0.9s ease-in-out infinite' }} />
               Live
             </span>
-            <Link to="/btc" style={enterBtn}>Enter →</Link>
-          </div>
+          </Link>
 
           {/* GOLD — coming soon */}
           <div className="hub-card" style={premiumCard}>
@@ -325,21 +326,6 @@ export default function Hub() {
           </div>
 
         </div>
-
-        {/* ── SEO paragraph ── */}
-        <p style={{
-          fontFamily: MONO,
-          fontSize: 'clamp(11px, 1.6vw, 13px)',
-          color: 'rgba(168,162,158,0.75)',
-          letterSpacing: '0.06em',
-          lineHeight: 1.7,
-          maxWidth: '90vw',
-          width: 680,
-          margin: '0 auto 8px',
-          textAlign: 'center',
-        }}>
-          PredictAlpha is an AI-powered price prediction platform for Bitcoin (BTC), Ethereum (ETH), and Gold. Real-time forecasts across 6 timeframes — 1H, 4H, 1D, 3D, 1W, and 1M — powered by a stacked ensemble of LSTM, XGBoost, and Prophet models. Live on-chain data, derivatives signals, and AI-generated market analysis updated every 5 minutes. The most accurate AI crypto prediction tool for traders who want data, not noise.
-        </p>
 
       </div>
 
@@ -367,12 +353,11 @@ export default function Hub() {
         /* hover: pointer devices only — no sticky touch */
         @media (hover: hover) {
           .hub-card:hover {
-            transform: scale(1.03);
-            border-color: rgba(245,166,35,0.8) !important;
+            transform: scale(1.02);
+            border-color: rgba(212,175,55,0.9) !important;
             box-shadow:
-              0 0 30px rgba(245,166,35,0.4),
-              0 0 60px rgba(245,166,35,0.15),
-              inset 0 0 40px rgba(245,166,35,0.08) !important;
+              0 0 20px rgba(212,175,55,0.45),
+              0 0 40px rgba(212,175,55,0.2) !important;
           }
           .hub-card:hover::before {
             left: 150%;
@@ -380,17 +365,21 @@ export default function Hub() {
           }
         }
 
+        /* remove default Link underline/color on the BTC card */
+        .hub-card-link { color: inherit !important; }
+
         @media (max-width: 768px) {
           .header-inner { padding: 0 12px !important; }
           .navbar-brand  { font-size: 14px !important; white-space: nowrap !important; }
           .hide-mobile   { display: none !important; }
           .show-mobile   { display: flex !important; align-items: center !important; }
-          .hub-cards     { flex-direction: column !important; align-items: center !important; gap: 16px !important; }
+          .hub-cards     { flex-direction: column !important; align-items: center !important; gap: 1.5rem !important; }
+          .hub-card      { width: 100% !important; max-width: 420px !important; margin: 0 auto !important; padding: 2rem !important; }
           .hub-h1        { letter-spacing: 0.08em !important; }
         }
 
         @media (max-width: 414px) {
-          .hub-cards { gap: 14px !important; }
+          .hub-cards { gap: 1.5rem !important; }
         }
 
         @media (max-width: 768px) {
