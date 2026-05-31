@@ -376,7 +376,8 @@ class BTCEnsemble:
                     params={
                         "select":   "horizon,actual_price,predicted_price,current_price,direction_correct,created_at",
                         "resolved": "eq.true",
-                        "limit":    "10000",
+                        "limit":    "500",
+                        "order":    "created_at.desc",
                     },
                 )
                 resp.raise_for_status()

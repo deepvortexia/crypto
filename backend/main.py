@@ -183,6 +183,7 @@ _order_book_cache:    TTLCache = TTLCache(maxsize=1,  ttl=30)   # 30 s
 _key_levels_cache:    TTLCache = TTLCache(maxsize=1,  ttl=300)  # 5 min
 _ohlc_candles_cache:  TTLCache = TTLCache(maxsize=10, ttl=60)   # 1 min per limit
 _hub_prices_cache:    TTLCache = TTLCache(maxsize=1,  ttl=60)   # 1 min
+_accuracy_cache:      TTLCache = TTLCache(maxsize=1,  ttl=300)  # 5 min
 
 _CMC_API_KEY    = os.getenv("CMC_API_KEY", "")
 _CMC_QUOTES_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
@@ -636,7 +637,11 @@ async def get_accuracy():
     Historical prediction accuracy: MAPE and direction accuracy per horizon.
     Computed from all stored predictions that have been resolved against actual prices.
     """
-    return await ensemble.get_accuracy()
+    if "accuracy" in _accuracy_cache:
+        return _accuracy_cache["accuracy"]
+    result = await ensemble.get_accuracy()
+    _accuracy_cache["accuracy"] = result
+    return result
 
 
 # ── Cron resolve ──────────────────────────────────────────────────────────────
