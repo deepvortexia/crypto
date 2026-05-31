@@ -1502,7 +1502,24 @@ async def get_open_interest():
             resp.raise_for_status()
             items = resp.json().get("data", [])
         if items:
-            result = {"value": float(items[0]["oi"])}
+            oi_btc = float(items[0]["oiCcy"])
+
+            # BTC price: use cached value if fresh, otherwise fetch from OKX ticker
+            btc_price = None
+            cached = _price_cache.get("price")
+            if cached:
+                btc_price = cached.get("price")
+            if not btc_price:
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    tr = await client.get(
+                        f"{_OKX_BASE}/api/v5/market/ticker",
+                        params={"instId": "BTC-USDT"},
+                    )
+                    tr.raise_for_status()
+                    td = tr.json().get("data", [{}])[0]
+                    btc_price = float(td.get("last", 0))
+
+            result = {"value": oi_btc * btc_price if btc_price else None}
             _open_interest_cache["oi"] = result
             return result
     except Exception as exc:
