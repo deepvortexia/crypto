@@ -384,7 +384,7 @@ async def get_live_price():
             "price": last,
             "change_24h_pct": change_24h_pct,
             "market_cap": cmc["market_cap"],
-            "volume_24h": float(ticker.get("volCcy24h", 0)),
+            "volume_24h": cmc["volume_24h"] if cmc.get("volume_24h") else float(ticker.get("volCcy24h", 0)),
             "last_updated": int(time()),
         }
         _price_cache["price"] = data
