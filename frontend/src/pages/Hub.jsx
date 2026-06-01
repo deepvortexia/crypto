@@ -238,7 +238,7 @@ export default function Hub() {
         <div className="hub-ticker">
           {Array.from({ length: 6 }).map((_, i) => (
             <span key={i} style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, letterSpacing: '0.28em', color: '#f59e0b', whiteSpace: 'nowrap', paddingRight: '4rem' }}>
-              ● LIVE · BTC · ETH · GOLD
+              👁️ WE DON'T PREDICT THE FUTURE · WE BUILD THE PERCEPTION OF IT · LSTM · XGBOOST · PROPHET · 6 TIMEFRAMES · FREE TO START · 👁️
             </span>
           ))}
         </div>
