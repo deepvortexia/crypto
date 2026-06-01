@@ -589,6 +589,12 @@ export default function About() {
           NOT FINANCIAL ADVICE · FOR EDUCATIONAL PURPOSES ONLY
         </div>
         <Link to="/" style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 10, letterSpacing: '0.2em', color: '#f59e0b', opacity: 0.7, textDecoration: 'none', textTransform: 'uppercase' }}>← HUB</Link>
+        <a href="https://x.com/PredictAlphapp" target="_blank" rel="noopener noreferrer" style={{display:'inline-flex', alignItems:'center', gap:6, textDecoration:'none', opacity:0.75}}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="#f59e0b" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.254 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/>
+          </svg>
+          <span style={{fontFamily:'"Share Tech Mono",monospace', fontSize:10, color:'#f59e0b', letterSpacing:'0.1em'}}>X / Twitter</span>
+        </a>
         <div style={{ width: '100%', fontFamily: mono, fontSize: 9, color: '#374151', letterSpacing: '0.12em', textAlign: 'center' }}>
           AI predictions may be inaccurate · Past signals do not guarantee future results · Trade responsibly
         </div>
