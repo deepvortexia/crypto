@@ -1629,7 +1629,7 @@ const [deepOpen,      setDeepOpen]      = useState(false)
                 <IndCard
                   label={<>BB Lower<Tooltip text="Price near lower band = oversold potential reversal"/></>}
                   value={bb ? fmtPrice(bb.lower) : '—'}
-                  sub={bb && curPrice ? (curPrice < bb.lower ? 'Oversold ⚠️' : 'Bollinger Band') : 'Bollinger Band'}
+                  sub={bb && curPrice ? (curPrice < bb.lower ? 'Price below lower band ⚠️' : 'Bollinger Band') : 'Bollinger Band'}
                   barName="bbLower"
                 />
                 <IndCard
