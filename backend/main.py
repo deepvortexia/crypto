@@ -251,12 +251,19 @@ async def lifespan(app: FastAPI):
     retrainer.stop_scheduler()
 
 
+_resolve_lock = asyncio.Lock()
+
+
 async def _resolve_loop():
     await asyncio.sleep(60)  # wait 60s on startup only
     while True:
         try:
-            count = await ensemble.resolve_predictions(None)
-            logger.info(f"[cron] resolved {count} predictions")
+            if _resolve_lock.locked():
+                logger.info("[cron] resolve cycle already running, skipping")
+            else:
+                async with _resolve_lock:
+                    count = await ensemble.resolve_predictions(None)
+                    logger.info(f"[cron] resolved {count} predictions")
         except Exception as exc:
             logger.error(f"[cron] resolve loop error: {exc}")
         await asyncio.sleep(900)
@@ -558,8 +565,11 @@ async def get_prediction(
 
 
 async def _resolve_predictions(current_price: float):
+    if _resolve_lock.locked():
+        return
     try:
-        await ensemble.resolve_predictions(current_price)
+        async with _resolve_lock:
+            await ensemble.resolve_predictions(current_price)
     except Exception as exc:
         logger.error(f"resolve_predictions error: {exc}")
 
@@ -651,7 +661,10 @@ async def cron_resolve(request: Request):
     expected = os.getenv("CRON_SECRET", "")
     if not expected or not hmac.compare_digest(secret, expected):
         raise HTTPException(status_code=401, detail="Unauthorized")
-    count = await ensemble.resolve_predictions(None)
+    if _resolve_lock.locked():
+        return {"resolved": 0, "skipped": True}
+    async with _resolve_lock:
+        count = await ensemble.resolve_predictions(None)
     return {"resolved": count}
 
 
