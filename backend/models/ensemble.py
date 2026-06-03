@@ -241,7 +241,7 @@ class BTCEnsemble:
     # ── Horizon → OKX bar string ──────────────────────────────────────────────
 
     _HORIZON_BAR = {
-        "1h": "1H", "4h": "4H", "8h": "8H", "12h": "12H",
+        "1h": "1H", "4h": "4H", "8h": "4H", "12h": "12H",
         "24h": "1D", "1week": "1W", "1month": "1M",
     }
 
@@ -271,7 +271,8 @@ class BTCEnsemble:
         actual OKX candle price at the prediction's target_time.
         Returns the count of predictions successfully resolved in this call."""
         headers = self._sb_headers()
-        now_iso = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(timezone.utc)
+        now_iso = now.isoformat()
         resolved_count = 0
 
         try:
@@ -320,6 +321,25 @@ class BTCEnsemble:
                     target_time_str = row["target_time"]
                     target_dt = datetime.fromisoformat(target_time_str.replace("Z", "+00:00"))
                     target_ms = int(target_dt.timestamp() * 1000)
+
+                    age = now - target_dt
+                    if age > timedelta(hours=48):
+                        patch_resp = await client.patch(
+                            self._sb_url(f"predictions?id=eq.{row['id']}"),
+                            headers=headers,
+                            json={
+                                "resolved":          True,
+                                "actual_price":      None,
+                                "direction_correct": None,
+                                "resolved_at":       now_iso,
+                            },
+                        )
+                        patch_resp.raise_for_status()
+                        logger.warning(
+                            f"[Resolve] Voiding stale row id={row['id']} "
+                            f"horizon={row['horizon']} age={age}"
+                        )
+                        continue
 
                     bar = self._HORIZON_BAR.get(row["horizon"], "1H")
                     candles = await _fetch_okx_candle(client, bar, target_ms)
