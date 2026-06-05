@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && react-snap",
+    "build": "vite build",
     "prerender": "react-snap",
     "preview": "vite preview",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives"
@@ -15,7 +15,6 @@
     "destination": "dist",
     "routes": [
       "/",
-      "/btc",
       "/about",
       "/pricing",
       "/proof"

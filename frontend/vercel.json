@@ -1,5 +1,4 @@
 {
-  "cleanUrls": true,
   "rewrites": [
     { "source": "/alternativeme/(.*)", "destination": "https://api.alternative.me/$1" },
     { "source": "/blockchain/(.*)",    "destination": "https://api.blockchain.info/$1" },
