@@ -87,12 +87,12 @@ export default function About() {
         <meta property="og:description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
         <meta property="og:url" content="https://predictalpha.app/about" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
+        <meta property="og:image" content="https://predictalpha.app/og-imagejpg.jpg" />
         <link rel="canonical" href="https://predictalpha.app/about" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="How PredictAlpha Works — AI Crypto Prediction Engine" />
         <meta name="twitter:description" content="Learn how PredictAlpha uses a 3-model AI ensemble (LSTM + XGBoost + Prophet) to generate real-time Bitcoin, Ethereum and Gold price predictions across 6 time horizons." />
-        <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
+        <meta name="twitter:image" content="https://predictalpha.app/og-imagejpg.jpg" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "FAQPage",

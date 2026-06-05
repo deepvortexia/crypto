@@ -173,6 +173,8 @@ export default function Hub() {
         <meta property="og:description" content="AI-powered price predictions for Bitcoin, Ethereum, and Gold. Real-time forecasts across 6 timeframes powered by LSTM, XGBoost and Prophet." />
         <meta property="og:url" content="https://predictalpha.app/" />
         <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://predictalpha.app/og-imagejpg.jpg" />
+        <meta name="twitter:image" content="https://predictalpha.app/og-imagejpg.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="PredictAlpha — AI Bitcoin, Ethereum &amp; Gold Price Predictions" />
         <meta name="twitter:description" content="Real-time AI price predictions for BTC, ETH and Gold. 6 timeframes. LSTM + XGBoost + Prophet ensemble models." />

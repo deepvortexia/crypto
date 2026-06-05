@@ -96,19 +96,19 @@ const hasData     = data && data.total_predictions > 0
         <meta property="og:description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, ML model performance — every prediction logged and verified on PredictAlpha." />
         <meta property="og:url" content="https://predictalpha.app/proof" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
+        <meta property="og:image" content="https://predictalpha.app/og-imagejpg.jpg" />
         <link rel="canonical" href="https://predictalpha.app/proof" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="PredictAlpha Proof of Work — AI Prediction Track Record" />
         <meta name="twitter:description" content="Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, ML model performance — every prediction logged and verified on PredictAlpha." />
-        <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
+        <meta name="twitter:image" content="https://predictalpha.app/og-imagejpg.jpg" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Article",
           "headline": "PredictAlpha Proof of Work — AI Prediction Track Record",
           "description": "Bitcoin, Ethereum and Gold AI prediction accuracy, crypto signal track record, LSTM XGBoost Prophet model performance — every prediction logged and verified.",
           "url": "https://predictalpha.app/proof",
-          "image": "https://predictalpha.app/og-image.webp",
+          "image": "https://predictalpha.app/og-imagejpg.jpg",
           "author": { "@type": "Organization", "name": "PredictAlpha", "url": "https://predictalpha.app" },
           "publisher": { "@type": "Organization", "name": "PredictAlpha", "url": "https://predictalpha.app", "logo": { "@type": "ImageObject", "url": "https://predictalpha.app/logoegyptfinal.webp" } },
           "about": [

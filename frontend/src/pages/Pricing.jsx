@@ -19,12 +19,12 @@ export default function Pricing() {
         <meta property="og:description" content="PredictAlpha pricing plans — free tier with 2 daily predictions, or go PRO at $12.99/month for unlimited Bitcoin, Ethereum &amp; Gold AI forecasts, all timeframes, and 20 deep analyses per day." />
         <meta property="og:url" content="https://predictalpha.app/pricing" />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://predictalpha.app/og-image.webp" />
+        <meta property="og:image" content="https://predictalpha.app/og-imagejpg.jpg" />
         <link rel="canonical" href="https://predictalpha.app/pricing" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="PredictAlpha PRO — AI Bitcoin, Ethereum &amp; Gold Pricing" />
         <meta name="twitter:description" content="PredictAlpha pricing plans — free tier with 2 daily predictions, or go PRO at $12.99/month for unlimited Bitcoin, Ethereum &amp; Gold AI forecasts, all timeframes, and 20 deep analyses per day." />
-        <meta name="twitter:image" content="https://predictalpha.app/og-image.webp" />
+        <meta name="twitter:image" content="https://predictalpha.app/og-imagejpg.jpg" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Product",
