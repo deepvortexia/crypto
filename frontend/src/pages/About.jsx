@@ -56,7 +56,7 @@ const SectionTitle = ({ children }) => (
 const FAQ_ITEMS = [
   {
     q: 'How accurate are the predictions?',
-    a: '72–92% directional accuracy depending on timeframe. 4H is most reliable. 1-month is a macro bias — treat it as directional orientation, not a price target.',
+    a: '57–68% directional accuracy depending on timeframe. 4H is most reliable. 1-month is a macro bias — treat it as directional orientation, not a price target.',
   },
   {
     q: 'What assets does PredictAlpha cover?',
@@ -100,7 +100,7 @@ export default function About() {
             {
               "@type": "Question",
               "name": "How accurate are PredictAlpha AI predictions?",
-              "acceptedAnswer": { "@type": "Answer", "text": "PredictAlpha achieves 72–92% directional accuracy depending on timeframe. The 4H horizon is the most reliable for short-term trading signals. The 1-month prediction is a directional bias indicator only and should not be used for precise entry/exit timing." }
+              "acceptedAnswer": { "@type": "Answer", "text": "PredictAlpha achieves 57–68% directional accuracy depending on timeframe. The 4H horizon is the most reliable for short-term trading signals. The 1-month prediction is a directional bias indicator only and should not be used for precise entry/exit timing." }
             },
             {
               "@type": "Question",
@@ -502,7 +502,7 @@ export default function About() {
               },
               {
                 title: 'Same Transparency Standards',
-                body: 'Every new asset will launch with the same real confidence scores, model agreement display, and Deep Analysis reasoning chain. No asset will be added until the ensemble achieves validated directional accuracy above 70% on the 4H horizon.',
+                body: 'Every new asset will launch with the same real confidence scores, model agreement display, and Deep Analysis reasoning chain. No asset will be added until the ensemble achieves validated directional accuracy above 57% on the 4H horizon.',
               },
             ].map(({ title, body }) => (
               <div key={title} style={{ ...cardStyle, position: 'relative' }}>

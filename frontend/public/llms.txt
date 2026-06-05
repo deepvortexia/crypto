@@ -1,0 +1,16 @@
+# PredictAlpha
+
+> PredictAlpha is an AI-powered Bitcoin price prediction tool. It runs an LSTM + XGBoost + Prophet ensemble across 7 timeframes (1H, 4H, 8H, 12H, 24H, 1 week, 1 month), combining live price, on-chain, derivatives, and sentiment data. Currently covers Bitcoin; Ethereum and Gold are coming soon.
+
+## Key facts
+- Directional accuracy: 57–68% depending on horizon (benchmarked live on /proof).
+- Models: LSTM neural net, XGBoost, Prophet, combined by an accuracy-weighted meta-learner.
+- Pricing: Free (2 predictions/day, 1H only) or PRO at $12.99/month (all timeframes, 20 deep analyses/day).
+- Not financial advice; educational/analytical tool.
+
+## Pages
+- Home: https://predictalpha.app/
+- Live BTC dashboard: https://predictalpha.app/btc
+- How it works: https://predictalpha.app/about
+- Pricing: https://predictalpha.app/pricing
+- Accuracy & track record: https://predictalpha.app/proof

@@ -419,11 +419,6 @@ export default function Hub() {
         }
       `}</style>
 
-      {/* ── hidden keyword block for SEO ── */}
-      <div style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
-        bitcoin price prediction AI, ethereum price forecast, gold price AI prediction, crypto machine learning, BTC ETH gold forecast tool, LSTM crypto prediction, XGBoost bitcoin, real-time crypto signals
-      </div>
-
       {/* ── FOOTER ── */}
       <div style={{ fontFamily: '"Share Tech Mono",monospace', fontSize: 11, color: 'rgba(168,162,158,0.4)', textAlign: 'center', maxWidth: 800, margin: '0 auto', padding: '24px 16px 0' }}>
         PredictAlpha is an AI-powered price prediction platform for Bitcoin (BTC), Ethereum (ETH), and Gold. Real-time forecasts across 6 timeframes — 1H, 4H, 1D, 3D, 1W, and 1M — powered by a stacked ensemble of LSTM, XGBoost, and Prophet models. Currently covering BTC. ETH and Gold coming soon.
