@@ -1884,7 +1884,7 @@ async def get_market_tensions(request: Request, authorization: Optional[str] = H
         # Extract exact values for injection — no aliases, no rounding by Haiku
         btc_price       = price_data["price"]
         change_24h      = price_data["change_24h_pct"]
-        rsi             = indicators_data["rsi"]["value"]
+        rsi             = round(indicators_data["rsi"]["value"], 1)
         rsi_signal      = indicators_data["rsi"]["signal"]
         macd            = indicators_data["macd"]["macd"]
         macd_signal     = indicators_data["macd"]["signal"]
